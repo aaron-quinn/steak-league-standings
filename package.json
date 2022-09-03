@@ -44,5 +44,6 @@
       "no-unused-vars": "off",
       "no-undef": "off"
     }
-  }
+  },
+  "type": "module"
 }
