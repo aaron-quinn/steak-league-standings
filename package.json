@@ -43,5 +43,11 @@
       "no-undef": "off"
     }
   },
+  "postcss": {
+    "plugins": {
+      "tailwindcss": {},
+      "autoprefixer": {}
+    }
+  },
   "type": "module"
 }
