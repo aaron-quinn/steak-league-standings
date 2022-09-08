@@ -11,7 +11,7 @@ console.log(props.steakTeams);
     <li
       v-for="(team, index) in steakTeams"
       :key="team.id"
-      class="px-2 py-4 mb-4 w-full rounded-md bg-slate-800 text-slate-200 font-light text-xl flex justify-between"
+      class="px-4 py-4 mb-3 w-full rounded-md bg-slate-800 text-slate-200 font-light text-xl flex justify-between shadow-2xl"
     >
       <div>
         {{ index + 1 }}
