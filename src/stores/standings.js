@@ -2,5 +2,7 @@ import { defineStore } from 'pinia';
 
 export const useStandingsStore = defineStore({
   id: 'standings',
-  state: () => ({}),
+  state: () => ({
+    year: 2021,
+  }),
 });
