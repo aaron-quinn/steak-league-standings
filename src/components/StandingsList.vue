@@ -9,12 +9,15 @@ console.log(props.steakTeams);
 <template>
   <ul class="px-10 w-full">
     <li
-      class="p-2 mb-4 w-full rounded-sm bg-slate-400"
       v-for="(team, index) in steakTeams"
       :key="team.id"
+      class="px-2 py-4 mb-4 w-full rounded-md bg-slate-800 text-slate-200 font-light text-xl flex justify-between"
     >
-      <span class="team-name">{{ index + 1 }} {{ team.name }}</span>
-      <span class="team-points">{{ team.points }}</span>
+      <div>
+        {{ index + 1 }}
+        <span class="ml-2 font-bold text-2xl">{{ team.name }}</span>
+      </div>
+      <div class="text-2xl font-bold">{{ team.points }}</div>
     </li>
   </ul>
 </template>

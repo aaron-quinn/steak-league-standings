@@ -36,14 +36,14 @@ const steakTeams = managers
     <div class="max-w-7xl m-auto flex">
       <div class="px-10">
         <img
-          class="max-w-[160px] mx-auto mb-8"
+          class="max-w-[250px] mx-auto mb-8"
           src="steak.svg"
           alt="Steak League"
         />
         <h1
-          class="text-white text-4xl font-extralight tracking-wide text-center"
+          class="text-white text-6xl font-extralight tracking-wide text-center leading-[1.1]"
         >
-          THE STEAK LEAGUE
+          STEAK LEAGUE
         </h1>
       </div>
       <StandingsList :steak-teams="steakTeams" />
