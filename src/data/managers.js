@@ -452,7 +452,7 @@ export default function getManagers() {
       },
     },
     {
-      name: 'Erik Siegrist',
+      name: 'Josh Ross',
       teams: {
         2022: {
           league: 'LA',
