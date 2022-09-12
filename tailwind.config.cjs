@@ -5,8 +5,9 @@ module.exports = {
     fontFamily: {
       sans: ['Urbanist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       mono: ['ui-monospace', 'SFMono-Regular'],
+      numerals: ['Open Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
     },
     extend: {},
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/forms')],
 };

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import StandingsView from '../views/StandingsView.vue';
+import MainView from '../views/MainView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,7 +7,18 @@ const router = createRouter({
     {
       path: '/',
       name: 'standings',
-      component: StandingsView,
+      component: MainView,
+      props: {
+        live: false,
+      },
+    },
+    {
+      path: '/current',
+      name: 'live-standings',
+      component: MainView,
+      props: {
+        live: true,
+      },
     },
   ],
 });

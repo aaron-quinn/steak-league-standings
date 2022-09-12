@@ -1,4 +1,5 @@
 <script setup>
+import { toRaw } from 'vue';
 import { useStandingsStore } from '../stores/standings';
 import getManagers from '../data/managers';
 import getPlayoffSlots from '../utils/get-playoff-slots';
@@ -8,17 +9,15 @@ const props = defineProps({
   standings: Object,
 });
 
-const results = { ...props.standings };
-
 const managers = getManagers();
-const { year } = useStandingsStore();
+const { year, standings } = useStandingsStore();
 
 const managersWithPts = managers
   .filter((t) => t.teams[year])
   .map((m) => {
     const { league, division, teamID } = m.teams[year];
     const team = `${league.toLowerCase()}${teamID}`;
-    const { points, wins, losses, ties } = results[team];
+    const { points, wins, losses, ties } = toRaw(standings)[team];
     return {
       name: m.name,
       league,
@@ -32,8 +31,6 @@ const managersWithPts = managers
 
 const madisonTeams = managersWithPts.filter((t) => t.league === 'Madison');
 const laTeams = managersWithPts.filter((t) => t.league === 'LA');
-console.log(madisonTeams);
-console.log(laTeams);
 
 const playoffsMadison = Object.entries(
   getPlayoffSlots({
@@ -50,9 +47,6 @@ const playoffsLA = Object.entries(
     divisionName2: 'Tornado Room',
   })
 );
-
-console.log(playoffsMadison);
-console.log(playoffsLA);
 </script>
 
 <template>

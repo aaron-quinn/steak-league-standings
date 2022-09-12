@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-import PlayoffList from './PlayoffList.vue';
 
 const props = defineProps({
   playoffTeams: Object,
@@ -11,7 +10,7 @@ const leagueName = ref(props.league);
 </script>
 
 <template>
-  <div class="bg-slate-800 rounded-md mb-6 flex-grow antialiased">
+  <div class="bg-slate-800 rounded-md flex-grow antialiased">
     <div
       class="py-3 px-4 bg-slate-700 text-slate-300 rounded-t-md text-lg font-bold"
     >
