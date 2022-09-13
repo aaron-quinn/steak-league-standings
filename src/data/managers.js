@@ -382,7 +382,7 @@ export default function getManagers() {
           steak: false,
         },
         2016: {
-          steak: true,
+          steak: false,
         },
       },
     },
