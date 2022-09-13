@@ -3,7 +3,7 @@
 <template>
   <img
     class="max-w-[150px] lg:max-w-[250px] mx-auto mb-6 lg:mb-8"
-    src="steak.svg"
+    src="/steak.svg"
     alt="Steak League"
   />
   <h1
