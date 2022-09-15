@@ -26,7 +26,6 @@ const standingsAPIURL = props.live
   : `/standings/${year}`;
 const standings = await api.getData(standingsAPIURL);
 store.standings = standings;
-console.log(standings);
 </script>
 
 <template>

@@ -1,14 +1,21 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router';
+import { RouterView } from 'vue-router';
+import LoadingScreen from './components/LoadingScreen.vue';
 </script>
 
 <template>
-  <Suspense>
-    <template #default>
-      <RouterView />
+  <RouterView v-slot="{ Component }">
+    <template v-if="Component">
+      <Transition mode="out-in">
+        <KeepAlive>
+          <Suspense>
+            <component :is="Component"></component>
+            <template #fallback>
+              <LoadingScreen />
+            </template>
+          </Suspense>
+        </KeepAlive>
+      </Transition>
     </template>
-    <template #fallback>
-      <h1>Loading standings...</h1>
-    </template>
-  </Suspense>
+  </RouterView>
 </template>
