@@ -4,7 +4,7 @@ import { useStandingsStore } from '../stores/standings';
 const { live } = useStandingsStore();
 const tabs = [
   { name: 'Official Standings', href: '/', current: !live },
-  { name: 'Current Standings', href: '/current', current: live },
+  { name: 'Live Standings', href: '/live', current: live },
 ];
 </script>
 

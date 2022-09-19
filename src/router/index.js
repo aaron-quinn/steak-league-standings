@@ -13,7 +13,7 @@ const router = createRouter({
       },
     },
     {
-      path: '/current',
+      path: '/live',
       name: 'live-standings',
       component: MainView,
       props: {
