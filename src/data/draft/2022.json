@@ -1,0 +1,1430 @@
+[
+  {
+    "nom": 1,
+    "player": "Jonathan Taylor",
+    "pos": "RB",
+    "cost": 69
+  },
+  {
+    "nom": 4,
+    "player": "Christian McCaffrey",
+    "pos": "RB",
+    "cost": 59
+  },
+  {
+    "nom": 14,
+    "player": "Justin Jefferson",
+    "pos": "WR",
+    "cost": 52
+  },
+  {
+    "nom": 8,
+    "player": "Dalvin Cook",
+    "pos": "RB",
+    "cost": 52
+  },
+  {
+    "nom": 19,
+    "player": "Ja'Marr Chase",
+    "pos": "WR",
+    "cost": 51
+  },
+  {
+    "nom": 9,
+    "player": "Derrick Henry",
+    "pos": "RB",
+    "cost": 51
+  },
+  {
+    "nom": 7,
+    "player": "Austin Ekeler",
+    "pos": "RB",
+    "cost": 50
+  },
+  {
+    "nom": 11,
+    "player": "Najee Harris",
+    "pos": "RB",
+    "cost": 50
+  },
+  {
+    "nom": 2,
+    "player": "Cooper Kupp",
+    "pos": "WR",
+    "cost": 49
+  },
+  {
+    "nom": 35,
+    "player": "Saquon Barkley",
+    "pos": "RB",
+    "cost": 46
+  },
+  {
+    "nom": 34,
+    "player": "Joe Mixon",
+    "pos": "RB",
+    "cost": 45
+  },
+  {
+    "nom": 21,
+    "player": "D'Andre Swift",
+    "pos": "RB",
+    "cost": 44
+  },
+  {
+    "nom": 28,
+    "player": "Stefon Diggs",
+    "pos": "WR",
+    "cost": 43
+  },
+  {
+    "nom": 12,
+    "player": "Alvin Kamara",
+    "pos": "RB",
+    "cost": 41
+  },
+  {
+    "nom": 18,
+    "player": "CeeDee Lamb",
+    "pos": "WR",
+    "cost": 41
+  },
+  {
+    "nom": 26,
+    "player": "Aaron Jones",
+    "pos": "RB",
+    "cost": 41
+  },
+  {
+    "nom": 16,
+    "player": "Davante Adams",
+    "pos": "WR",
+    "cost": 40
+  },
+  {
+    "nom": 17,
+    "player": "Deebo Samuel",
+    "pos": "WR",
+    "cost": 39
+  },
+  {
+    "nom": 13,
+    "player": "Travis Kelce",
+    "pos": "TE",
+    "cost": 38
+  },
+  {
+    "nom": 45,
+    "player": "Travis Etienne",
+    "pos": "RB",
+    "cost": 36
+  },
+  {
+    "nom": 31,
+    "player": "Nick Chubb",
+    "pos": "RB",
+    "cost": 36
+  },
+  {
+    "nom": 44,
+    "player": "Mike Evans",
+    "pos": "WR",
+    "cost": 34
+  },
+  {
+    "nom": 40,
+    "player": "Javonte Williams",
+    "pos": "RB",
+    "cost": 34
+  },
+  {
+    "nom": 30,
+    "player": "Tyreek Hill",
+    "pos": "WR",
+    "cost": 33
+  },
+  {
+    "nom": 47,
+    "player": "A.J. Brown",
+    "pos": "WR",
+    "cost": 33
+  },
+  {
+    "nom": 20,
+    "player": "Leonard Fournette",
+    "pos": "RB",
+    "cost": 32
+  },
+  {
+    "nom": 58,
+    "player": "Breece Hall",
+    "pos": "RB",
+    "cost": 32
+  },
+  {
+    "nom": 15,
+    "player": "Mark Andrews",
+    "pos": "TE",
+    "cost": 32
+  },
+  {
+    "nom": 29,
+    "player": "Ezekiel Elliott",
+    "pos": "RB",
+    "cost": 30
+  },
+  {
+    "nom": 60,
+    "player": "Courtland Sutton",
+    "pos": "WR",
+    "cost": 30
+  },
+  {
+    "nom": 23,
+    "player": "Jaylen Waddle",
+    "pos": "WR",
+    "cost": 29
+  },
+  {
+    "nom": 3,
+    "player": "Kyle Pitts",
+    "pos": "TE",
+    "cost": 28
+  },
+  {
+    "nom": 42,
+    "player": "Tee Higgins",
+    "pos": "WR",
+    "cost": 28
+  },
+  {
+    "nom": 32,
+    "player": "James Conner",
+    "pos": "RB",
+    "cost": 27
+  },
+  {
+    "nom": 33,
+    "player": "Mike Williams",
+    "pos": "WR",
+    "cost": 27
+  },
+  {
+    "nom": 48,
+    "player": "J.K. Dobbins",
+    "pos": "RB",
+    "cost": 27
+  },
+  {
+    "nom": 25,
+    "player": "Keenan Allen",
+    "pos": "WR",
+    "cost": 26
+  },
+  {
+    "nom": 56,
+    "player": "Michael Pittman",
+    "pos": "WR",
+    "cost": 26
+  },
+  {
+    "nom": 79,
+    "player": "AJ Dillon",
+    "pos": "RB",
+    "cost": 25
+  },
+  {
+    "nom": 39,
+    "player": "Diontae Johnson",
+    "pos": "WR",
+    "cost": 24
+  },
+  {
+    "nom": 85,
+    "player": "Allen Robinson",
+    "pos": "WR",
+    "cost": 24
+  },
+  {
+    "nom": 53,
+    "player": "DK Metcalf",
+    "pos": "WR",
+    "cost": 23
+  },
+  {
+    "nom": 65,
+    "player": "Elijah Mitchell",
+    "pos": "RB",
+    "cost": 23
+  },
+  {
+    "nom": 57,
+    "player": "D.J. Moore",
+    "pos": "WR",
+    "cost": 23
+  },
+  {
+    "nom": 68,
+    "player": "Terry McLaurin",
+    "pos": "WR",
+    "cost": 23
+  },
+  {
+    "nom": 154,
+    "player": "Dameon Pierce",
+    "pos": "RB",
+    "cost": 23
+  },
+  {
+    "nom": 72,
+    "player": "Darnell Mooney",
+    "pos": "WR",
+    "cost": 22
+  },
+  {
+    "nom": 37,
+    "player": "Josh Allen",
+    "pos": "QB",
+    "cost": 21
+  },
+  {
+    "nom": 62,
+    "player": "Josh Jacobs",
+    "pos": "RB",
+    "cost": 21
+  },
+  {
+    "nom": 36,
+    "player": "David Montgomery",
+    "pos": "RB",
+    "cost": 21
+  },
+  {
+    "nom": 98,
+    "player": "JuJu Smith-Schuster",
+    "pos": "WR",
+    "cost": 21
+  },
+  {
+    "nom": 43,
+    "player": "Cam Akers",
+    "pos": "RB",
+    "cost": 21
+  },
+  {
+    "nom": 87,
+    "player": "Gabriel Davis",
+    "pos": "WR",
+    "cost": 21
+  },
+  {
+    "nom": 136,
+    "player": "Rashaad Penny",
+    "pos": "RB",
+    "cost": 20
+  },
+  {
+    "nom": 46,
+    "player": "Brandin Cooks",
+    "pos": "WR",
+    "cost": 20
+  },
+  {
+    "nom": 27,
+    "player": "George Kittle",
+    "pos": "TE",
+    "cost": 19
+  },
+  {
+    "nom": 22,
+    "player": "Darren Waller",
+    "pos": "TE",
+    "cost": 19
+  },
+  {
+    "nom": 82,
+    "player": "Rashod Bateman",
+    "pos": "WR",
+    "cost": 18
+  },
+  {
+    "nom": 59,
+    "player": "Justin Herbert",
+    "pos": "QB",
+    "cost": 18
+  },
+  {
+    "nom": 93,
+    "player": "Clyde Edwards-Helaire",
+    "pos": "RB",
+    "cost": 17
+  },
+  {
+    "nom": 49,
+    "player": "Marquise Brown",
+    "pos": "WR",
+    "cost": 17
+  },
+  {
+    "nom": 100,
+    "player": "Allen Lazard",
+    "pos": "WR",
+    "cost": 17
+  },
+  {
+    "nom": 51,
+    "player": "Amon-Ra St. Brown",
+    "pos": "WR",
+    "cost": 17
+  },
+  {
+    "nom": 76,
+    "player": "Elijah Moore",
+    "pos": "WR",
+    "cost": 17
+  },
+  {
+    "nom": 61,
+    "player": "Michael Thomas",
+    "pos": "WR",
+    "cost": 17
+  },
+  {
+    "nom": 71,
+    "player": "Jerry Jeudy",
+    "pos": "WR",
+    "cost": 16
+  },
+  {
+    "nom": 69,
+    "player": "Jalen Hurts",
+    "pos": "QB",
+    "cost": 16
+  },
+  {
+    "nom": 121,
+    "player": "Christian Kirk",
+    "pos": "WR",
+    "cost": 16
+  },
+  {
+    "nom": 70,
+    "player": "Kyler Murray",
+    "pos": "QB",
+    "cost": 16
+  },
+  {
+    "nom": 104,
+    "player": "DeAndre Hopkins",
+    "pos": "WR",
+    "cost": 16
+  },
+  {
+    "nom": 55,
+    "player": "Lamar Jackson",
+    "pos": "QB",
+    "cost": 16
+  },
+  {
+    "nom": 95,
+    "player": "Drake London",
+    "pos": "WR",
+    "cost": 15
+  },
+  {
+    "nom": 74,
+    "player": "Amari Cooper",
+    "pos": "WR",
+    "cost": 15
+  },
+  {
+    "nom": 77,
+    "player": "Adam Thielen",
+    "pos": "WR",
+    "cost": 15
+  },
+  {
+    "nom": 172,
+    "player": "James Robinson",
+    "pos": "RB",
+    "cost": 15
+  },
+  {
+    "nom": 73,
+    "player": "Chris Godwin",
+    "pos": "WR",
+    "cost": 15
+  },
+  {
+    "nom": 112,
+    "player": "Chris Olave",
+    "pos": "WR",
+    "cost": 14
+  },
+  {
+    "nom": 41,
+    "player": "Patrick Mahomes",
+    "pos": "QB",
+    "cost": 14
+  },
+  {
+    "nom": 124,
+    "player": "Rhamondre Stevenson",
+    "pos": "RB",
+    "cost": 14
+  },
+  {
+    "nom": 111,
+    "player": "Brandon Aiyuk",
+    "pos": "WR",
+    "cost": 14
+  },
+  {
+    "nom": 63,
+    "player": "Kareem Hunt",
+    "pos": "RB",
+    "cost": 14
+  },
+  {
+    "nom": 130,
+    "player": "Chase Edmonds",
+    "pos": "RB",
+    "cost": 12
+  },
+  {
+    "nom": 6,
+    "player": "Kadarius Toney",
+    "pos": "WR",
+    "cost": 12
+  },
+  {
+    "nom": 78,
+    "player": "Miles Sanders",
+    "pos": "RB",
+    "cost": 12
+  },
+  {
+    "nom": 86,
+    "player": "Dallas Goedert",
+    "pos": "TE",
+    "cost": 12
+  },
+  {
+    "nom": 102,
+    "player": "Hunter Renfrow",
+    "pos": "WR",
+    "cost": 12
+  },
+  {
+    "nom": 81,
+    "player": "Dalton Schultz",
+    "pos": "TE",
+    "cost": 12
+  },
+  {
+    "nom": 52,
+    "player": "Cordarrelle Patterson",
+    "pos": "RB",
+    "cost": 11
+  },
+  {
+    "nom": 116,
+    "player": "DeVonta Smith",
+    "pos": "WR",
+    "cost": 11
+  },
+  {
+    "nom": 50,
+    "player": "T.J. Hockenson",
+    "pos": "TE",
+    "cost": 11
+  },
+  {
+    "nom": 64,
+    "player": "Antonio Gibson",
+    "pos": "RB",
+    "cost": 11
+  },
+  {
+    "nom": 90,
+    "player": "Tyler Lockett",
+    "pos": "WR",
+    "cost": 10
+  },
+  {
+    "nom": 66,
+    "player": "George Pickens",
+    "pos": "WR",
+    "cost": 10
+  },
+  {
+    "nom": 135,
+    "player": "Robert Woods",
+    "pos": "WR",
+    "cost": 10
+  },
+  {
+    "nom": 89,
+    "player": "Tony Pollard",
+    "pos": "RB",
+    "cost": 10
+  },
+  {
+    "nom": 54,
+    "player": "Melvin Gordon",
+    "pos": "RB",
+    "cost": 10
+  },
+  {
+    "nom": 96,
+    "player": "Joe Burrow",
+    "pos": "QB",
+    "cost": 9
+  },
+  {
+    "nom": 5,
+    "player": "Trey Lance",
+    "pos": "QB",
+    "cost": 9
+  },
+  {
+    "nom": 92,
+    "player": "Dak Prescott",
+    "pos": "QB",
+    "cost": 9
+  },
+  {
+    "nom": 88,
+    "player": "Damien Harris",
+    "pos": "RB",
+    "cost": 8
+  },
+  {
+    "nom": 169,
+    "player": "Kenneth Walker III",
+    "pos": "RB",
+    "cost": 8
+  },
+  {
+    "nom": 179,
+    "player": "Darrell Henderson",
+    "pos": "RB",
+    "cost": 8
+  },
+  {
+    "nom": 67,
+    "player": "Devin Singletary",
+    "pos": "RB",
+    "cost": 8
+  },
+  {
+    "nom": 38,
+    "player": "Cole Kmet",
+    "pos": "TE",
+    "cost": 8
+  },
+  {
+    "nom": 99,
+    "player": "Russell Wilson",
+    "pos": "QB",
+    "cost": 8
+  },
+  {
+    "nom": 132,
+    "player": "Chase Claypool",
+    "pos": "WR",
+    "cost": 8
+  },
+  {
+    "nom": 125,
+    "player": "Skyy Moore",
+    "pos": "WR",
+    "cost": 7
+  },
+  {
+    "nom": 164,
+    "player": "Romeo Doubs",
+    "pos": "WR",
+    "cost": 7
+  },
+  {
+    "nom": 178,
+    "player": "Brian Robinson",
+    "pos": "RB",
+    "cost": 6
+  },
+  {
+    "nom": 139,
+    "player": "James Cook",
+    "pos": "RB",
+    "cost": 6
+  },
+  {
+    "nom": 176,
+    "player": "D.J. Chark",
+    "pos": "WR",
+    "cost": 6
+  },
+  {
+    "nom": 141,
+    "player": "Pat Freiermuth",
+    "pos": "TE",
+    "cost": 5
+  },
+  {
+    "nom": 157,
+    "player": "Jakobi Meyers",
+    "pos": "WR",
+    "cost": 5
+  },
+  {
+    "nom": 167,
+    "player": "Jahan Dotson",
+    "pos": "WR",
+    "cost": 5
+  },
+  {
+    "nom": 94,
+    "player": "Aaron Rodgers",
+    "pos": "QB",
+    "cost": 5
+  },
+  {
+    "nom": 188,
+    "player": "Kenneth Gainwell",
+    "pos": "RB",
+    "cost": 5
+  },
+  {
+    "nom": 158,
+    "player": "Michael Carter",
+    "pos": "RB",
+    "cost": 5
+  },
+  {
+    "nom": 153,
+    "player": "Rondale Moore",
+    "pos": "WR",
+    "cost": 5
+  },
+  {
+    "nom": 161,
+    "player": "K.J. Osborn",
+    "pos": "WR",
+    "cost": 5
+  },
+  {
+    "nom": 128,
+    "player": "Zach Ertz",
+    "pos": "TE",
+    "cost": 5
+  },
+  {
+    "nom": 155,
+    "player": "Garrett Wilson",
+    "pos": "WR",
+    "cost": 4
+  },
+  {
+    "nom": 183,
+    "player": "Jalen Tolbert",
+    "pos": "WR",
+    "cost": 4
+  },
+  {
+    "nom": 190,
+    "player": "Tyler Allgeier",
+    "pos": "RB",
+    "cost": 4
+  },
+  {
+    "nom": 170,
+    "player": "Tyler Boyd",
+    "pos": "WR",
+    "cost": 4
+  },
+  {
+    "nom": 131,
+    "player": "Treylon Burks",
+    "pos": "WR",
+    "cost": 4
+  },
+  {
+    "nom": 148,
+    "player": "Mike Gesicki",
+    "pos": "TE",
+    "cost": 4
+  },
+  {
+    "nom": 180,
+    "player": "Isaiah Spiller",
+    "pos": "RB",
+    "cost": 4
+  },
+  {
+    "nom": 181,
+    "player": "Nico Collins",
+    "pos": "WR",
+    "cost": 4
+  },
+  {
+    "nom": 75,
+    "player": "T.J. Watt",
+    "pos": "DE",
+    "cost": 3
+  },
+  {
+    "nom": 147,
+    "player": "Jameson Williams",
+    "pos": "WR",
+    "cost": 3
+  },
+  {
+    "nom": 110,
+    "player": "Derek Carr",
+    "pos": "QB",
+    "cost": 3
+  },
+  {
+    "nom": 186,
+    "player": "Jamaal Williams",
+    "pos": "RB",
+    "cost": 3
+  },
+  {
+    "nom": 199,
+    "player": "Alexander Mattison",
+    "pos": "RB",
+    "cost": 3
+  },
+  {
+    "nom": 231,
+    "player": "Kevin Byard",
+    "pos": "S",
+    "cost": 3
+  },
+  {
+    "nom": 195,
+    "player": "J.D. McKissic",
+    "pos": "RB",
+    "cost": 3
+  },
+  {
+    "nom": 163,
+    "player": "Marquez Valdes-Scantling",
+    "pos": "WR",
+    "cost": 3
+  },
+  {
+    "nom": 10,
+    "player": "Isiah Pacheco",
+    "pos": "RB",
+    "cost": 3
+  },
+  {
+    "nom": 84,
+    "player": "Jordyn Brooks",
+    "pos": "LB",
+    "cost": 3
+  },
+  {
+    "nom": 160,
+    "player": "Kenny Golladay",
+    "pos": "WR",
+    "cost": 3
+  },
+  {
+    "nom": 143,
+    "player": "Albert Okwuegbunam",
+    "pos": "TE",
+    "cost": 3
+  },
+  {
+    "nom": 166,
+    "player": "Khalil Herbert",
+    "pos": "RB",
+    "cost": 3
+  },
+  {
+    "nom": 97,
+    "player": "Matthew Stafford",
+    "pos": "QB",
+    "cost": 3
+  },
+  {
+    "nom": 175,
+    "player": "Josh Palmer",
+    "pos": "WR",
+    "cost": 3
+  },
+  {
+    "nom": 24,
+    "player": "Evan McPherson",
+    "pos": "PK",
+    "cost": 2
+  },
+  {
+    "nom": 193,
+    "player": "Alec Pierce",
+    "pos": "WR",
+    "cost": 2
+  },
+  {
+    "nom": 204,
+    "player": "Wan'Dale Robinson",
+    "pos": "WR",
+    "cost": 2
+  },
+  {
+    "nom": 223,
+    "player": "Gus Edwards",
+    "pos": "RB",
+    "cost": 2
+  },
+  {
+    "nom": 83,
+    "player": "Tom Brady",
+    "pos": "QB",
+    "cost": 2
+  },
+  {
+    "nom": 114,
+    "player": "Dawson Knox",
+    "pos": "TE",
+    "cost": 2
+  },
+  {
+    "nom": 205,
+    "player": "Zack Moss",
+    "pos": "RB",
+    "cost": 2
+  },
+  {
+    "nom": 189,
+    "player": "Mecole Hardman",
+    "pos": "WR",
+    "cost": 2
+  },
+  {
+    "nom": 101,
+    "player": "Justin Tucker",
+    "pos": "PK",
+    "cost": 2
+  },
+  {
+    "nom": 109,
+    "player": "Foyesade Oluokun",
+    "pos": "LB",
+    "cost": 2
+  },
+  {
+    "nom": 115,
+    "player": "Myles Garrett",
+    "pos": "DE",
+    "cost": 2
+  },
+  {
+    "nom": 129,
+    "player": "Budda Baker",
+    "pos": "S",
+    "cost": 2
+  },
+  {
+    "nom": 171,
+    "player": "Jarvis Landry",
+    "pos": "WR",
+    "cost": 2
+  },
+  {
+    "nom": 149,
+    "player": "DeVante Parker",
+    "pos": "WR",
+    "cost": 2
+  },
+  {
+    "nom": 185,
+    "player": "Michael Gallup",
+    "pos": "WR",
+    "cost": 2
+  },
+  {
+    "nom": 91,
+    "player": "DeForest Buckner",
+    "pos": "DT",
+    "cost": 2
+  },
+  {
+    "nom": 108,
+    "player": "Derwin James",
+    "pos": "S",
+    "cost": 2
+  },
+  {
+    "nom": 120,
+    "player": "Matt Gay",
+    "pos": "PK",
+    "cost": 2
+  },
+  {
+    "nom": 117,
+    "player": "Aaron Donald",
+    "pos": "DT",
+    "cost": 2
+  },
+  {
+    "nom": 151,
+    "player": "Harrison Butker",
+    "pos": "PK",
+    "cost": 2
+  },
+  {
+    "nom": 173,
+    "player": "Robbie Anderson",
+    "pos": "WR",
+    "cost": 2
+  },
+  {
+    "nom": 202,
+    "player": "Hunter Henry",
+    "pos": "TE",
+    "cost": 2
+  },
+  {
+    "nom": 80,
+    "player": "Micah Parsons",
+    "pos": "LB",
+    "cost": 2
+  },
+  {
+    "nom": 146,
+    "player": "Nick Bosa",
+    "pos": "DE",
+    "cost": 2
+  },
+  {
+    "nom": 196,
+    "player": "Russell Gage",
+    "pos": "WR",
+    "cost": 2
+  },
+  {
+    "nom": 113,
+    "player": "Xavier McKinney",
+    "pos": "S",
+    "cost": 1
+  },
+  {
+    "nom": 127,
+    "player": "Shaquille Leonard",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 213,
+    "player": "Eric Kendricks",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 221,
+    "player": "Jessie Bates",
+    "pos": "S",
+    "cost": 1
+  },
+  {
+    "nom": 227,
+    "player": "Jonathan Allen",
+    "pos": "DT",
+    "cost": 1
+  },
+  {
+    "nom": 232,
+    "player": "Jake Elliott",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 107,
+    "player": "Trey Hendrickson",
+    "pos": "DE",
+    "cost": 1
+  },
+  {
+    "nom": 177,
+    "player": "Nick Folk",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 200,
+    "player": "Devin Duvernay",
+    "pos": "WR",
+    "cost": 1
+  },
+  {
+    "nom": 209,
+    "player": "Rachaad White",
+    "pos": "RB",
+    "cost": 1
+  },
+  {
+    "nom": 218,
+    "player": "Cole Holcomb",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 226,
+    "player": "Sammy Watkins",
+    "pos": "WR",
+    "cost": 1
+  },
+  {
+    "nom": 103,
+    "player": "De'Vondre Campbell",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 145,
+    "player": "Joey Bosa",
+    "pos": "DE",
+    "cost": 1
+  },
+  {
+    "nom": 159,
+    "player": "Kirk Cousins",
+    "pos": "QB",
+    "cost": 1
+  },
+  {
+    "nom": 206,
+    "player": "Marvin Jones",
+    "pos": "WR",
+    "cost": 1
+  },
+  {
+    "nom": 215,
+    "player": "Van Jefferson",
+    "pos": "WR",
+    "cost": 1
+  },
+  {
+    "nom": 229,
+    "player": "Jeffery Wilson",
+    "pos": "RB",
+    "cost": 1
+  },
+  {
+    "nom": 234,
+    "player": "Hassan Haskins",
+    "pos": "RB",
+    "cost": 1
+  },
+  {
+    "nom": 236,
+    "player": "Greg Joseph",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 238,
+    "player": "Vonn Bell",
+    "pos": "S",
+    "cost": 1
+  },
+  {
+    "nom": 142,
+    "player": "Irv Smith Jr.",
+    "pos": "TE",
+    "cost": 1
+  },
+  {
+    "nom": 156,
+    "player": "Younghoe Koo",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 184,
+    "player": "Johnathan Abram",
+    "pos": "S",
+    "cost": 1
+  },
+  {
+    "nom": 214,
+    "player": "Christian Watson",
+    "pos": "WR",
+    "cost": 1
+  },
+  {
+    "nom": 222,
+    "player": "Nyheim Hines",
+    "pos": "RB",
+    "cost": 1
+  },
+  {
+    "nom": 228,
+    "player": "Harold Landry",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 233,
+    "player": "Robert Tonyan",
+    "pos": "TE",
+    "cost": 1
+  },
+  {
+    "nom": 235,
+    "player": "Blake Martinez",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 237,
+    "player": "Amari Rodgers",
+    "pos": "WR",
+    "cost": 1
+  },
+  {
+    "nom": 105,
+    "player": "Cameron Heyward",
+    "pos": "DT",
+    "cost": 1
+  },
+  {
+    "nom": 119,
+    "player": "Jerome Baker",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 133,
+    "player": "Desmond King",
+    "pos": "CB",
+    "cost": 1
+  },
+  {
+    "nom": 187,
+    "player": "David Bell",
+    "pos": "WR",
+    "cost": 1
+  },
+  {
+    "nom": 198,
+    "player": "Tyrion Davis-Price",
+    "pos": "RB",
+    "cost": 1
+  },
+  {
+    "nom": 208,
+    "player": "Corey Davis",
+    "pos": "WR",
+    "cost": 1
+  },
+  {
+    "nom": 217,
+    "player": "Pierre Strong Jr.",
+    "pos": "RB",
+    "cost": 1
+  },
+  {
+    "nom": 225,
+    "player": "Chris Evans",
+    "pos": "RB",
+    "cost": 1
+  },
+  {
+    "nom": 230,
+    "player": "Graham Gano",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 123,
+    "player": "Fred Warner",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 137,
+    "player": "Antoine Winfield",
+    "pos": "S",
+    "cost": 1
+  },
+  {
+    "nom": 165,
+    "player": "Dustin Hopkins",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 191,
+    "player": "Brian Burns",
+    "pos": "DE",
+    "cost": 1
+  },
+  {
+    "nom": 211,
+    "player": "Tyler Higbee",
+    "pos": "TE",
+    "cost": 1
+  },
+  {
+    "nom": 118,
+    "player": "Devin White",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 174,
+    "player": "Robbie Gould",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 197,
+    "player": "Sam Hubbard",
+    "pos": "DE",
+    "cost": 1
+  },
+  {
+    "nom": 207,
+    "player": "KJ Hamler",
+    "pos": "WR",
+    "cost": 1
+  },
+  {
+    "nom": 216,
+    "player": "Zamir White",
+    "pos": "RB",
+    "cost": 1
+  },
+  {
+    "nom": 224,
+    "player": "Justin Simmons",
+    "pos": "S",
+    "cost": 1
+  },
+  {
+    "nom": 126,
+    "player": "Bobby Wagner",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 140,
+    "player": "David Njoku",
+    "pos": "TE",
+    "cost": 1
+  },
+  {
+    "nom": 168,
+    "player": "Matt Prater",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 182,
+    "player": "Minkah Fitzpatrick",
+    "pos": "S",
+    "cost": 1
+  },
+  {
+    "nom": 194,
+    "player": "Danielle Hunter",
+    "pos": "DE",
+    "cost": 1
+  },
+  {
+    "nom": 144,
+    "player": "Raheem Mostert",
+    "pos": "RB",
+    "cost": 1
+  },
+  {
+    "nom": 106,
+    "player": "Roquan Smith",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 134,
+    "player": "Jalen Thompson",
+    "pos": "S",
+    "cost": 1
+  },
+  {
+    "nom": 162,
+    "player": "Tyler Bass",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 138,
+    "player": "Hayden Hurst",
+    "pos": "TE",
+    "cost": 1
+  },
+  {
+    "nom": 152,
+    "player": "Brandon McManus",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 192,
+    "player": "Logan Wilson",
+    "pos": "LB",
+    "cost": 1
+  },
+  {
+    "nom": 203,
+    "player": "Isaiah Likely",
+    "pos": "TE",
+    "cost": 1
+  },
+  {
+    "nom": 212,
+    "player": "Jeffery Simmons",
+    "pos": "DT",
+    "cost": 1
+  },
+  {
+    "nom": 220,
+    "player": "Trevon Diggs",
+    "pos": "CB",
+    "cost": 1
+  },
+  {
+    "nom": 122,
+    "player": "Jeremy Chinn",
+    "pos": "S",
+    "cost": 1
+  },
+  {
+    "nom": 150,
+    "player": "Daniel Carlson",
+    "pos": "PK",
+    "cost": 1
+  },
+  {
+    "nom": 201,
+    "player": "Trevor Lawrence",
+    "pos": "QB",
+    "cost": 1
+  },
+  {
+    "nom": 210,
+    "player": "Jaylen Warren",
+    "pos": "RB",
+    "cost": 1
+  },
+  {
+    "nom": 219,
+    "player": "Joshua Kelley",
+    "pos": "RB",
+    "cost": 1
+  }
+]
