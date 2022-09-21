@@ -5,6 +5,7 @@ export const useStandingsStore = defineStore({
   state: () => ({
     year: 2022,
     standings: {},
+    players: [],
     live: false,
   }),
 });

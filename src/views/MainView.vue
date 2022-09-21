@@ -8,6 +8,7 @@ import LeagueLogo from '../components/LeagueLogo.vue';
 import { useStandingsStore } from '../stores/standings';
 import api from '../api';
 import ViewSwitcher from '../components/ViewSwitcher.vue';
+import getDraftResults from '../data/draft-results';
 
 const props = defineProps({
   live: {
@@ -26,6 +27,21 @@ const standingsAPIURL = props.live
   : `/standings/${year}`;
 const standings = await api.getData(standingsAPIURL);
 store.standings = standings;
+
+const playerListAPIURL = `/points/${year}`;
+const playerList = await api.getData(playerListAPIURL);
+const draftResults = getDraftResults();
+
+const players = playerList.map((player) => {
+  player.draftPrice =
+    draftResults.find(
+      (result) =>
+        result.player === player.name && result.pos === player.position
+    )?.cost || 0;
+  return player;
+});
+
+store.players = players;
 </script>
 
 <template>
