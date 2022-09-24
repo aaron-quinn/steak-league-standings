@@ -10,21 +10,11 @@ const tabs = [
 
 <template>
   <div class="mb-6 antialiased">
-    <div class="sm:hidden">
-      <label for="tabs" class="sr-only">Select a tab</label>
-      <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
-      <select
-        id="tabs"
-        name="tabs"
-        class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+    <div class="block">
+      <nav
+        class="flex space-x-4 justify-center lg:justify-start"
+        aria-label="Tabs"
       >
-        <option v-for="tab in tabs" :key="tab.name" :selected="tab.current">
-          {{ tab.name }}
-        </option>
-      </select>
-    </div>
-    <div class="hidden sm:block">
-      <nav class="flex space-x-4" aria-label="Tabs">
         <a
           v-for="tab in tabs"
           :key="tab.name"
