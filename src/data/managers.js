@@ -278,7 +278,7 @@ export default function getManagers() {
       },
     },
     {
-      name: 'Nick Rawlings',
+      name: 'Nick Rawling',
       teams: {
         2022: {
           league: 'Madison',
