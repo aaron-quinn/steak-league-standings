@@ -323,7 +323,7 @@ export default function getManagers() {
       },
     },
     {
-      name: 'Erik Caturia',
+      name: 'Eric Caturia',
       teams: {
         2022: {
           league: 'Madison',
