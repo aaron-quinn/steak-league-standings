@@ -1,6 +1,7 @@
 <template>
   <div
     class="h-screen bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-center p-8 antialiased"
+    style="height: 100dvh"
   >
     <div
       role="status"
