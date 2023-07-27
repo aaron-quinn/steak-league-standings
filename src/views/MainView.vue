@@ -28,10 +28,11 @@ const standingsAPIURL = props.live
 const standings = await api.getData(standingsAPIURL);
 store.standings = standings;
 
-const playerListAPIURL = `/points/${year}`;
-const playerList = await api.getData(playerListAPIURL);
-const draftResults = getDraftResults();
+//const playerListAPIURL = `/points/${year}`;
+//const playerList = await api.getData(playerListAPIURL);
+//const draftResults = getDraftResults();
 
+/*
 const players = playerList.map((player) => {
   player.draftPrice =
     draftResults.find(
@@ -42,6 +43,7 @@ const players = playerList.map((player) => {
 });
 
 store.players = players;
+*/
 </script>
 
 <template>
