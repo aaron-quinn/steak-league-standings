@@ -335,6 +335,9 @@ export default function getManagers() {
         2016: {
           steak: true,
         },
+        2014: {
+          champion: true,
+        },
       },
     },
     {
@@ -537,6 +540,12 @@ export default function getManagers() {
         2016: {
           steak: false,
         },
+        2010: {
+          champion: true,
+        },
+        2008: {
+          champion: true,
+        },
       },
     },
     {
@@ -602,6 +611,9 @@ export default function getManagers() {
           league: 'LA',
           division: 'Taylors',
           teamID: '0009',
+        },
+        2005: {
+          champion: true,
         },
       },
     },
@@ -679,6 +691,9 @@ export default function getManagers() {
         2016: {
           steak: false,
         },
+        2012: {
+          champion: true,
+        },
       },
     },
     {
@@ -698,6 +713,12 @@ export default function getManagers() {
           league: 'LA',
           division: 'Tornado Room',
           teamID: '0005',
+        },
+        2007: {
+          champion: true,
+        },
+        2001: {
+          champion: true,
         },
       },
     },
@@ -780,6 +801,9 @@ export default function getManagers() {
           division: 'Tornado Room',
           teamID: '0007',
         },
+        2003: {
+          champion: true,
+        },
       },
     },
     {
@@ -823,6 +847,9 @@ export default function getManagers() {
         2016: {
           champion: true,
         },
+        2013: {
+          champion: true,
+        },
       },
     },
     {
@@ -842,6 +869,49 @@ export default function getManagers() {
           league: 'LA',
           division: 'Tornado Room',
           teamID: '0014',
+        },
+      },
+    },
+    {
+      name: 'Derek VanRiper',
+      teams: {
+        2015: {
+          champion: true,
+        },
+      },
+    },
+    {
+      name: 'Joe Sheehan',
+      teams: {
+        2006: {
+          champion: true,
+        },
+      },
+    },
+    {
+      name: 'Mike Romanowski',
+      teams: {
+        2004: {
+          champion: true,
+        },
+      },
+    },
+    {
+      name: 'Josh White',
+      teams: {
+        2002: {
+          champion: true,
+        },
+      },
+    },
+    {
+      name: 'Dalton Del Don',
+      teams: {
+        2011: {
+          champion: true,
+        },
+        2009: {
+          champion: true,
         },
       },
     },
