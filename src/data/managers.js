@@ -5,7 +5,7 @@ export default function getManagers() {
       teams: {
         2023: {
           league: 'Madison',
-          division: 'Filet Mignon',
+          division: 'Au Poivre',
           teamID: '0002',
           steak: false,
         },
@@ -81,7 +81,7 @@ export default function getManagers() {
       teams: {
         2023: {
           league: 'Madison',
-          division: 'Au Poivre',
+          division: 'Filet Mignon',
           teamID: '0010',
           steak: false,
         },
@@ -120,7 +120,7 @@ export default function getManagers() {
       teams: {
         2023: {
           league: 'Madison',
-          division: 'Au Poivre',
+          division: 'Filet Mignon',
           teamID: '0004',
           steak: false,
         },
@@ -223,7 +223,7 @@ export default function getManagers() {
       teams: {
         2023: {
           league: 'Madison',
-          division: 'Au Poivre',
+          division: 'Filet Mignon',
           teamID: '0012',
           steak: false,
         },
@@ -384,7 +384,7 @@ export default function getManagers() {
       teams: {
         2023: {
           league: 'Madison',
-          division: 'Filet Mignon',
+          division: 'Au Poivre',
           teamID: '0014',
           steak: false,
         },
@@ -412,7 +412,7 @@ export default function getManagers() {
       teams: {
         2023: {
           league: 'Madison',
-          division: 'Filet Mignon',
+          division: 'Au Poivre',
           teamID: '0007',
           steak: false,
         },
