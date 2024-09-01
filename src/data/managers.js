@@ -3,11 +3,17 @@ export default function getManagers() {
     {
       name: 'Aaron Quinn',
       teams: {
-        2023: {
+        2024: {
           league: 'Madison',
           division: 'Au Poivre',
           teamID: '0002',
           steak: false,
+        },
+        2023: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0002',
+          steak: true,
         },
         2022: {
           league: 'Madison',
@@ -79,11 +85,17 @@ export default function getManagers() {
     {
       name: 'Andrew Parr',
       teams: {
-        2023: {
+        2024: {
           league: 'Madison',
           division: 'Filet Mignon',
           teamID: '0010',
           steak: false,
+        },
+        2023: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0010',
+          steak: true,
         },
         2022: {
           league: 'Madison',
@@ -118,6 +130,12 @@ export default function getManagers() {
     {
       name: 'D.J. Trainor',
       teams: {
+        2024: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0004',
+          steak: false,
+        },
         2023: {
           league: 'Madison',
           division: 'Filet Mignon',
@@ -147,11 +165,17 @@ export default function getManagers() {
     {
       name: 'Ryan Pohle',
       teams: {
-        2023: {
+        2024: {
           league: 'Madison',
           division: 'Au Poivre',
           teamID: '0003',
           steak: false,
+        },
+        2023: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0003',
+          steak: true,
         },
         2022: {
           league: 'Madison',
@@ -181,6 +205,12 @@ export default function getManagers() {
     {
       name: 'Harry Thompson',
       teams: {
+        2024: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0011',
+          steak: false,
+        },
         2023: {
           league: 'Madison',
           division: 'Au Poivre',
@@ -221,11 +251,17 @@ export default function getManagers() {
     {
       name: 'Shannon McKeown',
       teams: {
-        2023: {
+        2024: {
           league: 'Madison',
           division: 'Filet Mignon',
           teamID: '0012',
           steak: false,
+        },
+        2023: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0012',
+          steak: true,
         },
         2022: {
           league: 'Madison',
@@ -259,11 +295,17 @@ export default function getManagers() {
     {
       name: 'Chris Benzine',
       teams: {
-        2023: {
+        2024: {
           league: 'Madison',
           division: 'Au Poivre',
           teamID: '0013',
           steak: false,
+        },
+        2023: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0013',
+          steak: true,
         },
         2022: {
           league: 'Madison',
@@ -285,6 +327,12 @@ export default function getManagers() {
     {
       name: 'Kurt Kroll',
       teams: {
+        2024: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0005',
+          steak: false,
+        },
         2023: {
           league: 'Madison',
           division: 'Filet Mignon',
@@ -308,6 +356,12 @@ export default function getManagers() {
     {
       name: `Kevin O'Brien`,
       teams: {
+        2024: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0001',
+          steak: false,
+        },
         2023: {
           league: 'Madison',
           division: 'Filet Mignon',
@@ -326,11 +380,17 @@ export default function getManagers() {
           teamID: '0001',
           steak: false,
         },
+        2020: {
+          steak: false,
+        },
         2019: {
           steak: false,
         },
         2018: {
           steak: true,
+        },
+        2017: {
+          steak: false,
         },
         2016: {
           steak: true,
@@ -343,6 +403,12 @@ export default function getManagers() {
     {
       name: 'Jim Coventry',
       teams: {
+        2024: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0006',
+          steak: false,
+        },
         2023: {
           league: 'Madison',
           division: 'Filet Mignon',
@@ -382,11 +448,17 @@ export default function getManagers() {
     {
       name: 'Steve Bulanda',
       teams: {
-        2023: {
+        2024: {
           league: 'Madison',
           division: 'Au Poivre',
           teamID: '0014',
           steak: false,
+        },
+        2023: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0014',
+          steak: true,
         },
       },
     },
@@ -410,6 +482,12 @@ export default function getManagers() {
     {
       name: 'Eric Caturia',
       teams: {
+        2024: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0007',
+          steak: false,
+        },
         2023: {
           league: 'Madison',
           division: 'Au Poivre',
@@ -448,6 +526,12 @@ export default function getManagers() {
     {
       name: 'Jake Letarski',
       teams: {
+        2024: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0008',
+          steak: false,
+        },
         2023: {
           league: 'Madison',
           division: 'Filet Mignon',
@@ -485,8 +569,24 @@ export default function getManagers() {
       },
     },
     {
+      name: 'Chris Knudsvig',
+      teams: {
+        2024: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0009',
+          steak: false,
+        },
+      },
+    },
+    {
       name: 'Paul Martinez',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0001',
+        },
         2023: {
           league: 'LA',
           division: 'Taylors',
@@ -507,6 +607,12 @@ export default function getManagers() {
     {
       name: 'Peter Schoenke',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0004',
+          steak: false,
+        },
         2023: {
           league: 'LA',
           division: 'Taylors',
@@ -551,6 +657,12 @@ export default function getManagers() {
     {
       name: 'Ken Crites',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0012',
+          steak: false,
+        },
         2023: {
           league: 'LA',
           division: 'Taylors',
@@ -574,6 +686,11 @@ export default function getManagers() {
     {
       name: 'Len Hochberg',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0006',
+        },
         2023: {
           league: 'LA',
           division: 'Taylors',
@@ -597,6 +714,11 @@ export default function getManagers() {
     {
       name: 'Tim Schuler',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0009',
+        },
         2023: {
           league: 'LA',
           division: 'Taylors',
@@ -620,11 +742,17 @@ export default function getManagers() {
     {
       name: 'Joe Bartel',
       teams: {
-        2023: {
+        2024: {
           league: 'LA',
           division: 'Taylors',
           teamID: '0010',
           steak: false,
+        },
+        2023: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0010',
+          steak: true,
         },
         2022: {
           league: 'LA',
@@ -658,11 +786,17 @@ export default function getManagers() {
     {
       name: 'Mike Doria',
       teams: {
-        2023: {
+        2024: {
           league: 'LA',
           division: 'Taylors',
           teamID: '0003',
           steak: false,
+        },
+        2023: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0003',
+          steak: true,
         },
         2022: {
           league: 'LA',
@@ -699,6 +833,11 @@ export default function getManagers() {
     {
       name: 'Chris Liss',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0005',
+        },
         2023: {
           league: 'LA',
           division: 'Tornado Room',
@@ -725,11 +864,17 @@ export default function getManagers() {
     {
       name: 'Herb Ilk',
       teams: {
-        2023: {
+        2024: {
           league: 'LA',
           division: 'Tornado Room',
           teamID: '0011',
           steak: false,
+        },
+        2023: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0011',
+          steak: true,
         },
         2022: {
           league: 'LA',
@@ -763,6 +908,11 @@ export default function getManagers() {
     {
       name: 'Scott Jenstad',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0008',
+        },
         2023: {
           league: 'LA',
           division: 'Tornado Room',
@@ -786,6 +936,11 @@ export default function getManagers() {
     {
       name: 'Jeff Erickson',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0007',
+        },
         2023: {
           league: 'LA',
           division: 'Tornado Room',
@@ -809,6 +964,11 @@ export default function getManagers() {
     {
       name: 'Jason Thornbury',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0013',
+        },
         2023: {
           league: 'LA',
           division: 'Tornado Room',
@@ -829,6 +989,11 @@ export default function getManagers() {
     {
       name: 'Erik Siegrist',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0002',
+        },
         2023: {
           league: 'LA',
           division: 'Tornado Room',
@@ -855,10 +1020,16 @@ export default function getManagers() {
     {
       name: 'Josh Ross',
       teams: {
+        2024: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0014',
+        },
         2023: {
           league: 'LA',
           division: 'Tornado Room',
           teamID: '0014',
+          champion: true,
         },
         2022: {
           league: 'LA',

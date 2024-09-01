@@ -50,7 +50,12 @@ const steakTeams = getManagers()
       teams: t.teams,
     };
   })
-  .sort((a, b) => b.points - a.points);
+  .sort((a, b) => {
+    if (a.points === b.points) {
+      return a.name.localeCompare(b.name);
+    }
+    return b.points - a.points;
+  });
 
 const teams = [...steakTeams];
 
