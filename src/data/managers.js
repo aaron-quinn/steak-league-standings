@@ -351,6 +351,9 @@ export default function getManagers() {
           teamID: '0005',
           steak: true,
         },
+        2020: {
+          steak: false,
+        },
       },
     },
     {
