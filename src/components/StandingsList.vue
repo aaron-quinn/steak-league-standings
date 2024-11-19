@@ -214,7 +214,7 @@ const teamsWithGap = teams.map((t) => {
   top: -100px;
   width: 100px;
   height: 100px;
-  background-image: url('tombstone-pizza.webp'); /* Replace with the path to your pizza image */
+  background-image: url('/tombstone-pizza.webp'); /* Replace with the path to your pizza image */
   background-size: cover;
   animation: fall 3s linear infinite;
 }
