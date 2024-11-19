@@ -28,6 +28,20 @@ function triggerScreenshot() {
     });
 }
 
+function triggerPizzaAnimation() {
+  const pizzaContainer = document.createElement('div');
+  pizzaContainer.classList.add('pizza-animation-container');
+  document.body.appendChild(pizzaContainer);
+
+  for (let i = 0; i < 50; i++) {
+    const pizza = document.createElement('div');
+    pizza.classList.add('pizza');
+    pizza.style.left = `${Math.random() * 100}vw`;
+    pizza.style.animationDelay = `${Math.random() * 2}s`;
+    pizzaContainer.appendChild(pizza);
+  }
+}
+
 const { standings, year, live } = useStandingsStore();
 
 const steakTeams = getManagers()
@@ -109,7 +123,13 @@ const teamsWithGap = teams.map((t) => {
         <div class="w-5">
           {{ index + 1 }}
         </div>
-        <div class="ml-2">
+        <div
+          class="ml-2"
+          :class="{
+            'cursor-pointer': team.name.includes('Kurt'),
+          }"
+          @click="team.name.includes('Kurt') && triggerPizzaAnimation()"
+        >
           {{ team.name }}
           <span class="text-slate-400 ml-1 text-xs lg:text-sm" v-if="!live">{{
             team.record
@@ -176,3 +196,32 @@ const teamsWithGap = teams.map((t) => {
     </button>
   </div>
 </template>
+
+<style>
+.pizza-animation-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.pizza {
+  position: absolute;
+  top: -100px;
+  width: 100px;
+  height: 100px;
+  background-image: url('tombstone-pizza.webp'); /* Replace with the path to your pizza image */
+  background-size: cover;
+  animation: fall 3s linear infinite;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh);
+  }
+}
+</style>

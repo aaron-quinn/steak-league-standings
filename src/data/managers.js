@@ -325,7 +325,7 @@ export default function getManagers() {
       },
     },
     {
-      name: 'Kurt Kroll🍕',
+      name: 'Kurt Kroll 🪦🍕',
       teams: {
         2024: {
           league: 'Madison',
@@ -357,7 +357,7 @@ export default function getManagers() {
       },
     },
     {
-      name: `Kevin O'Brien`,
+      name: `Kevin O'Brien 🪦`,
       teams: {
         2024: {
           league: 'Madison',
