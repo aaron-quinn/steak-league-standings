@@ -58,7 +58,7 @@ managersList.sort((a, b) => {
         :key="manager.name"
         class="px-4 w-full text-slate-300 font-light flex justify-between shadow-2xl items-center"
       >
-        <div class="flex items-center leading-8 text-base gap-x-3">
+        <div class="flex items-center leading-6 text-sm gap-x-3">
           <div class="flex items-center justify-start w-[140px] tracking-wider">
             <div v-for="n in manager.numSteaks" :key="n">🥩</div>
             <div v-for="n in manager.missedSteaks" :key="n" class="opacity-10">
@@ -66,7 +66,7 @@ managersList.sort((a, b) => {
             </div>
           </div>
           <div>
-            {{ manager.name }}
+            {{ manager.name.split(' ')[1] }}
             <span class="text-slate-400 text-xs font-thin ml-0.5">
               {{
                 Math.round(

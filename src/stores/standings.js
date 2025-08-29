@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 export const useStandingsStore = defineStore({
   id: 'standings',
   state: () => ({
-    year: 2024,
+    year: 2025,
     standings: {},
     players: [],
     live: false,

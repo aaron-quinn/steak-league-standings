@@ -128,7 +128,6 @@ const teamsWithGap = teams.map((t) => {
           :class="{
             'cursor-pointer': team.name.includes('Kurt'),
           }"
-          @click="team.name.includes('Kurt') && triggerPizzaAnimation()"
         >
           {{ team.name }}
           <span class="text-slate-400 ml-1 text-xs lg:text-sm" v-if="!live">{{
