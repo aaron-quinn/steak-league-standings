@@ -249,7 +249,7 @@ export default function getManagers() {
       },
     },
     {
-      name: 'Harry Thompson',
+      name: 'Harry Thompson 🪦',
       teams: {
         2025: {
           league: 'Madison',
