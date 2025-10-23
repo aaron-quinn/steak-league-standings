@@ -389,7 +389,7 @@ export default function getManagers() {
       },
     },
     {
-      name: 'Kurt Kroll',
+      name: 'Kurt Kroll ✳️',
       teams: {
         2025: {
           league: 'Madison',
