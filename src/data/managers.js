@@ -389,7 +389,7 @@ export default function getManagers() {
       },
     },
     {
-      name: 'Kurt Kroll ✳️',
+      name: 'Kurt Kroll',
       teams: {
         2025: {
           league: 'Madison',
@@ -559,7 +559,7 @@ export default function getManagers() {
       },
     },
     {
-      name: 'Eric Caturia',
+      name: 'Eric Caturia 🪦',
       teams: {
         2025: {
           league: 'Madison',
