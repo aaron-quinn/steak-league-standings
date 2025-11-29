@@ -1,5 +1,7 @@
-export default function getManagers() {
-  const managers = [
+import type { Manager } from '../types/Manager';
+
+export default function getManagers(): Manager[] {
+  const managers: Manager[] = [
     {
       name: 'Jason Shebilske',
       teams: {

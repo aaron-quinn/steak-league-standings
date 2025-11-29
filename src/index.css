@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Pizza animation styles (Easter egg) */
+.pizza-animation-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.pizza {
+  position: absolute;
+  top: -100px;
+  width: 100px;
+  height: 100px;
+  background-image: url('/tombstone-pizza.webp');
+  background-size: cover;
+  animation: fall 3s linear infinite;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh);
+  }
+}

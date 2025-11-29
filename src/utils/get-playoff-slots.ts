@@ -1,11 +1,19 @@
 import sortByPts from './sort-by-pts';
 import sortByRecord from './sort-by-record';
+import type { TeamForPlayoff } from '../types/TeamForPlayoff';
+import type { PlayoffSlots } from '../types/PlayoffSlots';
+
+interface GetPlayoffSlotsParams {
+  leagueData: TeamForPlayoff[];
+  divisionName1: string;
+  divisionName2: string;
+}
 
 export default function getPlayoffsSlots({
   leagueData,
   divisionName1,
   divisionName2,
-}) {
+}: GetPlayoffSlotsParams): PlayoffSlots {
   const division1 = leagueData
     .filter((t) => t.division === divisionName1)
     .sort(sortByRecord);
@@ -20,16 +28,16 @@ export default function getPlayoffsSlots({
   let nonDivisionWinners = [...division1, ...division2]
     .filter((t) => !divisionWinners.includes(t.name))
     .sort(sortByPts);
-  const mostPtsNonDiv = nonDivisionWinners.shift().name;
+  const mostPtsNonDiv = nonDivisionWinners.shift()!.name;
 
   nonDivisionWinners = nonDivisionWinners.sort(sortByRecord);
-  const bestRecordNonDiv = nonDivisionWinners.shift().name;
+  const bestRecordNonDiv = nonDivisionWinners.shift()!.name;
 
   nonDivisionWinners = nonDivisionWinners.sort(sortByPts);
-  const secondMostPtsNonDiv = nonDivisionWinners.shift().name;
+  const secondMostPtsNonDiv = nonDivisionWinners.shift()!.name;
 
   nonDivisionWinners = nonDivisionWinners.sort(sortByRecord);
-  const secondBestRecord = nonDivisionWinners.shift().name;
+  const secondBestRecord = nonDivisionWinners.shift()!.name;
 
   return {
     'Division Winner, Best Record': divisionWinners[0],
