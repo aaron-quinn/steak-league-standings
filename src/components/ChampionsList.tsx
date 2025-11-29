@@ -34,23 +34,16 @@ export default function ChampionsList() {
   }, []);
 
   return (
-    <div className="hidden lg:block">
-      <div className="bg-slate-700 text-slate-300 py-2 px-4 rounded-t-md font-bold">
-        Champions
-      </div>
-      <ul className="w-full antialiased text-base bg-slate-800 py-3 rounded-b-md mb-6">
-        {championsList.map((manager) => (
-          <li
-            key={`${manager.name}-${manager.year}`}
-            className="px-4 w-full text-slate-300 font-light flex justify-between shadow-2xl items-center"
-          >
-            <div className="flex items-center leading-7">
-              <div className="w-7 mr-3">{manager.year}</div>
-              <div className="ml-2">{manager.name}</div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ul className="w-full antialiased text-sm py-2">
+      {championsList.map((manager) => (
+        <li
+          key={`${manager.name}-${manager.year}`}
+          className="px-3 py-0.5 w-full text-slate-400 font-light flex items-center"
+        >
+          <span className="w-10 text-slate-500">{manager.year}</span>
+          <span>{manager.name}</span>
+        </li>
+      ))}
+    </ul>
   );
 }

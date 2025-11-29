@@ -1,9 +1,12 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import clsx from 'clsx';
 import { useStandingsStore } from '../stores/standings';
 import getManagers from '../data/managers';
 import getPlayoffSlots from '../utils/get-playoff-slots';
 import PlayoffList from './PlayoffList';
 import type { TeamForPlayoff } from '../types/TeamForPlayoff';
+
+type League = 'madison' | 'la';
 
 export default function PlayoffLists() {
   const standings = useStandingsStore((state) => state.standings);
@@ -62,10 +65,41 @@ export default function PlayoffLists() {
     };
   }, [standings, year]);
 
+  const [activeLeague, setActiveLeague] = useState<League>('madison');
+
   return (
-    <div className="flex flex-wrap w-full gap-6">
-      <PlayoffList playoffTeams={playoffsMadison} league="Madison" />
-      <PlayoffList playoffTeams={playoffsLA} league="LA" />
+    <div>
+      <div className="flex bg-slate-700 rounded-t-md">
+        <button
+          onClick={() => setActiveLeague('madison')}
+          className={clsx(
+            'flex-1 py-2 px-3 text-sm font-bold rounded-tl-md transition-colors',
+            activeLeague === 'madison'
+              ? 'bg-slate-600 text-slate-200'
+              : 'text-slate-400 hover:text-slate-300',
+          )}
+        >
+          Madison
+        </button>
+        <button
+          onClick={() => setActiveLeague('la')}
+          className={clsx(
+            'flex-1 py-2 px-3 text-sm font-bold rounded-tr-md transition-colors',
+            activeLeague === 'la'
+              ? 'bg-slate-600 text-slate-200'
+              : 'text-slate-400 hover:text-slate-300',
+          )}
+        >
+          LA
+        </button>
+      </div>
+      <div className="bg-slate-800 rounded-b-md">
+        {activeLeague === 'madison' ? (
+          <PlayoffList playoffTeams={playoffsMadison} />
+        ) : (
+          <PlayoffList playoffTeams={playoffsLA} />
+        )}
+      </div>
     </div>
   );
 }
