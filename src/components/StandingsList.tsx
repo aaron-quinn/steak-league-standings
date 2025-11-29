@@ -114,13 +114,13 @@ export default function StandingsList() {
                 <span className="text-sm lg:text-base text-gray-300 font-medium min-w-[120px] lg:min-w-[160px]">
                   {team.name}
                 </span>
-              </div>
-              <div className="flex items-center gap-3 lg:gap-6 font-mono">
                 {!live && (
-                  <span className="text-gray-600 text-xs tabular-nums w-14 lg:w-16 text-center">
+                  <span className="text-gray-600 text-xs tabular-nums">
                     {team.record}
                   </span>
                 )}
+              </div>
+              <div className="flex items-center gap-2 lg:gap-4 font-mono">
                 <span className="text-xs lg:text-sm tabular-nums text-gray-400 w-16 lg:w-20 text-right">
                   {Number(team.pointsInt).toLocaleString('en-US')}
                   <span className="text-[0.75em] text-gray-600">
@@ -158,13 +158,13 @@ export default function StandingsList() {
                 <span className="text-sm lg:text-base text-gray-300 font-medium min-w-[120px] lg:min-w-[160px]">
                   {teamsWithGap[steakLineTeam].name}
                 </span>
-              </div>
-              <div className="flex items-center gap-3 lg:gap-6 font-mono">
                 {!live && (
-                  <span className="text-gray-600 text-xs tabular-nums w-14 lg:w-16 text-center">
+                  <span className="text-gray-600 text-xs tabular-nums">
                     {teamsWithGap[steakLineTeam].record}
                   </span>
                 )}
+              </div>
+              <div className="flex items-center gap-2 lg:gap-4 font-mono">
                 <span className="text-xs lg:text-sm tabular-nums text-gray-400 w-16 lg:w-20 text-right">
                   {Number(teamsWithGap[steakLineTeam].pointsInt).toLocaleString(
                     'en-US',
@@ -216,13 +216,13 @@ export default function StandingsList() {
                     <span className="text-sm lg:text-base text-gray-500 min-w-[120px] lg:min-w-[160px]">
                       {team.name}
                     </span>
-                  </div>
-                  <div className="flex items-center gap-3 lg:gap-6 font-mono">
                     {!live && (
-                      <span className="text-gray-600 text-xs tabular-nums w-14 lg:w-16 text-center">
+                      <span className="text-gray-600 text-xs tabular-nums">
                         {team.record}
                       </span>
                     )}
+                  </div>
+                  <div className="flex items-center gap-2 lg:gap-4 font-mono">
                     <span className="text-xs lg:text-sm tabular-nums text-gray-500 w-16 lg:w-20 text-right">
                       {Number(team.pointsInt).toLocaleString('en-US')}
                       <span className="text-[0.75em] text-gray-700">
