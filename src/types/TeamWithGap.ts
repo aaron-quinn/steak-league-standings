@@ -8,4 +8,5 @@ export interface TeamWithGap extends TeamWithStandings {
   pointsDec: string | undefined;
   gapInt: string;
   gapDec: string;
+  gapNum: number;
 }

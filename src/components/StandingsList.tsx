@@ -8,7 +8,7 @@ export default function StandingsList() {
   const year = useStandingsStore((state) => state.year);
   const live = useStandingsStore((state) => state.live);
 
-  const { teamsWithGap, steakLineTeam, selfBuyerSpot } = useMemo(() => {
+  const { teamsWithGap, steakLineTeam, selfBuyerSpot, maxPositiveGap, maxNegativeGap } = useMemo(() => {
     const managers = getManagers();
 
     const steakTeams = managers
@@ -75,13 +75,20 @@ export default function StandingsList() {
         pointsDec: pointsPieces[1],
         gapInt: gapPieces[0],
         gapDec: gapPieces[1],
+        gapNum: Math.abs(gap),
       };
     });
+
+    // Calculate max gaps for heatmap intensity
+    const maxPositiveGap = Math.max(...withGap.slice(0, steakLine).map(t => t.gapNum), 1);
+    const maxNegativeGap = Math.max(...withGap.slice(selfBuyer ? steakLine + 1 : steakLine).map(t => t.gapNum), 1);
 
     return {
       teamsWithGap: withGap,
       steakLineTeam: steakLine,
       selfBuyerSpot: selfBuyer,
+      maxPositiveGap,
+      maxNegativeGap,
     };
   }, [standings, year]);
 
@@ -97,16 +104,18 @@ export default function StandingsList() {
           <div className="h-px flex-1 bg-gradient-to-l from-emerald-600/30 to-transparent" />
         </div>
         <div className="rounded-lg border border-gray-800/60 overflow-hidden">
-          {teamsWithGap.slice(0, steakLineTeam).map((team, index) => (
-            <div
-              key={team.id}
-              className={`
-                flex items-center justify-between px-3 py-2.5 lg:py-3
-                ${index % 2 === 0 ? 'bg-emerald-950/10' : 'bg-transparent'}
-                ${index !== steakLineTeam - 1 ? 'border-b border-gray-800/30' : ''}
-                hover:bg-emerald-950/20 transition-colors
-              `}
-            >
+          {teamsWithGap.slice(0, steakLineTeam).map((team, index) => {
+            const intensity = Math.round((team.gapNum / maxPositiveGap) * 40);
+            return (
+              <div
+                key={team.id}
+                className={`
+                  flex items-center justify-between px-3 py-2.5 lg:py-3
+                  ${index !== steakLineTeam - 1 ? 'border-b border-gray-800/30' : ''}
+                  hover:bg-emerald-950/30 transition-colors
+                `}
+                style={{ backgroundColor: `rgba(6, 78, 59, ${intensity / 100})` }}
+              >
               <div className="flex items-center gap-4">
                 <span className="w-6 h-6 rounded-full bg-emerald-900/30 text-emerald-500/80 font-mono text-xs flex items-center justify-center">
                   {index + 1}
@@ -135,7 +144,8 @@ export default function StandingsList() {
                 </span>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
 
@@ -143,16 +153,16 @@ export default function StandingsList() {
       {selfBuyerSpot && teamsWithGap[steakLineTeam] && (
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
-            <div className="h-px flex-1 bg-gradient-to-r from-blue-500/30 to-transparent" />
-            <span className="text-[10px] uppercase tracking-widest text-blue-400/60 font-medium">
+            <div className="h-px flex-1 bg-gradient-to-r from-gray-600/30 to-transparent" />
+            <span className="text-[10px] uppercase tracking-widest text-gray-500/60 font-medium">
               Self Buyer
             </span>
-            <div className="h-px flex-1 bg-gradient-to-l from-blue-500/30 to-transparent" />
+            <div className="h-px flex-1 bg-gradient-to-l from-gray-600/30 to-transparent" />
           </div>
-          <div className="rounded-lg border border-blue-800/30 bg-blue-950/10 overflow-hidden">
+          <div className="rounded-lg border border-gray-700/40 overflow-hidden">
             <div className="flex items-center justify-between px-3 py-2.5 lg:py-3">
               <div className="flex items-center gap-4">
-                <span className="w-6 h-6 rounded-full bg-blue-900/30 text-blue-400/80 font-mono text-xs flex items-center justify-center border border-blue-700/30">
+                <span className="w-6 h-6 rounded-full bg-gray-800/50 text-gray-400 font-mono text-xs flex items-center justify-center">
                   {steakLineTeam + 1}
                 </span>
                 <span className="text-sm lg:text-base text-gray-300 font-medium min-w-[120px] lg:min-w-[160px]">
@@ -173,7 +183,7 @@ export default function StandingsList() {
                     .{teamsWithGap[steakLineTeam].pointsDec}
                   </span>
                 </span>
-                <span className="w-20 lg:w-24 text-right text-sm lg:text-base tabular-nums text-gray-600 font-semibold">
+                <span className="w-20 lg:w-24 text-right text-sm lg:text-base tabular-nums text-gray-500 font-semibold">
                   —
                 </span>
               </div>
@@ -199,15 +209,16 @@ export default function StandingsList() {
                 ? steakLineTeam + 1 + index
                 : steakLineTeam + index;
               const isLast = actualIndex === teamsWithGap.length - 1;
+              const intensity = Math.round((team.gapNum / maxNegativeGap) * 35);
               return (
                 <div
                   key={team.id}
                   className={`
                     flex items-center justify-between px-3 py-2 lg:py-2.5
-                    ${index % 2 === 0 ? 'bg-red-950/5' : 'bg-transparent'}
                     ${!isLast ? 'border-b border-gray-800/20' : ''}
-                    hover:bg-red-950/10 transition-colors
+                    hover:bg-red-950/20 transition-colors
                   `}
+                  style={{ backgroundColor: `rgba(127, 29, 29, ${intensity / 100})` }}
                 >
                   <div className="flex items-center gap-4">
                     <span className="w-6 h-6 rounded-full bg-gray-800/30 text-gray-500 font-mono text-xs flex items-center justify-center">
