@@ -59,34 +59,38 @@ export default function SteakHistory() {
   }, [year]);
 
   return (
-    <ul className="w-full antialiased py-3">
-      {managersList.map((manager) => (
-        <li
-          key={manager.name}
-          className="px-4 py-1.5 w-full text-navy-200 font-normal flex items-center gap-3 hover:bg-navy-900/30 transition-colors"
-        >
-          <div className="flex items-center justify-start min-w-[100px] text-sm tracking-tight">
-            {[...Array(manager.numSteaks)].map((_, i) => (
-              <span key={`steak-${i}`}>🥩</span>
-            ))}
-            {manager.missedSteaks.map((_, i) => (
-              <span key={`missed-${i}`} className="opacity-25 grayscale">
-                🥩
+    <div className="w-full antialiased py-2">
+      <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 px-3">
+        {managersList.map((manager) => (
+          <>
+            <div key={`${manager.name}-steaks`} className="text-sm">
+              {[...Array(manager.numSteaks)].map((_, i) => (
+                <span key={`steak-${i}`} className="opacity-70">
+                  🥩
+                </span>
+              ))}
+              {manager.missedSteaks.map((_, i) => (
+                <span key={`missed-${i}`} className="opacity-15">
+                  🥩
+                </span>
+              ))}
+            </div>
+            <div
+              key={`${manager.name}-info`}
+              className="text-sm flex items-center gap-1.5 text-gray-400"
+            >
+              <span>{manager.name.split(' ')[1]}</span>
+              <span className="text-blue-400/50 text-xs font-mono">
+                {Math.round(
+                  (100 * manager.numSteaks) /
+                    (manager.numSteaks + manager.missedSteaks.length),
+                )}
+                %
               </span>
-            ))}
-          </div>
-          <div className="text-sm flex items-center gap-2">
-            <span className="font-medium">{manager.name.split(' ')[1]}</span>
-            <span className="text-accent-500/70 text-xs font-mono">
-              {Math.round(
-                (100 * manager.numSteaks) /
-                  (manager.numSteaks + manager.missedSteaks.length),
-              )}
-              %
-            </span>
-          </div>
-        </li>
-      ))}
-    </ul>
+            </div>
+          </>
+        ))}
+      </div>
+    </div>
   );
 }

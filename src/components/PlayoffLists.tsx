@@ -68,15 +68,15 @@ export default function PlayoffLists() {
   const [activeLeague, setActiveLeague] = useState<League>('madison');
 
   return (
-    <div className="rounded-xl overflow-hidden border border-navy-800/50 shadow-xl shadow-black/30">
-      <div className="flex bg-navy-900">
+    <div className="rounded-lg overflow-hidden border border-gray-800/60">
+      <div className="flex border-b border-gray-800/60">
         <button
           onClick={() => setActiveLeague('madison')}
           className={clsx(
-            'flex-1 py-2.5 px-3 text-sm font-semibold transition-all duration-200',
+            'flex-1 py-2 px-3 text-sm font-medium transition-colors',
             activeLeague === 'madison'
-              ? 'bg-navy-950 text-accent-400 border-b-2 border-accent-500'
-              : 'text-navy-400 hover:text-accent-300',
+              ? 'text-blue-400/80 bg-blue-950/20'
+              : 'text-gray-500 hover:text-gray-400',
           )}
         >
           Madison
@@ -84,16 +84,16 @@ export default function PlayoffLists() {
         <button
           onClick={() => setActiveLeague('la')}
           className={clsx(
-            'flex-1 py-2.5 px-3 text-sm font-semibold transition-all duration-200',
+            'flex-1 py-2 px-3 text-sm font-medium transition-colors',
             activeLeague === 'la'
-              ? 'bg-navy-950 text-accent-400 border-b-2 border-accent-500'
-              : 'text-navy-400 hover:text-accent-300',
+              ? 'text-blue-400/80 bg-blue-950/20'
+              : 'text-gray-500 hover:text-gray-400',
           )}
         >
           LA
         </button>
       </div>
-      <div className="bg-navy-950">
+      <div>
         {activeLeague === 'madison' ? (
           <PlayoffList playoffTeams={playoffsMadison} />
         ) : (

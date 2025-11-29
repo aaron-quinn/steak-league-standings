@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import clsx from 'clsx';
 import { useStandingsStore } from '../stores/standings';
 import getManagers from '../data/managers';
 import type { TeamWithGap } from '../types/TeamWithGap';
@@ -86,92 +85,97 @@ export default function StandingsList() {
     };
   }, [standings, year]);
 
-  // Helper to determine which group a team belongs to
-  const getTeamGroup = (index: number) => {
-    if (index < steakLineTeam) return 'above';
-    if (index === steakLineTeam) return 'line';
-    return 'below';
-  };
-
   return (
-    <div className="w-full antialiased space-y-3 lg:space-y-4">
+    <div className="w-full antialiased">
       {/* Teams above the line - getting steaks */}
-      <ul className="rounded-xl overflow-hidden border border-navy-800/50 shadow-xl shadow-black/30">
-        {teamsWithGap.filter((_, i) => getTeamGroup(i) === 'above').map((team, index) => (
-          <li
-            key={team.id}
-            className={clsx(
-              'px-4 py-2 lg:py-3 w-full bg-navy-900 text-navy-100 font-normal text-base lg:text-lg flex justify-between items-center transition-colors hover:bg-navy-800/50',
-              {
-                'border-b border-navy-800/50': index !== steakLineTeam - 1,
-              },
-            )}
-          >
-            <div className="flex items-center">
-              <div className="w-6 text-accent-500 font-mono font-medium text-sm">{index + 1}</div>
-              <div
-                className={clsx('ml-2 font-medium', {
-                  'cursor-pointer': team.name.includes('Kurt'),
-                })}
-              >
-                {team.name}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="h-px flex-1 bg-gradient-to-r from-emerald-600/30 to-transparent" />
+          <span className="text-[10px] uppercase tracking-widest text-emerald-600/60 font-medium">
+            Eaters
+          </span>
+          <div className="h-px flex-1 bg-gradient-to-l from-emerald-600/30 to-transparent" />
+        </div>
+        <div className="rounded-lg border border-gray-800/60 overflow-hidden">
+          {teamsWithGap.slice(0, steakLineTeam).map((team, index) => (
+            <div
+              key={team.id}
+              className={`
+                flex items-center justify-between px-3 py-2.5 lg:py-3
+                ${index % 2 === 0 ? 'bg-emerald-950/10' : 'bg-transparent'}
+                ${index !== steakLineTeam - 1 ? 'border-b border-gray-800/30' : ''}
+                hover:bg-emerald-950/20 transition-colors
+              `}
+            >
+              <div className="flex items-center gap-4">
+                <span className="w-6 h-6 rounded-full bg-emerald-900/30 text-emerald-500/80 font-mono text-xs flex items-center justify-center">
+                  {index + 1}
+                </span>
+                <span className="text-sm lg:text-base text-gray-300 font-medium min-w-[120px] lg:min-w-[160px]">
+                  {team.name}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 lg:gap-6 font-mono">
                 {!live && (
-                  <span className="text-navy-500 ml-2 text-xs lg:text-sm font-normal">
+                  <span className="text-gray-600 text-xs tabular-nums w-14 lg:w-16 text-center">
                     {team.record}
                   </span>
                 )}
-              </div>
-            </div>
-            <div className="flex items-center font-mono tracking-tight">
-              <div className="text-base lg:text-lg">
-                <span className="font-medium">
+                <span className="text-xs lg:text-sm tabular-nums text-gray-400 w-16 lg:w-20 text-right">
                   {Number(team.pointsInt).toLocaleString('en-US')}
-                  <span className="text-navy-500 text-[11px] lg:text-xs relative left-[1px]">
+                  <span className="text-[0.75em] text-gray-600">
                     .{team.pointsDec}
                   </span>
                 </span>
-              </div>
-              <div className="w-14 lg:w-16 text-right ml-3 text-sm lg:text-base font-semibold text-emerald-400">
-                <span>+{team.gapInt}</span>
-                <span className="text-[11px] lg:text-xs left-[1px] relative font-normal opacity-70">
-                  .{team.gapDec}
+                <span className="w-20 lg:w-24 text-right text-sm lg:text-base tabular-nums text-emerald-500/90 font-semibold">
+                  +{team.gapInt}
+                  <span className="text-[0.75em] text-emerald-500/50">
+                    .{team.gapDec}
+                  </span>
                 </span>
               </div>
             </div>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </div>
+      </div>
 
       {/* Self-buyer spot - on the line */}
       {selfBuyerSpot && teamsWithGap[steakLineTeam] && (
-        <div className="rounded-xl overflow-hidden border border-accent-700/40 bg-navy-900/80">
-          <div className="px-4 py-2 lg:py-3 w-full text-navy-200 font-normal text-base lg:text-lg flex justify-between items-center">
-            <div className="flex items-center">
-              <div className="w-6 text-accent-400 font-mono font-medium text-sm">{steakLineTeam + 1}</div>
-              <div
-                className={clsx('ml-2 font-medium text-accent-200', {
-                  'cursor-pointer': teamsWithGap[steakLineTeam].name.includes('Kurt'),
-                })}
-              >
-                {teamsWithGap[steakLineTeam].name}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="h-px flex-1 bg-gradient-to-r from-blue-500/30 to-transparent" />
+            <span className="text-[10px] uppercase tracking-widest text-blue-400/60 font-medium">
+              Self Buyer
+            </span>
+            <div className="h-px flex-1 bg-gradient-to-l from-blue-500/30 to-transparent" />
+          </div>
+          <div className="rounded-lg border border-blue-800/30 bg-blue-950/10 overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2.5 lg:py-3">
+              <div className="flex items-center gap-4">
+                <span className="w-6 h-6 rounded-full bg-blue-900/30 text-blue-400/80 font-mono text-xs flex items-center justify-center border border-blue-700/30">
+                  {steakLineTeam + 1}
+                </span>
+                <span className="text-sm lg:text-base text-gray-300 font-medium min-w-[120px] lg:min-w-[160px]">
+                  {teamsWithGap[steakLineTeam].name}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 lg:gap-6 font-mono">
                 {!live && (
-                  <span className="text-navy-500 ml-2 text-xs lg:text-sm font-normal">
+                  <span className="text-gray-600 text-xs tabular-nums w-14 lg:w-16 text-center">
                     {teamsWithGap[steakLineTeam].record}
                   </span>
                 )}
-              </div>
-            </div>
-            <div className="flex items-center font-mono tracking-tight">
-              <div className="text-base lg:text-lg">
-                <span className="font-medium text-accent-200">
-                  {Number(teamsWithGap[steakLineTeam].pointsInt).toLocaleString('en-US')}
-                  <span className="text-navy-500 text-[11px] lg:text-xs relative left-[1px]">
+                <span className="text-xs lg:text-sm tabular-nums text-gray-400 w-16 lg:w-20 text-right">
+                  {Number(teamsWithGap[steakLineTeam].pointsInt).toLocaleString(
+                    'en-US',
+                  )}
+                  <span className="text-[0.75em] text-gray-600">
                     .{teamsWithGap[steakLineTeam].pointsDec}
                   </span>
                 </span>
-              </div>
-              <div className="w-14 lg:w-16 text-right ml-3 text-sm lg:text-base font-semibold text-navy-500">
-                &ndash;
+                <span className="w-20 lg:w-24 text-right text-sm lg:text-base tabular-nums text-gray-600 font-semibold">
+                  —
+                </span>
               </div>
             </div>
           </div>
@@ -179,55 +183,64 @@ export default function StandingsList() {
       )}
 
       {/* Teams below the line - buying steaks */}
-      <ul className="rounded-xl overflow-hidden border border-navy-800/50 shadow-xl shadow-black/30">
-        {teamsWithGap.filter((_, i) => selfBuyerSpot ? i > steakLineTeam : i >= steakLineTeam).map((team, index) => {
-          const actualIndex = selfBuyerSpot ? steakLineTeam + 1 + index : steakLineTeam + index;
-          const isLast = actualIndex === teamsWithGap.length - 1;
-          return (
-            <li
-              key={team.id}
-              className={clsx(
-                'px-4 py-2 lg:py-3 w-full bg-navy-1000 text-navy-400 font-normal text-base lg:text-lg flex justify-between items-center transition-colors hover:bg-navy-950/50',
-                {
-                  'border-b border-navy-900/50': !isLast,
-                },
-              )}
-            >
-              <div className="flex items-center">
-                <div className="w-6 text-navy-600 font-mono font-medium text-sm">{actualIndex + 1}</div>
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <div className="h-px flex-1 bg-gradient-to-r from-red-500/25 to-transparent" />
+          <span className="text-[10px] uppercase tracking-widest text-red-400/50 font-medium">
+            Buyers
+          </span>
+          <div className="h-px flex-1 bg-gradient-to-l from-red-500/25 to-transparent" />
+        </div>
+        <div className="rounded-lg border border-gray-800/40 overflow-hidden">
+          {teamsWithGap
+            .slice(selfBuyerSpot ? steakLineTeam + 1 : steakLineTeam)
+            .map((team, index) => {
+              const actualIndex = selfBuyerSpot
+                ? steakLineTeam + 1 + index
+                : steakLineTeam + index;
+              const isLast = actualIndex === teamsWithGap.length - 1;
+              return (
                 <div
-                  className={clsx('ml-2 font-medium', {
-                    'cursor-pointer': team.name.includes('Kurt'),
-                  })}
+                  key={team.id}
+                  className={`
+                    flex items-center justify-between px-3 py-2 lg:py-2.5
+                    ${index % 2 === 0 ? 'bg-red-950/5' : 'bg-transparent'}
+                    ${!isLast ? 'border-b border-gray-800/20' : ''}
+                    hover:bg-red-950/10 transition-colors
+                  `}
                 >
-                  {team.name}
-                  {!live && (
-                    <span className="text-navy-700 ml-2 text-xs lg:text-sm font-normal">
-                      {team.record}
+                  <div className="flex items-center gap-4">
+                    <span className="w-6 h-6 rounded-full bg-gray-800/30 text-gray-500 font-mono text-xs flex items-center justify-center">
+                      {actualIndex + 1}
                     </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center font-mono tracking-tight">
-                <div className="text-base lg:text-lg">
-                  <span className="font-medium">
-                    {Number(team.pointsInt).toLocaleString('en-US')}
-                    <span className="text-navy-700 text-[11px] lg:text-xs relative left-[1px]">
-                      .{team.pointsDec}
+                    <span className="text-sm lg:text-base text-gray-500 min-w-[120px] lg:min-w-[160px]">
+                      {team.name}
                     </span>
-                  </span>
+                  </div>
+                  <div className="flex items-center gap-3 lg:gap-6 font-mono">
+                    {!live && (
+                      <span className="text-gray-600 text-xs tabular-nums w-14 lg:w-16 text-center">
+                        {team.record}
+                      </span>
+                    )}
+                    <span className="text-xs lg:text-sm tabular-nums text-gray-500 w-16 lg:w-20 text-right">
+                      {Number(team.pointsInt).toLocaleString('en-US')}
+                      <span className="text-[0.75em] text-gray-700">
+                        .{team.pointsDec}
+                      </span>
+                    </span>
+                    <span className="w-20 lg:w-24 text-right text-sm lg:text-base tabular-nums text-red-500/70 font-semibold">
+                      {team.gapInt}
+                      <span className="text-[0.75em] text-red-500/40">
+                        .{team.gapDec}
+                      </span>
+                    </span>
+                  </div>
                 </div>
-                <div className="w-14 lg:w-16 text-right ml-3 text-sm lg:text-base font-semibold text-rose-400/70">
-                  <span>{team.gapInt}</span>
-                  <span className="text-[11px] lg:text-xs left-[1px] relative font-normal opacity-70">
-                    .{team.gapDec}
-                  </span>
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+              );
+            })}
+        </div>
+      </div>
     </div>
   );
 }

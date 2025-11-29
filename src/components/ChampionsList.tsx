@@ -34,14 +34,16 @@ export default function ChampionsList() {
   }, []);
 
   return (
-    <ul className="w-full antialiased text-sm py-3">
+    <ul className="w-full antialiased text-sm py-2">
       {championsList.map((manager) => (
         <li
           key={`${manager.name}-${manager.year}`}
-          className="px-4 py-1.5 w-full flex items-center hover:bg-navy-900/30 transition-colors"
+          className="px-3 py-1 w-full flex items-center"
         >
-          <span className="w-12 text-accent-500 font-mono font-medium">{manager.year}</span>
-          <span className="text-navy-200 font-medium">{manager.name}</span>
+          <span className="w-10 text-blue-500 font-mono text-xs">
+            {manager.year}
+          </span>
+          <span className="text-gray-200">{manager.name}</span>
         </li>
       ))}
     </ul>

@@ -9,34 +9,32 @@ export default function HistoryTabs() {
   const [activeTab, setActiveTab] = useState<Tab>('steaks');
 
   return (
-    <div className="rounded-xl overflow-hidden border border-navy-800/50 shadow-xl shadow-black/30">
-      <div className="flex bg-navy-900">
+    <div className="rounded-lg overflow-hidden border border-gray-800/60">
+      <div className="flex border-b border-gray-800/60">
         <button
           onClick={() => setActiveTab('steaks')}
           className={clsx(
-            'flex-1 py-2.5 px-3 text-sm font-semibold transition-all duration-200',
+            'flex-1 py-2 px-3 text-sm font-medium transition-colors',
             activeTab === 'steaks'
-              ? 'bg-navy-950 text-accent-400 border-b-2 border-accent-500'
-              : 'text-navy-400 hover:text-accent-300',
+              ? 'text-blue-400/80 bg-blue-950/20'
+              : 'text-gray-500 hover:text-gray-400',
           )}
         >
-          Steak Leaderboard
+          Steak Leaders
         </button>
         <button
           onClick={() => setActiveTab('champions')}
           className={clsx(
-            'flex-1 py-2.5 px-3 text-sm font-semibold transition-all duration-200',
+            'flex-1 py-2 px-3 text-sm font-medium transition-colors',
             activeTab === 'champions'
-              ? 'bg-navy-950 text-accent-400 border-b-2 border-accent-500'
-              : 'text-navy-400 hover:text-accent-300',
+              ? 'text-blue-400/80 bg-blue-950/20'
+              : 'text-gray-500 hover:text-gray-400',
           )}
         >
           Champions
         </button>
       </div>
-      <div className="bg-navy-950">
-        {activeTab === 'steaks' ? <SteakHistory /> : <ChampionsList />}
-      </div>
+      <div>{activeTab === 'steaks' ? <SteakHistory /> : <ChampionsList />}</div>
     </div>
   );
 }

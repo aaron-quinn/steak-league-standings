@@ -39,8 +39,8 @@ export default function MainView({ live }: MainViewProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-navy-1000 via-navy-950 to-navy-1000 min-h-screen py-4 px-3 lg:py-8 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="bg-gray-950 min-h-screen py-4 px-3 lg:py-8 lg:px-8">
+      <div className="w-fit mx-auto">
         {/* Header row - logo and view switcher */}
         <div className="flex items-center justify-between lg:justify-start gap-2 lg:gap-4 mb-4 lg:mb-6">
           <LeagueLogo />

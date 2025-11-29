@@ -16,16 +16,16 @@ export default function ViewSwitcher() {
 
   return (
     <div className="antialiased">
-      <nav className="flex space-x-1 lg:space-x-2" aria-label="Tabs">
+      <nav className="flex space-x-1" aria-label="Tabs">
         {tabs.map((tab) => (
           <a
             key={tab.name}
             href={tab.href}
             className={clsx(
-              'px-2.5 py-1.5 lg:px-4 lg:py-2 font-medium text-xs lg:text-sm rounded-lg whitespace-nowrap transition-all duration-200',
+              'px-2.5 py-1.5 lg:px-3 lg:py-1.5 font-medium text-xs lg:text-sm rounded-md whitespace-nowrap transition-colors',
               tab.current
-                ? 'bg-accent-600 text-white shadow-lg shadow-accent-600/20'
-                : 'text-navy-400 hover:text-accent-400 hover:bg-navy-900/50',
+                ? 'bg-blue-600/80 text-gray-100'
+                : 'text-gray-500 hover:text-blue-400/80',
             )}
             aria-current={tab.current ? 'page' : undefined}
           >
