@@ -9,15 +9,15 @@ export default function HistoryTabs() {
   const [activeTab, setActiveTab] = useState<Tab>('steaks');
 
   return (
-    <div>
-      <div className="flex bg-slate-700 rounded-t-md">
+    <div className="rounded-xl overflow-hidden border border-navy-800/50 shadow-xl shadow-black/30">
+      <div className="flex bg-navy-900">
         <button
           onClick={() => setActiveTab('steaks')}
           className={clsx(
-            'flex-1 py-2 px-3 text-sm font-bold rounded-tl-md transition-colors',
+            'flex-1 py-2.5 px-3 text-sm font-semibold transition-all duration-200',
             activeTab === 'steaks'
-              ? 'bg-slate-600 text-slate-200'
-              : 'text-slate-400 hover:text-slate-300',
+              ? 'bg-navy-950 text-accent-400 border-b-2 border-accent-500'
+              : 'text-navy-400 hover:text-accent-300',
           )}
         >
           Steak Leaderboard
@@ -25,16 +25,16 @@ export default function HistoryTabs() {
         <button
           onClick={() => setActiveTab('champions')}
           className={clsx(
-            'flex-1 py-2 px-3 text-sm font-bold rounded-tr-md transition-colors',
+            'flex-1 py-2.5 px-3 text-sm font-semibold transition-all duration-200',
             activeTab === 'champions'
-              ? 'bg-slate-600 text-slate-200'
-              : 'text-slate-400 hover:text-slate-300',
+              ? 'bg-navy-950 text-accent-400 border-b-2 border-accent-500'
+              : 'text-navy-400 hover:text-accent-300',
           )}
         >
           Champions
         </button>
       </div>
-      <div className="bg-slate-800 rounded-b-md">
+      <div className="bg-navy-950">
         {activeTab === 'steaks' ? <SteakHistory /> : <ChampionsList />}
       </div>
     </div>

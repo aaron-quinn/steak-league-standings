@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-navy-1000 text-navy-200;
+  }
+
+  /* Custom scrollbar for the premium feel */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-navy-950;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-navy-800 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-navy-700;
+  }
+}
+
 /* Pizza animation styles (Easter egg) */
 .pizza-animation-container {
   position: fixed;

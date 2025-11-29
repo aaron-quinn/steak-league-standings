@@ -59,25 +59,25 @@ export default function SteakHistory() {
   }, [year]);
 
   return (
-    <ul className="w-full antialiased py-2">
+    <ul className="w-full antialiased py-3">
       {managersList.map((manager) => (
         <li
           key={manager.name}
-          className="px-3 py-0.5 w-full text-slate-300 font-light flex items-center gap-2"
+          className="px-4 py-1.5 w-full text-navy-200 font-normal flex items-center gap-3 hover:bg-navy-900/30 transition-colors"
         >
-          <div className="flex items-center justify-start min-w-[100px] text-xs tracking-tighter">
+          <div className="flex items-center justify-start min-w-[100px] text-sm tracking-tight">
             {[...Array(manager.numSteaks)].map((_, i) => (
               <span key={`steak-${i}`}>🥩</span>
             ))}
             {manager.missedSteaks.map((_, i) => (
-              <span key={`missed-${i}`} className="opacity-20">
+              <span key={`missed-${i}`} className="opacity-25 grayscale">
                 🥩
               </span>
             ))}
           </div>
-          <div className="text-sm flex items-center gap-1.5">
-            <span>{manager.name.split(' ')[1]}</span>
-            <span className="text-slate-500 text-xs">
+          <div className="text-sm flex items-center gap-2">
+            <span className="font-medium">{manager.name.split(' ')[1]}</span>
+            <span className="text-accent-500/70 text-xs font-mono">
               {Math.round(
                 (100 * manager.numSteaks) /
                   (manager.numSteaks + manager.missedSteaks.length),

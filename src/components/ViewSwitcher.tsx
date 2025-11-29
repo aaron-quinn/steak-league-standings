@@ -22,10 +22,10 @@ export default function ViewSwitcher() {
             key={tab.name}
             href={tab.href}
             className={clsx(
-              'px-2 py-1.5 lg:px-3 lg:py-2 font-medium text-xs lg:text-sm rounded-md whitespace-nowrap',
+              'px-2.5 py-1.5 lg:px-4 lg:py-2 font-medium text-xs lg:text-sm rounded-lg whitespace-nowrap transition-all duration-200',
               tab.current
-                ? 'bg-slate-200 text-slate-800'
-                : 'text-slate-200 hover:text-slate-50',
+                ? 'bg-accent-600 text-white shadow-lg shadow-accent-600/20'
+                : 'text-navy-400 hover:text-accent-400 hover:bg-navy-900/50',
             )}
             aria-current={tab.current ? 'page' : undefined}
           >
