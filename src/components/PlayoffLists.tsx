@@ -12,7 +12,7 @@ export default function PlayoffLists() {
   const standings = useStandingsStore((state) => state.standings);
   const year = useStandingsStore((state) => state.year);
 
-  const { playoffsMadison, playoffsLA } = useMemo(() => {
+  const { playoffsMadison, playoffsLA, bubbleMadison, bubbleLA } = useMemo(() => {
     const managers = getManagers();
 
     const managersWithPts: TeamForPlayoff[] = managers
@@ -43,25 +43,26 @@ export default function PlayoffLists() {
     const madisonTeams = managersWithPts.filter((t) => t.league === 'Madison');
     const laTeams = managersWithPts.filter((t) => t.league === 'LA');
 
-    const madisonSlots = Object.entries(
-      getPlayoffSlots({
-        leagueData: madisonTeams,
-        divisionName1: 'Au Poivre',
-        divisionName2: 'Filet Mignon',
-      }),
-    ) as [string, string][];
+    const madisonResult = getPlayoffSlots({
+      leagueData: madisonTeams,
+      divisionName1: 'Au Poivre',
+      divisionName2: 'Filet Mignon',
+    });
 
-    const laSlots = Object.entries(
-      getPlayoffSlots({
-        leagueData: laTeams,
-        divisionName1: 'Taylors',
-        divisionName2: 'Tornado Room',
-      }),
-    ) as [string, string][];
+    const laResult = getPlayoffSlots({
+      leagueData: laTeams,
+      divisionName1: 'Taylors',
+      divisionName2: 'Tornado Room',
+    });
+
+    const madisonSlots = Object.entries(madisonResult.slots) as [string, string][];
+    const laSlots = Object.entries(laResult.slots) as [string, string][];
 
     return {
       playoffsMadison: madisonSlots,
       playoffsLA: laSlots,
+      bubbleMadison: madisonResult.bubbleTeams,
+      bubbleLA: laResult.bubbleTeams,
     };
   }, [standings, year]);
 
@@ -95,9 +96,9 @@ export default function PlayoffLists() {
       </div>
       <div>
         {activeLeague === 'madison' ? (
-          <PlayoffList playoffTeams={playoffsMadison} />
+          <PlayoffList playoffTeams={playoffsMadison} bubbleTeams={bubbleMadison} />
         ) : (
-          <PlayoffList playoffTeams={playoffsLA} />
+          <PlayoffList playoffTeams={playoffsLA} bubbleTeams={bubbleLA} />
         )}
       </div>
     </div>
