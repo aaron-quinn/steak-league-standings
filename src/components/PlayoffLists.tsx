@@ -80,7 +80,7 @@ export default function PlayoffLists() {
         <button
           onClick={() => setActiveLeague('madison')}
           className={clsx(
-            'flex-1 py-2 px-3 text-sm font-medium transition-colors',
+            'flex-1 py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-colors',
             activeLeague === 'madison'
               ? 'text-blue-400/80 bg-blue-950/20'
               : 'text-gray-500 hover:text-gray-400',
@@ -91,7 +91,7 @@ export default function PlayoffLists() {
         <button
           onClick={() => setActiveLeague('la')}
           className={clsx(
-            'flex-1 py-2 px-3 text-sm font-medium transition-colors',
+            'flex-1 py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-colors',
             activeLeague === 'la'
               ? 'text-blue-400/80 bg-blue-950/20'
               : 'text-gray-500 hover:text-gray-400',

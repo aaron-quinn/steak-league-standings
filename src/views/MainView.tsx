@@ -39,10 +39,10 @@ export default function MainView({ live }: MainViewProps) {
   }
 
   return (
-    <div className="bg-black min-h-screen py-4 px-3 lg:py-8 lg:px-8">
-      <div className="w-fit mx-auto">
+    <div className="bg-black min-h-screen py-3 px-2 sm:py-4 sm:px-3 lg:py-8 lg:px-8">
+      <div className="w-full max-w-[375px] sm:max-w-none sm:w-fit mx-auto">
         {/* Header row - logo and view switcher */}
-        <div className="flex items-center justify-between lg:justify-start gap-2 lg:gap-4 mb-4 lg:mb-6">
+        <div className="flex items-center justify-between lg:justify-start gap-1.5 sm:gap-2 lg:gap-4 mb-3 sm:mb-4 lg:mb-6">
           <LeagueLogo />
           <ViewSwitcher />
         </div>

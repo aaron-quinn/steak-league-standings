@@ -52,32 +52,32 @@ export default function PlayoffList({
   bubbleTeams,
 }: PlayoffListProps) {
   return (
-    <div className="py-2 antialiased">
+    <div className="py-1.5 sm:py-2 antialiased">
       {playoffTeams.map(([qualifier, name], index) => (
-        <div key={name} className="py-1.5 px-3 flex items-start gap-2">
-          <span className="text-blue-500/70 font-mono text-xs w-5 relative top-1">
+        <div key={name} className="py-1 sm:py-1.5 px-2 sm:px-3 flex items-start gap-1.5 sm:gap-2">
+          <span className="text-blue-500/70 font-mono text-[10px] sm:text-xs w-4 sm:w-5 relative top-0.5 sm:top-1 shrink-0">
             #{index + 1}
           </span>
-          <div>
-            <div className="text-gray-400 text-sm">{name}</div>
-            <div className="text-gray-600 text-xs">{qualifier}</div>
+          <div className="min-w-0">
+            <div className="text-gray-400 text-xs sm:text-sm truncate">{name}</div>
+            <div className="text-gray-600 text-[10px] sm:text-xs truncate">{qualifier}</div>
           </div>
         </div>
       ))}
 
       {bubbleTeams.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-gray-800/40">
-          <div className="px-3 pb-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-800/40">
+          <div className="px-2 sm:px-3 pb-1.5 sm:pb-2 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide">
             In the Race
           </div>
           {bubbleTeams.map((team) => (
-            <div key={team.name} className="py-1.5 px-3 flex items-start gap-2">
-              <span className="text-orange-500/60 font-mono text-xs w-5 relative top-1">
+            <div key={team.name} className="py-1 sm:py-1.5 px-2 sm:px-3 flex items-start gap-1.5 sm:gap-2">
+              <span className="text-orange-500/60 font-mono text-[10px] sm:text-xs w-4 sm:w-5 relative top-0.5 sm:top-1 shrink-0">
                 •
               </span>
-              <div>
-                <div className="text-gray-500 text-sm">{team.name}</div>
-                <div className="text-gray-600 text-xs">{formatGap(team)}</div>
+              <div className="min-w-0">
+                <div className="text-gray-500 text-xs sm:text-sm truncate">{team.name}</div>
+                <div className="text-gray-600 text-[10px] sm:text-xs truncate">{formatGap(team)}</div>
               </div>
             </div>
           ))}
