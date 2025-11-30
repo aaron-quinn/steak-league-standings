@@ -8,11 +8,7 @@ export default function StandingsList() {
   const year = useStandingsStore((state) => state.year);
   const live = useStandingsStore((state) => state.live);
 
-  const {
-    teamsWithGap,
-    steakLineTeam,
-    selfBuyerSpot,
-  } = useMemo(() => {
+  const { teamsWithGap, steakLineTeam, selfBuyerSpot } = useMemo(() => {
     const managers = getManagers();
 
     const steakTeams = managers
@@ -242,7 +238,7 @@ export default function StandingsList() {
                     <span className="w-6 h-6 rounded-full bg-gray-800/30 text-gray-500 font-mono text-xs flex items-center justify-center">
                       {actualIndex + 1}
                     </span>
-                    <span className="text-sm lg:text-base text-gray-500 min-w-[120px] lg:min-w-[160px]">
+                    <span className="text-sm lg:text-base text-gray-400 min-w-[120px] lg:min-w-[160px]">
                       {team.name}
                     </span>
                     {!live && (
