@@ -8,7 +8,11 @@ export default function StandingsList() {
   const year = useStandingsStore((state) => state.year);
   const live = useStandingsStore((state) => state.live);
 
-  const { teamsWithGap, steakLineTeam, selfBuyerSpot, maxPositiveGap, maxNegativeGap } = useMemo(() => {
+  const {
+    teamsWithGap,
+    steakLineTeam,
+    selfBuyerSpot,
+  } = useMemo(() => {
     const managers = getManagers();
 
     const steakTeams = managers
@@ -80,8 +84,16 @@ export default function StandingsList() {
     });
 
     // Calculate max gaps for heatmap intensity
-    const maxPositiveGap = Math.max(...withGap.slice(0, steakLine).map(t => t.gapNum), 1);
-    const maxNegativeGap = Math.max(...withGap.slice(selfBuyer ? steakLine + 1 : steakLine).map(t => t.gapNum), 1);
+    const maxPositiveGap = Math.max(
+      ...withGap.slice(0, steakLine).map((t) => t.gapNum),
+      1,
+    );
+    const maxNegativeGap = Math.max(
+      ...withGap
+        .slice(selfBuyer ? steakLine + 1 : steakLine)
+        .map((t) => t.gapNum),
+      1,
+    );
 
     return {
       teamsWithGap: withGap,
@@ -105,7 +117,8 @@ export default function StandingsList() {
         </div>
         <div className="rounded-lg border border-gray-800/60 overflow-hidden">
           {teamsWithGap.slice(0, steakLineTeam).map((team, index) => {
-            const intensity = Math.round((team.gapNum / maxPositiveGap) * 40);
+            const cappedGap = Math.min(team.gapNum, 150);
+            const intensity = Math.round((cappedGap / 150) * 40);
             return (
               <div
                 key={team.id}
@@ -114,37 +127,39 @@ export default function StandingsList() {
                   ${index !== steakLineTeam - 1 ? 'border-b border-gray-800/30' : ''}
                   hover:bg-emerald-950/30 transition-colors
                 `}
-                style={{ backgroundColor: `rgba(6, 78, 59, ${intensity / 100})` }}
+                style={{
+                  backgroundColor: `rgba(6, 78, 59, ${intensity / 100})`,
+                }}
               >
-              <div className="flex items-center gap-4">
-                <span className="w-6 h-6 rounded-full bg-emerald-900/30 text-emerald-500/80 font-mono text-xs flex items-center justify-center">
-                  {index + 1}
-                </span>
-                <span className="text-sm lg:text-base text-gray-300 font-medium min-w-[120px] lg:min-w-[160px]">
-                  {team.name}
-                </span>
-                {!live && (
-                  <span className="text-gray-600 text-xs tabular-nums">
-                    {team.record}
+                <div className="flex items-center gap-4">
+                  <span className="w-6 h-6 rounded-full bg-emerald-900/30 text-emerald-500/80 font-mono text-xs flex items-center justify-center">
+                    {index + 1}
                   </span>
-                )}
+                  <span className="text-sm lg:text-base text-gray-300 font-medium min-w-[120px] lg:min-w-[160px]">
+                    {team.name}
+                  </span>
+                  {!live && (
+                    <span className="text-gray-600 text-xs tabular-nums">
+                      {team.record}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 lg:gap-4 font-mono">
+                  <span className="text-xs lg:text-sm tabular-nums text-gray-400 w-16 lg:w-20 text-right">
+                    {Number(team.pointsInt).toLocaleString('en-US')}
+                    <span className="text-[0.75em] text-gray-600">
+                      .{team.pointsDec}
+                    </span>
+                  </span>
+                  <span className="w-20 lg:w-24 text-right text-sm lg:text-base tabular-nums text-emerald-500/90 font-semibold">
+                    +{team.gapInt}
+                    <span className="text-[0.75em] text-emerald-500/50">
+                      .{team.gapDec}
+                    </span>
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 lg:gap-4 font-mono">
-                <span className="text-xs lg:text-sm tabular-nums text-gray-400 w-16 lg:w-20 text-right">
-                  {Number(team.pointsInt).toLocaleString('en-US')}
-                  <span className="text-[0.75em] text-gray-600">
-                    .{team.pointsDec}
-                  </span>
-                </span>
-                <span className="w-20 lg:w-24 text-right text-sm lg:text-base tabular-nums text-emerald-500/90 font-semibold">
-                  +{team.gapInt}
-                  <span className="text-[0.75em] text-emerald-500/50">
-                    .{team.gapDec}
-                  </span>
-                </span>
-              </div>
-            </div>
-          );
+            );
           })}
         </div>
       </div>
@@ -209,7 +224,8 @@ export default function StandingsList() {
                 ? steakLineTeam + 1 + index
                 : steakLineTeam + index;
               const isLast = actualIndex === teamsWithGap.length - 1;
-              const intensity = Math.round((team.gapNum / maxNegativeGap) * 35);
+              const cappedGap = Math.min(team.gapNum, 150);
+              const intensity = Math.round((cappedGap / 150) * 35);
               return (
                 <div
                   key={team.id}
@@ -218,7 +234,9 @@ export default function StandingsList() {
                     ${!isLast ? 'border-b border-gray-800/20' : ''}
                     hover:bg-red-950/20 transition-colors
                   `}
-                  style={{ backgroundColor: `rgba(127, 29, 29, ${intensity / 100})` }}
+                  style={{
+                    backgroundColor: `rgba(127, 29, 29, ${intensity / 100})`,
+                  }}
                 >
                   <div className="flex items-center gap-4">
                     <span className="w-6 h-6 rounded-full bg-gray-800/30 text-gray-500 font-mono text-xs flex items-center justify-center">

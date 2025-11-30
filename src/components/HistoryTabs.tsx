@@ -14,7 +14,7 @@ export default function HistoryTabs() {
         <button
           onClick={() => setActiveTab('steaks')}
           className={clsx(
-            'flex-1 py-2 px-3 text-sm font-medium transition-colors',
+            'flex-1 py-2 px-3 text-sm font-medium transition-colors whitespace-nowrap',
             activeTab === 'steaks'
               ? 'text-blue-400/80 bg-blue-950/20'
               : 'text-gray-500 hover:text-gray-400',
