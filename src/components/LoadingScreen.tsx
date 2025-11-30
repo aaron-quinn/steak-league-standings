@@ -9,7 +9,7 @@ export default function LoadingScreen() {
         className="flex flex-col items-center justify-center max-w-lg"
       >
         <img
-          className="animate-pulse w-32 h-32 md:w-60 md:h-60 opacity-60"
+          className="animate-spin w-32 h-32 md:w-60 md:h-60 opacity-60"
           src="/steak.svg"
           alt="Steak League"
         />

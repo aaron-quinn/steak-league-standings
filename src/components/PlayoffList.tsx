@@ -54,13 +54,20 @@ export default function PlayoffList({
   return (
     <div className="py-1.5 sm:py-2 antialiased">
       {playoffTeams.map(([qualifier, name], index) => (
-        <div key={name} className="py-1 sm:py-1.5 px-2 sm:px-3 flex items-start gap-1.5 sm:gap-2">
+        <div
+          key={name}
+          className="py-1 sm:py-1.5 px-2 sm:px-3 flex items-start gap-1.5 sm:gap-2"
+        >
           <span className="text-blue-500/70 font-mono text-[10px] sm:text-xs w-4 sm:w-5 relative top-0.5 sm:top-1 shrink-0">
             #{index + 1}
           </span>
           <div className="min-w-0">
-            <div className="text-gray-400 text-xs sm:text-sm truncate">{name}</div>
-            <div className="text-gray-600 text-[10px] sm:text-xs truncate">{qualifier}</div>
+            <div className="text-gray-400 text-xs sm:text-sm truncate">
+              {name}
+            </div>
+            <div className="text-gray-600 text-[10px] sm:text-xs truncate">
+              {qualifier}
+            </div>
           </div>
         </div>
       ))}
@@ -71,13 +78,20 @@ export default function PlayoffList({
             In the Race
           </div>
           {bubbleTeams.map((team) => (
-            <div key={team.name} className="py-1 sm:py-1.5 px-2 sm:px-3 flex items-start gap-1.5 sm:gap-2">
+            <div
+              key={team.name}
+              className="py-1 sm:py-1.5 px-2 sm:px-3 flex items-start gap-1.5 sm:gap-2"
+            >
               <span className="text-orange-500/60 font-mono text-[10px] sm:text-xs w-4 sm:w-5 relative top-0.5 sm:top-1 shrink-0">
                 •
               </span>
               <div className="min-w-0">
-                <div className="text-gray-500 text-xs sm:text-sm truncate">{team.name}</div>
-                <div className="text-gray-600 text-[10px] sm:text-xs truncate">{formatGap(team)}</div>
+                <div className="text-gray-500 text-xs sm:text-sm truncate">
+                  {team.name}
+                </div>
+                <div className="text-gray-600 text-[10px] sm:text-xs truncate">
+                  {formatGap(team)}
+                </div>
               </div>
             </div>
           ))}
