@@ -105,30 +105,30 @@ export default function StandingsList() {
       {/* Teams above the line - getting steaks */}
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-2">
-          <div className="h-px flex-1 bg-gradient-to-r from-emerald-600/30 to-transparent" />
-          <span className="text-[10px] uppercase tracking-widest text-emerald-600/60 font-medium">
+          <div className="h-px flex-1 bg-gradient-to-r from-emerald-600/35 to-transparent" />
+          <span className="text-[10px] uppercase tracking-widest text-emerald-600/65 font-medium">
             Eaters
           </span>
-          <div className="h-px flex-1 bg-gradient-to-l from-emerald-600/30 to-transparent" />
+          <div className="h-px flex-1 bg-gradient-to-l from-emerald-600/35 to-transparent" />
         </div>
-        <div className="rounded-lg border border-gray-800/60 overflow-hidden">
+        <div className="rounded-lg border border-gray-800/50 overflow-hidden">
           {teamsWithGap.slice(0, steakLineTeam).map((team, index) => {
-            const cappedGap = Math.min(team.gapNum, 150);
-            const intensity = Math.round((cappedGap / 150) * 40);
+            const cappedGap = Math.min(team.gapNum, 130);
+            const intensity = Math.round((cappedGap / 130) * 45) + 5;
             return (
               <div
                 key={team.id}
                 className={`
                   flex items-center justify-between px-3 py-2.5 lg:py-3
                   ${index !== steakLineTeam - 1 ? 'border-b border-gray-800/30' : ''}
-                  hover:bg-emerald-950/30 transition-colors
+                  hover:bg-emerald-950/35 transition-colors
                 `}
                 style={{
-                  backgroundColor: `rgba(6, 78, 59, ${intensity / 100})`,
+                  backgroundColor: `rgba(6, 80, 60, ${intensity / 100})`,
                 }}
               >
                 <div className="flex items-center gap-4">
-                  <span className="w-6 h-6 rounded-full bg-emerald-900/30 text-emerald-500/80 font-mono text-xs flex items-center justify-center">
+                  <span className="w-6 h-6 rounded-full bg-emerald-900/35 text-emerald-500/90 font-mono text-xs flex items-center justify-center">
                     {index + 1}
                   </span>
                   <span className="text-sm lg:text-base text-gray-300 font-medium min-w-[120px] lg:min-w-[160px]">
@@ -206,13 +206,13 @@ export default function StandingsList() {
       {/* Teams below the line - buying steaks */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <div className="h-px flex-1 bg-gradient-to-r from-red-500/25 to-transparent" />
-          <span className="text-[10px] uppercase tracking-widest text-red-400/50 font-medium">
+            <div className="h-px flex-1 bg-gradient-to-r from-red-500/30 to-transparent" />
+          <span className="text-[10px] uppercase tracking-widest text-red-400/55 font-medium">
             Buyers
           </span>
-          <div className="h-px flex-1 bg-gradient-to-l from-red-500/25 to-transparent" />
+          <div className="h-px flex-1 bg-gradient-to-l from-red-500/30 to-transparent" />
         </div>
-        <div className="rounded-lg border border-gray-800/40 overflow-hidden">
+        <div className="rounded-lg border border-gray-800/45 overflow-hidden">
           {teamsWithGap
             .slice(selfBuyerSpot ? steakLineTeam + 1 : steakLineTeam)
             .map((team, index) => {
@@ -220,22 +220,22 @@ export default function StandingsList() {
                 ? steakLineTeam + 1 + index
                 : steakLineTeam + index;
               const isLast = actualIndex === teamsWithGap.length - 1;
-              const cappedGap = Math.min(team.gapNum, 150);
-              const intensity = Math.round((cappedGap / 150) * 35);
+              const cappedGap = Math.min(team.gapNum, 130);
+              const intensity = Math.round((cappedGap / 130) * 40) + 5;
               return (
                 <div
                   key={team.id}
                   className={`
                     flex items-center justify-between px-3 py-2 lg:py-2.5
-                    ${!isLast ? 'border-b border-gray-800/20' : ''}
-                    hover:bg-red-950/20 transition-colors
+                    ${!isLast ? 'border-b border-gray-800/25' : ''}
+                    hover:bg-red-950/25 transition-colors
                   `}
                   style={{
-                    backgroundColor: `rgba(127, 29, 29, ${intensity / 100})`,
+                    backgroundColor: `rgba(130, 28, 28, ${intensity / 100})`,
                   }}
                 >
                   <div className="flex items-center gap-4">
-                    <span className="w-6 h-6 rounded-full bg-gray-800/30 text-gray-500 font-mono text-xs flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-full bg-gray-800/35 text-gray-500 font-mono text-xs flex items-center justify-center">
                       {actualIndex + 1}
                     </span>
                     <span className="text-sm lg:text-base text-gray-400 min-w-[120px] lg:min-w-[160px]">
@@ -250,13 +250,13 @@ export default function StandingsList() {
                   <div className="flex items-center gap-2 lg:gap-4 font-mono">
                     <span className="text-xs lg:text-sm tabular-nums text-gray-500 w-16 lg:w-20 text-right">
                       {Number(team.pointsInt).toLocaleString('en-US')}
-                      <span className="text-[0.75em] text-gray-700">
+                      <span className="text-[0.75em] text-gray-600">
                         .{team.pointsDec}
                       </span>
                     </span>
-                    <span className="w-20 lg:w-24 text-right text-sm lg:text-base tabular-nums text-red-500/70 font-semibold">
+                    <span className="w-20 lg:w-24 text-right text-sm lg:text-base tabular-nums text-red-500/80 font-semibold">
                       {team.gapInt}
-                      <span className="text-[0.75em] text-red-500/40">
+                      <span className="text-[0.75em] text-red-500/45">
                         .{team.gapDec}
                       </span>
                     </span>
