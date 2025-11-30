@@ -52,9 +52,34 @@ interface PlayerPopoverProps {
   team: TeamWithGap;
   onClose: () => void;
   anchorRect: DOMRect | null;
+  variant?: 'eater' | 'buyer' | 'self-buyer';
 }
 
-function PlayerPopover({ team, onClose, anchorRect }: PlayerPopoverProps) {
+const popoverVariantStyles = {
+  eater: {
+    count: 'text-emerald-500/90',
+    label: 'text-emerald-500/80',
+    position: 'text-emerald-600/70',
+  },
+  buyer: {
+    count: 'text-red-500/90',
+    label: 'text-red-500/80',
+    position: 'text-red-600/70',
+  },
+  'self-buyer': {
+    count: 'text-gray-400/90',
+    label: 'text-gray-400/80',
+    position: 'text-gray-500/70',
+  },
+};
+
+function PlayerPopover({
+  team,
+  onClose,
+  anchorRect,
+  variant = 'eater',
+}: PlayerPopoverProps) {
+  const popoverStyles = popoverVariantStyles[variant];
   const normalizedInProgress = normalizePlayers(team.inProgressNames);
   const normalizedYetToPlay = normalizePlayers(team.yetToPlayNames);
 
@@ -98,17 +123,21 @@ function PlayerPopover({ team, onClose, anchorRect }: PlayerPopoverProps) {
         {hasInProgress && (
           <div className="mb-2">
             <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-[10px] font-bold text-yellow-500/90">
+              <span className={`text-[10px] font-bold ${popoverStyles.count}`}>
                 {sortedInProgress.length}
               </span>
-              <span className="text-[10px] uppercase tracking-wide text-yellow-500/80">
+              <span
+                className={`text-[10px] uppercase tracking-wide ${popoverStyles.label}`}
+              >
                 In Progress
               </span>
             </div>
             <ul className="text-xs text-gray-300 space-y-0.5">
               {sortedInProgress.map((player, i) => (
                 <li key={i} className="flex items-center gap-2">
-                  <span className="w-7 text-[10px] font-medium text-yellow-600/70 uppercase">
+                  <span
+                    className={`w-7 text-[10px] font-medium ${popoverStyles.position} uppercase`}
+                  >
                     {player.position}
                   </span>
                   <span className="flex-1">{player.name}</span>
@@ -164,21 +193,21 @@ interface RemainingPlayersIndicatorProps {
 const variantStyles = {
   eater: {
     completed: 'bg-emerald-600/50',
-    inProgress: 'bg-yellow-500/70',
+    inProgress: 'bg-emerald-300/70',
     background: 'bg-emerald-950/40',
     hover: 'hover:bg-emerald-900/30',
     text: 'text-emerald-500/80 group-hover:text-emerald-400 font-semibold',
   },
   buyer: {
     completed: 'bg-red-600/50',
-    inProgress: 'bg-yellow-500/70',
+    inProgress: 'bg-red-400/80',
     background: 'bg-red-950/40',
     hover: 'hover:bg-red-900/30',
     text: 'text-red-500/80 group-hover:text-red-400 font-semibold',
   },
   'self-buyer': {
     completed: 'bg-gray-500/50',
-    inProgress: 'bg-yellow-500/70',
+    inProgress: 'bg-gray-400/80',
     background: 'bg-gray-800/40',
     hover: 'hover:bg-gray-700/30',
     text: 'text-gray-400/80 group-hover:text-gray-300 font-semibold',
@@ -271,6 +300,7 @@ function RemainingPlayersIndicator({
             team={team}
             onClose={() => setIsOpen(false)}
             anchorRect={anchorRect}
+            variant={variant}
           />
         </>
       )}
