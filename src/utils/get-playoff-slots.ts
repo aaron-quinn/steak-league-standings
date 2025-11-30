@@ -52,7 +52,8 @@ export default function getPlayoffsSlots({
     secondMostPtsTeam.points - team.points;
 
   const calcWinsBack = (team: TeamForPlayoff) => {
-    const secondBestWinEquiv = secondBestRecordTeam.wins + secondBestRecordTeam.ties * 0.5;
+    const secondBestWinEquiv =
+      secondBestRecordTeam.wins + secondBestRecordTeam.ties * 0.5;
     const teamWinEquiv = team.wins + team.ties * 0.5;
     return secondBestWinEquiv - teamWinEquiv;
   };

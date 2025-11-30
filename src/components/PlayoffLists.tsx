@@ -12,59 +12,65 @@ export default function PlayoffLists() {
   const standings = useStandingsStore((state) => state.standings);
   const year = useStandingsStore((state) => state.year);
 
-  const { playoffsMadison, playoffsLA, bubbleMadison, bubbleLA } = useMemo(() => {
-    const managers = getManagers();
+  const { playoffsMadison, playoffsLA, bubbleMadison, bubbleLA } =
+    useMemo(() => {
+      const managers = getManagers();
 
-    const managersWithPts: TeamForPlayoff[] = managers
-      .filter((t) => t.teams[year])
-      .map((m) => {
-        const teamYear = m.teams[year];
-        const league = teamYear.league || '';
-        const division = teamYear.division || '';
-        const teamID = teamYear.teamID || '';
-        const team = `${league.toLowerCase()}${teamID}`;
-        const teamStanding = standings[team] || {
-          points: 0,
-          wins: 0,
-          losses: 0,
-          ties: 0,
-        };
-        return {
-          name: m.name,
-          league,
-          division,
-          points: teamStanding.points,
-          wins: teamStanding.wins,
-          losses: teamStanding.losses,
-          ties: teamStanding.ties,
-        };
+      const managersWithPts: TeamForPlayoff[] = managers
+        .filter((t) => t.teams[year])
+        .map((m) => {
+          const teamYear = m.teams[year];
+          const league = teamYear.league || '';
+          const division = teamYear.division || '';
+          const teamID = teamYear.teamID || '';
+          const team = `${league.toLowerCase()}${teamID}`;
+          const teamStanding = standings[team] || {
+            points: 0,
+            wins: 0,
+            losses: 0,
+            ties: 0,
+          };
+          return {
+            name: m.name,
+            league,
+            division,
+            points: teamStanding.points,
+            wins: teamStanding.wins,
+            losses: teamStanding.losses,
+            ties: teamStanding.ties,
+          };
+        });
+
+      const madisonTeams = managersWithPts.filter(
+        (t) => t.league === 'Madison',
+      );
+      const laTeams = managersWithPts.filter((t) => t.league === 'LA');
+
+      const madisonResult = getPlayoffSlots({
+        leagueData: madisonTeams,
+        divisionName1: 'Au Poivre',
+        divisionName2: 'Filet Mignon',
       });
 
-    const madisonTeams = managersWithPts.filter((t) => t.league === 'Madison');
-    const laTeams = managersWithPts.filter((t) => t.league === 'LA');
+      const laResult = getPlayoffSlots({
+        leagueData: laTeams,
+        divisionName1: 'Taylors',
+        divisionName2: 'Tornado Room',
+      });
 
-    const madisonResult = getPlayoffSlots({
-      leagueData: madisonTeams,
-      divisionName1: 'Au Poivre',
-      divisionName2: 'Filet Mignon',
-    });
+      const madisonSlots = Object.entries(madisonResult.slots) as [
+        string,
+        string,
+      ][];
+      const laSlots = Object.entries(laResult.slots) as [string, string][];
 
-    const laResult = getPlayoffSlots({
-      leagueData: laTeams,
-      divisionName1: 'Taylors',
-      divisionName2: 'Tornado Room',
-    });
-
-    const madisonSlots = Object.entries(madisonResult.slots) as [string, string][];
-    const laSlots = Object.entries(laResult.slots) as [string, string][];
-
-    return {
-      playoffsMadison: madisonSlots,
-      playoffsLA: laSlots,
-      bubbleMadison: madisonResult.bubbleTeams,
-      bubbleLA: laResult.bubbleTeams,
-    };
-  }, [standings, year]);
+      return {
+        playoffsMadison: madisonSlots,
+        playoffsLA: laSlots,
+        bubbleMadison: madisonResult.bubbleTeams,
+        bubbleLA: laResult.bubbleTeams,
+      };
+    }, [standings, year]);
 
   const [activeLeague, setActiveLeague] = useState<League>('madison');
 
@@ -96,7 +102,10 @@ export default function PlayoffLists() {
       </div>
       <div>
         {activeLeague === 'madison' ? (
-          <PlayoffList playoffTeams={playoffsMadison} bubbleTeams={bubbleMadison} />
+          <PlayoffList
+            playoffTeams={playoffsMadison}
+            bubbleTeams={bubbleMadison}
+          />
         ) : (
           <PlayoffList playoffTeams={playoffsLA} bubbleTeams={bubbleLA} />
         )}

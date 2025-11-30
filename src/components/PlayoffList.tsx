@@ -35,13 +35,13 @@ function formatGap(team: BubbleTeam): string {
       winsAhead % 1 === 0.5
         ? `${Math.floor(winsAhead)}½`
         : winsAhead.toString();
-    parts.push(`${formatted} wins ahead`);
+    parts.push(`${formatted} win${winsAhead === 1 ? '' : 's'} ahead`);
   } else {
     const formatted =
       team.winsBack % 1 === 0.5
         ? `${Math.floor(team.winsBack)}½`
         : team.winsBack.toString();
-    parts.push(`${formatted} wins back`);
+    parts.push(`${formatted} win${team.winsBack === 1 ? '' : 's'} back`);
   }
 
   return parts.join(', ');
