@@ -1,14 +1,14 @@
 export default function LeagueLogo() {
   return (
-    <>
+    <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
       <img
-        className="max-w-[150px] lg:max-w-[250px] mx-auto mb-6 lg:mb-8"
+        className="w-5 sm:w-6 lg:w-10 opacity-70"
         src="/steak.svg"
         alt="Steak League"
       />
-      <h1 className="text-white text-4xl lg:text-6xl font-extralight tracking-wide text-center leading-[1.1] mb-3 lg:mb-8">
-        STEAK LEAGUE
+      <h1 className="text-blue-100 text-sm sm:text-base lg:text-xl font-medium tracking-wide whitespace-nowrap">
+        Steak League
       </h1>
-    </>
+    </div>
   );
 }

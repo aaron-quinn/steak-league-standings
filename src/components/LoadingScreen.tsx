@@ -1,7 +1,7 @@
 export default function LoadingScreen() {
   return (
     <div
-      className="h-screen bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-center p-8 antialiased"
+      className="h-screen bg-gray-950 text-gray-300 flex items-center justify-center p-8 antialiased"
       style={{ height: '100dvh' }}
     >
       <div
@@ -9,14 +9,14 @@ export default function LoadingScreen() {
         className="flex flex-col items-center justify-center max-w-lg"
       >
         <img
-          className="text-gray-200 animate-spin dark:text-gray-600 fill-blue-600 w-32 h-32 md:w-60 md:h-60"
+          className="animate-pulse w-32 h-32 md:w-60 md:h-60 opacity-60"
           src="/steak.svg"
           alt="Steak League"
         />
-        <div className="text-center mt-8 mb-4 md:mb-6 font-normal text-3xl md:text-4xl text-slate-200">
+        <div className="text-center mt-8 mb-4 md:mb-6 font-medium text-2xl md:text-3xl text-gray-300">
           Loading Standings...
         </div>
-        <p className="text-lg md:text-xl font-light text-slate-300">
+        <p className="text-base md:text-lg font-light text-gray-400 text-center">
           This can take a while due to this site being hosted on a free plan
           where the server needs to wake up.
         </p>

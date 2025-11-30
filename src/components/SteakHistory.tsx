@@ -59,42 +59,38 @@ export default function SteakHistory() {
   }, [year]);
 
   return (
-    <div className="hidden lg:block">
-      <div className="bg-slate-700 text-slate-300 py-2 px-4 rounded-t-md font-bold">
-        Madison Steak Leaderboard
-        <span className="text-sm pl-2 font-thin">Since 2016</span>
-      </div>
-      <ul className="w-full antialiased text-lg bg-slate-800 py-3 rounded-b-md mb-8">
+    <div className="w-full antialiased py-1.5 sm:py-2">
+      <div className="grid grid-cols-[auto_1fr] gap-x-2 sm:gap-x-4 gap-y-0.5 sm:gap-y-1 px-2 sm:px-3">
         {managersList.map((manager) => (
-          <li
-            key={manager.name}
-            className="px-4 w-full text-slate-300 font-light flex justify-between shadow-2xl items-center"
-          >
-            <div className="flex items-center leading-6 text-sm gap-x-3">
-              <div className="flex items-center justify-start w-[140px] tracking-wider">
-                {[...Array(manager.numSteaks)].map((_, i) => (
-                  <div key={`steak-${i}`}>🥩</div>
-                ))}
-                {manager.missedSteaks.map((_, i) => (
-                  <div key={`missed-${i}`} className="opacity-10">
-                    🥩
-                  </div>
-                ))}
-              </div>
-              <div>
-                {manager.name.split(' ')[1]}
-                <span className="text-slate-400 text-xs font-thin ml-1.5 inline-block">
-                  {Math.round(
-                    (100 * manager.numSteaks) /
-                      (manager.numSteaks + manager.missedSteaks.length),
-                  ).toFixed(0)}
-                  %
+          <>
+            <div key={`${manager.name}-steaks`} className="text-xs sm:text-sm">
+              {[...Array(manager.numSteaks)].map((_, i) => (
+                <span key={`steak-${i}`} className="opacity-70">
+                  🥩
                 </span>
-              </div>
+              ))}
+              {manager.missedSteaks.map((_, i) => (
+                <span key={`missed-${i}`} className="opacity-15">
+                  🥩
+                </span>
+              ))}
             </div>
-          </li>
+            <div
+              key={`${manager.name}-info`}
+              className="text-xs sm:text-sm flex items-center gap-1 sm:gap-1.5 text-gray-400"
+            >
+              <span className="truncate">{manager.name.split(' ')[1]}</span>
+              <span className="text-blue-400/50 text-[10px] sm:text-xs font-mono shrink-0">
+                {Math.round(
+                  (100 * manager.numSteaks) /
+                    (manager.numSteaks + manager.missedSteaks.length),
+                )}
+                %
+              </span>
+            </div>
+          </>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

@@ -2,8 +2,7 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import StandingsList from '../components/StandingsList';
 import PlayoffLists from '../components/PlayoffLists';
-import ChampionsList from '../components/ChampionsList';
-import SteakHistory from '../components/SteakHistory';
+import HistoryTabs from '../components/HistoryTabs';
 import LeagueLogo from '../components/LeagueLogo';
 import ViewSwitcher from '../components/ViewSwitcher';
 import LoadingScreen from '../components/LoadingScreen';
@@ -40,18 +39,28 @@ export default function MainView({ live }: MainViewProps) {
   }
 
   return (
-    <div className="bg-slate-900 py-6 lg:py-10 lg:px-10">
-      <div className="max-w-8xl m-auto grid grids-cols-2 lg:grid-cols-10 gap-4 lg:gap-10">
-        <div className="col-span-1 lg:col-span-3">
+    <div className="bg-black min-h-screen py-3 px-2 sm:py-4 sm:px-3 lg:py-8 lg:px-8">
+      <div className="w-full max-w-[375px] sm:max-w-none sm:w-fit mx-auto">
+        {/* Header row - logo and view switcher */}
+        <div className="flex items-center justify-between lg:justify-start gap-1.5 sm:gap-2 lg:gap-4 mb-3 sm:mb-4 lg:mb-6">
           <LeagueLogo />
-          <ChampionsList />
-          <SteakHistory />
-        </div>
-        <div className="col-span-1 lg:col-span-7">
           <ViewSwitcher />
-          <StandingsList />
-          <div className="flex justify-between">
+        </div>
+
+        {/* Main content grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+          {/* Primary column - Standings (always visible, priority 1) */}
+          <div className="lg:col-span-7 xl:col-span-8">
+            <StandingsList />
+          </div>
+
+          {/* Secondary column - Playoffs & History */}
+          <div className="lg:col-span-5 xl:col-span-4 space-y-4">
+            {/* Playoffs (priority 2) */}
             {!live && <PlayoffLists />}
+
+            {/* Steak History & Champions (tabbed) */}
+            <HistoryTabs />
           </div>
         </div>
       </div>
