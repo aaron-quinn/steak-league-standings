@@ -12,6 +12,7 @@ export interface TeamStanding {
   losses: number;
   ties: number;
   // Live scoring data
+  weeklyScore?: number;
   yetToPlay?: number;
   inProgress?: number;
   // Supports both old API (string[]) and new API (PlayerInfo[])

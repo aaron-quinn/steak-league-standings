@@ -275,14 +275,18 @@ function RemainingPlayersIndicator({
       'self-buyer': 'text-gray-500',
     }[variant];
 
+    const weeklyScore = team.weeklyScore ?? 0;
+
     return (
-      <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2 py-1">
-        <span
-          className={`w-10 sm:w-16 lg:w-20 text-[10px] sm:text-xs ${finalTextColor} font-medium text-center`}
-        >
+      <div className="flex items-center justify-center gap-1 sm:gap-1.5 px-1 sm:px-2 py-1 w-[72px] sm:w-[104px] lg:w-[120px]">
+        <span className={`text-[8px] sm:text-xs ${finalTextColor} font-medium`}>
           Final
         </span>
-        <span className="w-4 sm:w-5" />
+        <span
+          className={`text-[8px] sm:text-[10px] font-mono ${finalTextColor}`}
+        >
+          ({weeklyScore.toFixed(1)})
+        </span>
       </div>
     );
   }
@@ -374,6 +378,7 @@ export default function StandingsList() {
           record: `${teamStanding.wins}-${teamStanding.losses}-${teamStanding.ties}`,
           teams: t.teams,
           // Live player data
+          weeklyScore: teamStanding.weeklyScore,
           yetToPlay: teamStanding.yetToPlay,
           inProgress: teamStanding.inProgress,
           yetToPlayNames: teamStanding.yetToPlayNames,

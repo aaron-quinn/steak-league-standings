@@ -11,6 +11,7 @@ export interface TeamWithGap extends TeamWithStandings {
   gapDec: string;
   gapNum: number;
   // Live scoring data
+  weeklyScore?: number;
   yetToPlay?: number;
   inProgress?: number;
   // Supports both old API (string[]) and new API (PlayerInfo[])
