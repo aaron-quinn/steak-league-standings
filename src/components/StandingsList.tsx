@@ -95,12 +95,25 @@ function PlayerPopover({
 
   if (!anchorRect) return null;
 
-  // Position the popover below and to the left of the anchor
+  // Estimate popover height based on content
+  const estimatedHeight =
+    80 + // base padding, header
+    (hasInProgress ? 24 + sortedInProgress.length * 20 : 0) +
+    (hasYetToPlay ? 24 + sortedYetToPlay.length * 20 : 0);
+
+  // Check if there's enough space below the anchor
+  const spaceBelow = window.innerHeight - anchorRect.bottom;
+  const spaceAbove = anchorRect.top;
+  const showAbove = spaceBelow < estimatedHeight + 8 && spaceAbove > spaceBelow;
+
+  // Position the popover above or below the anchor
   const style: React.CSSProperties = {
     position: 'fixed',
-    top: anchorRect.bottom + 4,
     right: window.innerWidth - anchorRect.right,
     zIndex: 50,
+    ...(showAbove
+      ? { bottom: window.innerHeight - anchorRect.top + 4 }
+      : { top: anchorRect.bottom + 4 }),
   };
 
   return createPortal(
