@@ -250,11 +250,29 @@ function RemainingPlayersIndicator({
     };
   }, [isOpen]);
 
-  if (remaining === 0) return null;
-
   // Calculate percentages for the progress bar
   const completedPct = (completed / totalSlots) * 100;
   const inProgressPct = (inProgress / totalSlots) * 100;
+
+  // Show "Final" when all players have completed
+  if (remaining === 0) {
+    const finalTextColor = {
+      eater: 'text-emerald-600/70',
+      buyer: 'text-red-600/70',
+      'self-buyer': 'text-gray-500',
+    }[variant];
+
+    return (
+      <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2 py-1">
+        <span
+          className={`w-10 sm:w-16 lg:w-20 text-[10px] sm:text-xs ${finalTextColor} font-medium text-center`}
+        >
+          Final
+        </span>
+        <span className="w-4 sm:w-5" />
+      </div>
+    );
+  }
 
   return (
     <>
