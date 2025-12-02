@@ -2,6 +2,7 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import SteakHistory from './SteakHistory';
 import ChampionsList from './ChampionsList';
+import WeeklyScoreRanking from './WeeklyScoreRanking';
 
 type Tab = 'steaks' | 'champions';
 
@@ -34,7 +35,16 @@ export default function HistoryTabs() {
           Champions
         </button>
       </div>
-      <div>{activeTab === 'steaks' ? <SteakHistory /> : <ChampionsList />}</div>
+      <div>
+        {activeTab === 'steaks' ? (
+          <>
+            <SteakHistory />
+            <WeeklyScoreRanking />
+          </>
+        ) : (
+          <ChampionsList />
+        )}
+      </div>
     </div>
   );
 }
