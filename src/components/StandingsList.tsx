@@ -278,7 +278,7 @@ function RemainingPlayersIndicator({
     const weeklyScore = team.weeklyScore ?? 0;
 
     return (
-      <div className="flex items-center justify-center gap-1 sm:gap-1.5 px-1 sm:px-2 py-1 w-[72px] sm:w-[104px] lg:w-[120px]">
+      <div className="flex items-center justify-center gap-1 sm:gap-1.5 px-1 sm:px-2 py-1 w-[72px] sm:w-[104px] lg:w-[124px]">
         <span className={`text-[8px] sm:text-xs ${finalTextColor} font-medium`}>
           Final
         </span>
