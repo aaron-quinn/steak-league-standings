@@ -867,7 +867,7 @@ export default function getManagers(): Manager[] {
       },
     },
     {
-      name: 'Joe Bartel',
+      name: 'Joe Bartel 🪦',
       teams: {
         2025: {
           league: 'LA',
