@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import StandingsList from '../components/StandingsList';
 import PlayoffLists from '../components/PlayoffLists';
 import HistoryTabs from '../components/HistoryTabs';
+import WeeklyScoreRanking from '../components/WeeklyScoreRanking';
 import LeagueLogo from '../components/LeagueLogo';
 import ViewSwitcher from '../components/ViewSwitcher';
 import LoadingScreen from '../components/LoadingScreen';
@@ -59,8 +60,15 @@ export default function MainView({ live }: MainViewProps) {
             {/* Playoffs (priority 2) */}
             {!live && <PlayoffLists />}
 
-            {/* Steak History & Champions (tabbed) */}
-            <HistoryTabs />
+            {/* Weekly Score Ranking for Live View */}
+            {live && (
+              <div className="rounded-lg border border-gray-800/60 bg-gray-950/30">
+                <WeeklyScoreRanking />
+              </div>
+            )}
+
+            {/* Steak History & Champions (tabbed) - Hidden during live view */}
+            {!live && <HistoryTabs />}
           </div>
         </div>
       </div>

@@ -43,7 +43,7 @@ export default function WeeklyScoreRanking() {
   if (ranking.length === 0) return null;
 
   return (
-    <div className="mt-4 border-t border-gray-800/60 pt-4">
+    <div className="py-3">
       <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-2 sm:px-3">
         Weekly Leaders
       </h3>
@@ -51,7 +51,7 @@ export default function WeeklyScoreRanking() {
         {ranking.map((item, index) => (
           <div
             key={item.name}
-            className="flex items-center justify-between px-2 sm:px-3 py-1 text-xs hover:bg-white/5 rounded transition-colors"
+            className="flex items-center justify-between px-2 sm:px-3 py-1 gap-x-4 text-xs hover:bg-white/5 rounded transition-colors"
           >
             <div className="flex items-center gap-2 sm:gap-3">
               <span className="text-gray-500 w-3 sm:w-4 text-right font-mono text-[10px] sm:text-xs">
@@ -61,9 +61,9 @@ export default function WeeklyScoreRanking() {
                 {item.name}
               </span>
             </div>
-            <span className="font-mono text-emerald-400">
+            <div className="font-mono text-emerald-400">
               {item.score.toFixed(2)}
-            </span>
+            </div>
           </div>
         ))}
       </div>

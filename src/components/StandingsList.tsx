@@ -348,7 +348,7 @@ export default function StandingsList() {
   const year = useStandingsStore((state) => state.year);
   const live = useStandingsStore((state) => state.live);
 
-  const { teamsWithGap, steakLineTeam, selfBuyerSpot } = useMemo(() => {
+  const { teamsWithGap, steakLineTeam, selfBuyerSpot, shouldShowRemainingPlayers } = useMemo(() => {
     const managers = getManagers();
 
     const steakTeams = managers
@@ -437,12 +437,22 @@ export default function StandingsList() {
       1,
     );
 
+    // Check if all teams are final with a score of 0
+    const allTeamsFinalWithZeroScore = withGap.every((team) => {
+      const yetToPlay = team.yetToPlay || 0;
+      const inProgress = team.inProgress || 0;
+      const remaining = yetToPlay + inProgress;
+      const weeklyScore = team.weeklyScore ?? 0;
+      return remaining === 0 && weeklyScore === 0;
+    });
+
     return {
       teamsWithGap: withGap,
       steakLineTeam: steakLine,
       selfBuyerSpot: selfBuyer,
       maxPositiveGap,
       maxNegativeGap,
+      shouldShowRemainingPlayers: !allTeamsFinalWithZeroScore,
     };
   }, [standings, year]);
 
@@ -499,7 +509,7 @@ export default function StandingsList() {
                       .{team.gapDec}
                     </span>
                   </span>
-                  {live && (
+                  {live && shouldShowRemainingPlayers && (
                     <RemainingPlayersIndicator team={team} variant="eater" />
                   )}
                 </div>
@@ -546,7 +556,7 @@ export default function StandingsList() {
                 <span className="w-14 sm:w-20 lg:w-24 text-right text-xs sm:text-sm lg:text-base tabular-nums text-gray-500 font-semibold">
                   —
                 </span>
-                {live && (
+                {live && shouldShowRemainingPlayers && (
                   <RemainingPlayersIndicator
                     team={teamsWithGap[steakLineTeam]}
                     variant="self-buyer"
@@ -615,7 +625,7 @@ export default function StandingsList() {
                         .{team.gapDec}
                       </span>
                     </span>
-                    {live && (
+                    {live && shouldShowRemainingPlayers && (
                       <RemainingPlayersIndicator team={team} variant="buyer" />
                     )}
                   </div>
