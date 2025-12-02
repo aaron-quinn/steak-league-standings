@@ -28,7 +28,7 @@ export default function getPlayoffsSlots({
     .sort(sortByRecord);
 
   const divisionWinners = [division1[0], division2[0]]
-    .sort(sortByPts)
+    .sort(sortByRecord)
     .map((t) => t.name);
 
   let nonDivisionWinners = [...division1, ...division2]
