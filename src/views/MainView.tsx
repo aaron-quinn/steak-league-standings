@@ -8,7 +8,7 @@ import LeagueLogo from '../components/LeagueLogo';
 import ViewSwitcher from '../components/ViewSwitcher';
 import LoadingScreen from '../components/LoadingScreen';
 import { useStandingsStore } from '../stores/standings';
-import { getStandings } from '../api';
+import { getStandings, getWeek } from '../api';
 
 interface MainViewProps {
   live: boolean;
@@ -27,6 +27,14 @@ export default function MainView({ live }: MainViewProps) {
     queryKey: ['standings', year, live],
     queryFn: () => getStandings(standingsAPIURL),
   });
+
+  const { data: weekData } = useQuery({
+    queryKey: ['week', year],
+    queryFn: () => getWeek(year),
+    enabled: live,
+  });
+
+  const currentWeek = weekData?.week;
 
   useEffect(() => {
     if (standings) {
@@ -57,14 +65,16 @@ export default function MainView({ live }: MainViewProps) {
 
           {/* Secondary column - Playoffs & History */}
           <div className="lg:col-span-5 xl:col-span-4 space-y-4">
-            {/* Playoffs (priority 2) */}
-            {!live && <PlayoffLists />}
-
             {/* Weekly Score Ranking for Live View */}
             {live && (
               <div className="rounded-lg border border-gray-800/60 bg-gray-950/30">
                 <WeeklyScoreRanking />
               </div>
+            )}
+
+            {/* Playoffs (priority 2) */}
+            {(!live || (live && currentWeek && currentWeek <= 14)) && (
+              <PlayoffLists />
             )}
 
             {/* Steak History & Champions (tabbed) - Hidden during live view */}

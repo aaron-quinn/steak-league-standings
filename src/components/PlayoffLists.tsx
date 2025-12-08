@@ -11,6 +11,7 @@ type League = 'madison' | 'la';
 export default function PlayoffLists() {
   const standings = useStandingsStore((state) => state.standings);
   const year = useStandingsStore((state) => state.year);
+  const live = useStandingsStore((state) => state.live);
 
   const { playoffsMadison, playoffsLA, bubbleMadison, bubbleLA } =
     useMemo(() => {
@@ -100,14 +101,25 @@ export default function PlayoffLists() {
           LA
         </button>
       </div>
+      {live && (
+        <div className="bg-blue-950/10 border-b border-gray-800/60 px-3 py-2 text-center">
+          <p className="text-[10px] sm:text-xs text-gray-500/80 italic leading-tight max-w-[300px] text-pretty mx-auto">
+            These standings assume whoever is currently winning their matchup
+            will bank a win.
+          </p>
+        </div>
+      )}
       <div>
         {activeLeague === 'madison' ? (
           <PlayoffList
             playoffTeams={playoffsMadison}
-            bubbleTeams={bubbleMadison}
+            bubbleTeams={live ? [] : bubbleMadison}
           />
         ) : (
-          <PlayoffList playoffTeams={playoffsLA} bubbleTeams={bubbleLA} />
+          <PlayoffList
+            playoffTeams={playoffsLA}
+            bubbleTeams={live ? [] : bubbleLA}
+          />
         )}
       </div>
     </div>

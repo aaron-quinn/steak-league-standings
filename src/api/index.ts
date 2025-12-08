@@ -13,6 +13,11 @@ export async function getStandings(url: string): Promise<StandingsData> {
   return data;
 }
 
+export async function getWeek(year: number): Promise<{ week: number }> {
+  const { data } = await api.get<{ week: number }>(`/week/${year}`);
+  return data;
+}
+
 export default {
   getData: getStandings,
 };

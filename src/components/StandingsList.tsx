@@ -348,7 +348,12 @@ export default function StandingsList() {
   const year = useStandingsStore((state) => state.year);
   const live = useStandingsStore((state) => state.live);
 
-  const { teamsWithGap, steakLineTeam, selfBuyerSpot, shouldShowRemainingPlayers } = useMemo(() => {
+  const {
+    teamsWithGap,
+    steakLineTeam,
+    selfBuyerSpot,
+    shouldShowRemainingPlayers,
+  } = useMemo(() => {
     const managers = getManagers();
 
     const steakTeams = managers
