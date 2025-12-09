@@ -70,14 +70,12 @@ export default function SteakHistory() {
                 </span>
               ))}
               {manager.missedSteaks.map((_, i) => (
-                <span key={`missed-${i}`} className="opacity-15">
-                  🥩
+                <span key={`missed-${i}`} className="opacity-40">
+                  🪦
                 </span>
               ))}
             </div>
-            <div
-              className="text-xs sm:text-sm flex items-center gap-1 sm:gap-1.5 text-gray-400"
-            >
+            <div className="text-xs sm:text-sm flex items-center gap-1 sm:gap-1.5 text-gray-400">
               <span className="truncate">{manager.name.split(' ')[1]}</span>
               <span className="text-blue-400/50 text-[10px] sm:text-xs font-mono shrink-0">
                 {Math.round(
