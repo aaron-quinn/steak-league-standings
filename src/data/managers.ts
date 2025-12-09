@@ -205,7 +205,7 @@ export default function getManagers(): Manager[] {
       },
     },
     {
-      name: 'Ryan Pohle',
+      name: 'Ryan Pohle 🪦',
       teams: {
         2025: {
           league: 'Madison',

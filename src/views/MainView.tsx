@@ -31,7 +31,6 @@ export default function MainView({ live }: MainViewProps) {
   const { data: weekData } = useQuery({
     queryKey: ['week', year],
     queryFn: () => getWeek(year),
-    enabled: live,
   });
 
   const currentWeek = weekData?.week;
@@ -73,9 +72,7 @@ export default function MainView({ live }: MainViewProps) {
             )}
 
             {/* Playoffs (priority 2) */}
-            {(!live || (live && currentWeek && currentWeek <= 14)) && (
-              <PlayoffLists />
-            )}
+            {currentWeek && currentWeek < 15 && <PlayoffLists />}
 
             {/* Steak History & Champions (tabbed) - Hidden during live view */}
             {!live && <HistoryTabs />}

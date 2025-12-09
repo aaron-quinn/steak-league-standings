@@ -62,8 +62,8 @@ export default function SteakHistory() {
     <div className="w-full antialiased py-1.5 sm:py-2">
       <div className="grid grid-cols-[auto_1fr] gap-x-2 sm:gap-x-4 gap-y-0.5 sm:gap-y-1 px-2 sm:px-3">
         {managersList.map((manager) => (
-          <>
-            <div key={`${manager.name}-steaks`} className="text-xs sm:text-sm">
+          <div key={manager.name} className="contents">
+            <div className="text-xs sm:text-sm">
               {[...Array(manager.numSteaks)].map((_, i) => (
                 <span key={`steak-${i}`} className="opacity-70">
                   🥩
@@ -76,7 +76,6 @@ export default function SteakHistory() {
               ))}
             </div>
             <div
-              key={`${manager.name}-info`}
               className="text-xs sm:text-sm flex items-center gap-1 sm:gap-1.5 text-gray-400"
             >
               <span className="truncate">{manager.name.split(' ')[1]}</span>
@@ -88,7 +87,7 @@ export default function SteakHistory() {
                 %
               </span>
             </div>
-          </>
+          </div>
         ))}
       </div>
     </div>
