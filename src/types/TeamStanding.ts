@@ -2,7 +2,11 @@
 export interface PlayerInfo {
   name: string;
   position: string;
+  team?: string;
   gameTime?: string;
+  kickoffUTC?: number;
+  opponentDisplay?: string;
+  score?: string;
 }
 
 // Team data from API standings response

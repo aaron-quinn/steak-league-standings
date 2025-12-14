@@ -1,17 +1,22 @@
 import clsx from 'clsx';
-import { useStandingsStore } from '../stores/standings';
 
 export default function ViewSwitcher() {
-  const live = useStandingsStore((state) => state.live);
+  const currentPage =
+    window.location.pathname.split('/').filter(Boolean).pop() || '';
 
   const tabs = [
     {
       name: 'Official',
       fullName: 'Official Standings',
       href: '/',
-      current: !live,
+      current: currentPage === '',
     },
-    { name: 'Live', fullName: 'Live Standings', href: '/live', current: live },
+    {
+      name: 'Live',
+      fullName: 'Live Standings',
+      href: '/live',
+      current: currentPage === 'live',
+    },
   ];
 
   return (
