@@ -7,9 +7,11 @@ export interface PlayerInfo {
   team?: string;
   gameTime?: string;
   kickoffUTC?: number;
+  secondsRemaining?: number;
   opponentDisplay?: string;
   score?: string;
   isCompleted?: boolean;
+  inProgress?: boolean;
 }
 
 // Team data from API standings response
