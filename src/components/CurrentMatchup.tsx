@@ -45,10 +45,11 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
     if (!team1) return allPlayers;
 
     ['yetToPlayNames', 'inProgressNames', 'completedNames'].forEach((key) => {
-      allPlayers = [
-        ...allPlayers,
-        ...(team1[key as keyof TeamMatchup] as PlayerInfo[]),
-      ];
+      const players = (team1[key as keyof TeamMatchup] as PlayerInfo[]).map(
+        (player) =>
+          key === 'completedNames' ? { ...player, isCompleted: true } : player,
+      );
+      allPlayers = [...allPlayers, ...players];
     });
 
     return allPlayers.sort((a, b) => {
@@ -72,10 +73,11 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
     if (!team2) return allPlayers;
 
     ['yetToPlayNames', 'inProgressNames', 'completedNames'].forEach((key) => {
-      allPlayers = [
-        ...allPlayers,
-        ...(team2[key as keyof TeamMatchup] as PlayerInfo[]),
-      ];
+      const players = (team2[key as keyof TeamMatchup] as PlayerInfo[]).map(
+        (player) =>
+          key === 'completedNames' ? { ...player, isCompleted: true } : player,
+      );
+      allPlayers = [...allPlayers, ...players];
     });
 
     return allPlayers.sort((a, b) => {
@@ -98,27 +100,27 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
       <div className="flex flex-row justify-between px-3 mb-4 gap-4 lg:gap-6">
         <div className="flex flex-1 flex-row justify-between items-center">
           <div className="flex flex-col">
-            <div className="text-xs sm:text-lg font-semibold">
+            <div className="text-xs sm:text-sm md:text-lg font-semibold">
               {manager1 ? manager1.name : 'Unknown Manager'}
             </div>
-            <div className="text-[10px] sm:text-base text-gray-400">
+            <div className="text-[10px] sm:text-xs md:text-base text-gray-400">
               Yet to play: {team1 ? team1.yetToPlay : 'N/A'}
             </div>
           </div>
-          <div className="text-sm sm:text-2xl font-bold">
+          <div className="text-sm sm:text-lg md:text-2xl font-bold">
             {team1 ? Number(team1.score).toFixed(1) : '-'}
           </div>
         </div>
         {team2 && (
           <div className="flex flex-1 flex-row justify-between items-center text-right">
-            <div className="text-sm sm:text-2xl font-bold">
+            <div className="text-sm sm:text-lg md:text-2xl font-bold">
               {team2 ? Number(team2.score).toFixed(1) : '-'}
             </div>
             <div className="flex flex-col">
-              <div className="text-xs sm:text-lg font-semibold">
+              <div className="text-xs sm:text-sm md:text-lg font-semibold">
                 {manager2 ? manager2.name : 'Unknown Manager'}
               </div>
-              <div className="text-[10px] sm:text-base text-gray-400">
+              <div className="text-[10px] sm:text-xs md:text-base text-gray-400">
                 Yet to play: {team2 ? team2.yetToPlay : 'N/A'}
               </div>
             </div>
@@ -139,29 +141,35 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
                 >
                   <div className="flex flex-col gap-1">
                     <div className="flex flex-row items-end leading-none sm:leading-[28px] gap-x-1 text-[10px] sm:text-sm font-semibold">
-                      <span className="block sm:hidden">
-                        {player.name.split(' ').length === 2
-                          ? `${player.name.split(' ')[0][0]}. ${player.name.split(' ')[1]}`
+                      <span className="block md:hidden">
+                        {player.firstName && player.lastName
+                          ? `${player.firstName[0]}. ${player.lastName}`
                           : player.name}
                       </span>
-                      <span className="hidden sm:inline">{player.name}</span>{' '}
+                      <span className="hidden md:inline">{player.name}</span>{' '}
                       <span className="text-[8px] sm:text-[10px] font-normal">
                         {player.team} {player.position}
                       </span>
                     </div>
-                    {player.kickoffUTC && (
+                    {player.isCompleted ? (
                       <div className="text-[10px] sm:text-xs text-gray-400">
-                        {new Date(player.kickoffUTC * 1000).toLocaleString(
-                          'en-US',
-                          {
-                            weekday: 'short',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true,
-                          },
-                        )}{' '}
-                        {player.opponentDisplay}
+                        Final
                       </div>
+                    ) : (
+                      player.kickoffUTC && (
+                        <div className="text-[10px] sm:text-xs text-gray-400">
+                          {new Date(player.kickoffUTC * 1000).toLocaleString(
+                            'en-US',
+                            {
+                              weekday: 'short',
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              hour12: true,
+                            },
+                          )}{' '}
+                          {player.opponentDisplay}
+                        </div>
+                      )
                     )}
                   </div>
                   <div className="text-xs sm:text-base font-bold">
@@ -189,12 +197,12 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
                 >
                   <div className="flex flex-col gap-1">
                     <div className="flex flex-row items-end leading-none sm:leading-[28px] gap-x-1 text-[10px] sm:text-sm font-semibold">
-                      <span className="block sm:hidden">
-                        {player.name.split(' ').length === 2
-                          ? `${player.name.split(' ')[0][0]}. ${player.name.split(' ')[1]}`
+                      <span className="block md:hidden">
+                        {player.firstName && player.lastName
+                          ? `${player.firstName[0]}. ${player.lastName}`
                           : player.name}
                       </span>
-                      <span className="hidden sm:inline">{player.name}</span>{' '}
+                      <span className="hidden md:inline">{player.name}</span>{' '}
                       <span className="text-[8px] sm:text-[10px] font-normal">
                         {player.team} {player.position}
                       </span>
@@ -244,29 +252,35 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
                     </div>
                     <div className="flex flex-col gap-1 items-end text-right">
                       <div className="flex flex-row items-end leading-none sm:leading-[28px] gap-x-1 text-[10px] sm:text-sm font-semibold">
-                        <span className="block sm:hidden">
-                          {player.name.split(' ').length === 2
-                            ? `${player.name.split(' ')[0][0]}. ${player.name.split(' ')[1]}`
+                        <span className="block md:hidden">
+                          {player.firstName && player.lastName
+                            ? `${player.firstName[0]}. ${player.lastName}`
                             : player.name}
                         </span>
-                        <span className="hidden sm:inline">{player.name}</span>{' '}
+                        <span className="hidden md:inline">{player.name}</span>{' '}
                         <span className="text-[8px] sm:text-[10px] font-normal">
                           {player.team} {player.position}
                         </span>
                       </div>
-                      {player.kickoffUTC && (
+                      {player.isCompleted ? (
                         <div className="text-[10px] sm:text-xs text-gray-400">
-                          {new Date(player.kickoffUTC * 1000).toLocaleString(
-                            'en-US',
-                            {
-                              weekday: 'short',
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              hour12: true,
-                            },
-                          )}{' '}
-                          {player.opponentDisplay}
+                          Final
                         </div>
+                      ) : (
+                        player.kickoffUTC && (
+                          <div className="text-[10px] sm:text-xs text-gray-400">
+                            {new Date(player.kickoffUTC * 1000).toLocaleString(
+                              'en-US',
+                              {
+                                weekday: 'short',
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true,
+                              },
+                            )}{' '}
+                            {player.opponentDisplay}
+                          </div>
+                        )
                       )}
                     </div>
                   </li>
@@ -295,12 +309,12 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
                   </div>
                   <div className="flex flex-col gap-1 items-end text-right">
                     <div className="flex flex-row items-end leading-none sm:leading-[28px] gap-x-1 text-[10px] sm:text-sm font-semibold">
-                      <span className="block sm:hidden">
-                        {player.name.split(' ').length === 2
-                          ? `${player.name.split(' ')[0][0]}. ${player.name.split(' ')[1]}`
+                      <span className="block md:hidden">
+                        {player.firstName && player.lastName
+                          ? `${player.firstName[0]}. ${player.lastName}`
                           : player.name}
                       </span>
-                      <span className="hidden sm:inline">{player.name}</span>{' '}
+                      <span className="hidden md:inline">{player.name}</span>{' '}
                       <span className="text-[8px] sm:text-[10px] font-normal">
                         {player.team} {player.position}
                       </span>
