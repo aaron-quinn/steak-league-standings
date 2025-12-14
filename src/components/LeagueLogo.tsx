@@ -9,6 +9,14 @@ export default function LeagueLogo() {
       <h1 className="text-blue-100 text-sm sm:text-base lg:text-xl font-medium tracking-wide whitespace-nowrap">
         Steak League
       </h1>
+      <a
+        href="/matchups"
+        title="Iceman was here"
+        className="opacity-70 text-xs sm:text-base lg:text-lg"
+        role="link"
+      >
+        ⚔️
+      </a>
     </div>
   );
 }

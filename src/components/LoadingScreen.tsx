@@ -1,4 +1,8 @@
-export default function LoadingScreen() {
+interface Props {
+  title?: string;
+}
+
+export default function LoadingScreen({ title }: Props) {
   return (
     <div
       className="h-screen bg-gray-950 text-gray-300 flex items-center justify-center p-8 antialiased"
@@ -14,7 +18,7 @@ export default function LoadingScreen() {
           alt="Steak League"
         />
         <div className="text-center mt-8 mb-4 md:mb-6 font-medium text-2xl md:text-3xl text-gray-300">
-          Loading Standings...
+          {title || 'Loading Standings...'}
         </div>
         <p className="text-base md:text-lg font-light text-gray-400 text-center">
           This can take a while due to this site being hosted on a free plan
