@@ -1,12 +1,15 @@
 // Player info for live scoring
 export interface PlayerInfo {
   name: string;
+  firstName?: string;
+  lastName?: string;
   position: string;
   team?: string;
   gameTime?: string;
   kickoffUTC?: number;
   opponentDisplay?: string;
   score?: string;
+  isCompleted?: boolean;
 }
 
 // Team data from API standings response
