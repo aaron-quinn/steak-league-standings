@@ -179,8 +179,8 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
               return (
                 <li
                   key={player.name}
-                  className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg bg-gray-900/80 ${
-                    player.inProgress ? 'bg-blue-400/20' : ''
+                  className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg ${
+                    player.inProgress ? 'bg-blue-400/20' : 'bg-gray-900/80'
                   }`}
                   // ${
                   //   player.gameInfo?.inRedZone
@@ -261,8 +261,8 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
               return (
                 <li
                   key={player.name}
-                  className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg bg-gray-900/80 ${
-                    player.inProgress ? 'bg-blue-400/20' : ''
+                  className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg ${
+                    player.inProgress ? 'bg-blue-400/20' : 'bg-gray-900/80'
                   }`}
                 >
                   <div className="flex flex-col gap-1">
@@ -333,8 +333,8 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
                 return (
                   <li
                     key={player.name}
-                    className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg bg-gray-900/80 ${
-                      player.inProgress ? 'bg-blue-400/20' : ''
+                    className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg ${
+                      player.inProgress ? 'bg-blue-400/20' : 'bg-gray-900/80'
                     }`}
                   >
                     <div className="text-xs sm:text-base font-bold">
@@ -408,8 +408,8 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
                 return (
                   <li
                     key={player.name}
-                    className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg bg-gray-900/80 ${
-                      player.inProgress ? 'bg-blue-400/20' : ''
+                    className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg ${
+                      player.inProgress ? 'bg-blue-400/20' : 'bg-gray-900/80'
                     }`}
                   >
                     <div className="text-xs sm:text-base font-bold">
