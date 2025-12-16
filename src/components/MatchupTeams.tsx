@@ -29,7 +29,7 @@ export default function MatchupTeams({
         </div>
         <div className="text-[10px] leading-tight sm:text-xs text-gray-100 font-bold">
           {Number(team.score).toFixed(1)}
-          {team.yetToPlay === 0 && ' F'}
+          {team.yetToPlay === 0 && team.inProgress == 0 && ' F'}
         </div>
       </div>
     );
