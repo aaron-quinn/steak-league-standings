@@ -1,6 +1,6 @@
 import TeamMatchup, { PlayerInfo } from '@/types/TeamMatchup';
-import { getNflQuarterAndTime } from '@/utils/calculate-game-clock';
 import { useMemo } from 'react';
+import CurrentMatchupPlayer from './CurrentMatchupPlayer';
 
 // Position sort order: QB, RB, WR, TE, K/PK, then IDPs
 const POSITION_ORDER: Record<string, number> = {
@@ -170,76 +170,12 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
             className="flex flex-col gap-2"
           >
             {team1Starters.map((player) => {
-              const gameInfo = player.gameInfo || {};
-              const kickoffUTC = gameInfo.kickoff || null;
-              const gameSecondsRemaining = gameInfo.gameSecondsRemaining || 0;
-              const { quarter, quarterTime } =
-                getNflQuarterAndTime(gameSecondsRemaining);
-              const opponentDisplay = gameInfo.opponentDisplay || '';
               return (
-                <li
+                <CurrentMatchupPlayer
                   key={player.name}
-                  className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg ${
-                    player.inProgress ? 'bg-blue-400/20' : 'bg-gray-900/80'
-                  }`}
-                  // ${
-                  //   player.gameInfo?.inRedZone
-                  //     ? 'bg-red-600/20 border-red-800/80'
-                  //     : player.gameInfo?.hasPossession
-                  //       ? 'bg-blue-600/20 border-blue-400/40'
-                  //       : player.inProgress
-                  //         ? 'bg-blue-400/20 border-blue-400/20'
-                  //         : 'border-gray-900/80'
-                  // }
-                >
-                  <div className="flex flex-col gap-1">
-                    <div className="flex flex-row items-end leading-none sm:leading-[28px] gap-x-1 text-[10px] sm:text-sm font-semibold">
-                      <span className="block md:hidden">
-                        {player.firstName && player.lastName
-                          ? `${player.firstName[0]}. ${player.lastName}`
-                          : player.name}
-                      </span>
-                      <span className="hidden md:inline">{player.name}</span>{' '}
-                      <span className="text-[8px] sm:text-[10px] font-normal">
-                        {player.team} {player.position}
-                      </span>
-                    </div>
-                    {player.isCompleted ? (
-                      <div className="text-[10px] sm:text-xs text-gray-400">
-                        Final
-                      </div>
-                    ) : (
-                      kickoffUTC && (
-                        <div className="text-[10px] sm:text-xs text-gray-400">
-                          {kickoffUTC < Date.now() / 1000 &&
-                          gameSecondsRemaining > 0 ? (
-                            <>
-                              {quarterTime} {quarter} {opponentDisplay}
-                            </>
-                          ) : (
-                            <>
-                              {new Date(kickoffUTC * 1000).toLocaleString(
-                                'en-US',
-                                {
-                                  weekday: 'short',
-                                  hour: 'numeric',
-                                  minute: '2-digit',
-                                  hour12: true,
-                                },
-                              )}{' '}
-                              {opponentDisplay}
-                            </>
-                          )}
-                        </div>
-                      )
-                    )}
-                  </div>
-                  <div className="text-xs sm:text-base font-bold">
-                    {kickoffUTC && kickoffUTC < Date.now() / 1000
-                      ? player.score
-                      : '-'}
-                  </div>
-                </li>
+                  player={player}
+                  isTeam2={false}
+                />
               );
             })}
           </ul>
@@ -252,67 +188,12 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
             className="flex flex-col gap-2"
           >
             {team1Bench.map((player) => {
-              const gameInfo = player.gameInfo || {};
-              const kickoffUTC = gameInfo.kickoff || null;
-              const gameSecondsRemaining = gameInfo.gameSecondsRemaining || 0;
-              const { quarter, quarterTime } =
-                getNflQuarterAndTime(gameSecondsRemaining);
-              const opponentDisplay = gameInfo.opponentDisplay || '';
               return (
-                <li
+                <CurrentMatchupPlayer
                   key={player.name}
-                  className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg ${
-                    player.inProgress ? 'bg-blue-400/20' : 'bg-gray-900/80'
-                  }`}
-                >
-                  <div className="flex flex-col gap-1">
-                    <div className="flex flex-row items-end leading-none sm:leading-[28px] gap-x-1 text-[10px] sm:text-sm font-semibold">
-                      <span className="block md:hidden">
-                        {player.firstName && player.lastName
-                          ? `${player.firstName[0]}. ${player.lastName}`
-                          : player.name}
-                      </span>
-                      <span className="hidden md:inline">{player.name}</span>{' '}
-                      <span className="text-[8px] sm:text-[10px] font-normal">
-                        {player.team} {player.position}
-                      </span>
-                    </div>
-                    {player.isCompleted ? (
-                      <div className="text-[10px] sm:text-xs text-gray-400">
-                        Final
-                      </div>
-                    ) : (
-                      kickoffUTC && (
-                        <div className="text-[10px] sm:text-xs text-gray-400">
-                          {kickoffUTC < Date.now() / 1000 &&
-                          gameSecondsRemaining > 0 ? (
-                            <>
-                              {quarterTime} {quarter} {opponentDisplay}
-                            </>
-                          ) : (
-                            <>
-                              {new Date(kickoffUTC * 1000).toLocaleString(
-                                'en-US',
-                                {
-                                  weekday: 'short',
-                                  hour: 'numeric',
-                                  minute: '2-digit',
-                                  hour12: true,
-                                },
-                              )}{' '}
-                              {opponentDisplay}
-                            </>
-                          )}
-                        </div>
-                      )
-                    )}
-                  </div>
-                  <div className="text-xs sm:text-base font-bold">
-                    {kickoffUTC && kickoffUTC < Date.now() / 1000
-                      ? player.score
-                      : '-'}
-                  </div>
-                </li>
+                  player={player}
+                  isTeam2={false}
+                />
               );
             })}
           </ul>
@@ -324,67 +205,12 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
               className="flex flex-col gap-2"
             >
               {team2Starters.map((player) => {
-                const gameInfo = player.gameInfo || {};
-                const kickoffUTC = gameInfo.kickoff || null;
-                const gameSecondsRemaining = gameInfo.gameSecondsRemaining || 0;
-                const { quarter, quarterTime } =
-                  getNflQuarterAndTime(gameSecondsRemaining);
-                const opponentDisplay = gameInfo.opponentDisplay || '';
                 return (
-                  <li
+                  <CurrentMatchupPlayer
                     key={player.name}
-                    className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg ${
-                      player.inProgress ? 'bg-blue-400/20' : 'bg-gray-900/80'
-                    }`}
-                  >
-                    <div className="text-xs sm:text-base font-bold">
-                      {kickoffUTC && kickoffUTC < Date.now() / 1000
-                        ? player.score
-                        : '-'}
-                    </div>
-                    <div className="flex flex-col gap-1 items-end text-right">
-                      <div className="flex flex-row items-end leading-none sm:leading-[28px] gap-x-1 text-[10px] sm:text-sm font-semibold">
-                        <span className="block md:hidden">
-                          {player.firstName && player.lastName
-                            ? `${player.firstName[0]}. ${player.lastName}`
-                            : player.name}
-                        </span>
-                        <span className="hidden md:inline">{player.name}</span>{' '}
-                        <span className="text-[8px] sm:text-[10px] font-normal">
-                          {player.team} {player.position}
-                        </span>
-                      </div>
-                      {player.isCompleted ? (
-                        <div className="text-[10px] sm:text-xs text-gray-400">
-                          Final
-                        </div>
-                      ) : (
-                        kickoffUTC && (
-                          <div className="text-[10px] sm:text-xs text-gray-400">
-                            {kickoffUTC < Date.now() / 1000 &&
-                            gameSecondsRemaining > 0 ? (
-                              <>
-                                {quarterTime} {quarter} {opponentDisplay}
-                              </>
-                            ) : (
-                              <>
-                                {new Date(kickoffUTC * 1000).toLocaleString(
-                                  'en-US',
-                                  {
-                                    weekday: 'short',
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                    hour12: true,
-                                  },
-                                )}{' '}
-                                {opponentDisplay}
-                              </>
-                            )}
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </li>
+                    player={player}
+                    isTeam2={true}
+                  />
                 );
               })}
             </ul>
@@ -399,67 +225,12 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
               className="flex flex-col gap-2"
             >
               {team2Bench.map((player) => {
-                const gameInfo = player.gameInfo || {};
-                const kickoffUTC = gameInfo.kickoff || null;
-                const gameSecondsRemaining = gameInfo.gameSecondsRemaining || 0;
-                const { quarter, quarterTime } =
-                  getNflQuarterAndTime(gameSecondsRemaining);
-                const opponentDisplay = gameInfo.opponentDisplay || '';
                 return (
-                  <li
+                  <CurrentMatchupPlayer
                     key={player.name}
-                    className={`flex flex-row items-center justify-between py-2 px-3 rounded-lg ${
-                      player.inProgress ? 'bg-blue-400/20' : 'bg-gray-900/80'
-                    }`}
-                  >
-                    <div className="text-xs sm:text-base font-bold">
-                      {kickoffUTC && kickoffUTC < Date.now() / 1000
-                        ? player.score
-                        : '-'}
-                    </div>
-                    <div className="flex flex-col gap-1 items-end text-right">
-                      <div className="flex flex-row items-end leading-none sm:leading-[28px] gap-x-1 text-[10px] sm:text-sm font-semibold">
-                        <span className="block md:hidden">
-                          {player.firstName && player.lastName
-                            ? `${player.firstName[0]}. ${player.lastName}`
-                            : player.name}
-                        </span>
-                        <span className="hidden md:inline">{player.name}</span>{' '}
-                        <span className="text-[8px] sm:text-[10px] font-normal">
-                          {player.team} {player.position}
-                        </span>
-                      </div>
-                      {player.isCompleted ? (
-                        <div className="text-[10px] sm:text-xs text-gray-400">
-                          Final
-                        </div>
-                      ) : (
-                        kickoffUTC && (
-                          <div className="text-[10px] sm:text-xs text-gray-400">
-                            {kickoffUTC < Date.now() / 1000 &&
-                            gameSecondsRemaining > 0 ? (
-                              <>
-                                {quarterTime} {quarter} {opponentDisplay}
-                              </>
-                            ) : (
-                              <>
-                                {new Date(kickoffUTC * 1000).toLocaleString(
-                                  'en-US',
-                                  {
-                                    weekday: 'short',
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                    hour12: true,
-                                  },
-                                )}{' '}
-                                {opponentDisplay}
-                              </>
-                            )}
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </li>
+                    player={player}
+                    isTeam2={true}
+                  />
                 );
               })}
             </ul>
