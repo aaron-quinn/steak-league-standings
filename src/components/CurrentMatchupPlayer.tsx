@@ -24,7 +24,7 @@ function CurrentMatchupPlayer({ isTeam2, player }: Props) {
   function PlayerInfo() {
     return (
       <div
-        className={`flex flex-col gap-1 ${isTeam2 ? 'text-right' : 'text-left'}`}
+        className={`flex flex-col gap-1 ${isTeam2 ? 'text-right items-end' : 'text-left'}`}
       >
         <div className="flex flex-row leading-none sm:leading-[28px] gap-x-1 text-[10px] sm:text-sm font-semibold">
           <span className="block md:hidden">
