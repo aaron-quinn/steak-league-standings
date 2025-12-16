@@ -13,13 +13,14 @@ interface PlayerInfo {
   gameInfo: {
     kickoff: number;
     isHome: boolean;
-    opponentTeam: string;
     gameSecondsRemaining: number;
     hasPossession: boolean;
     inRedZone: boolean;
     score: string;
+    shortDownText?: string;
     quarter?: string;
     quarterTime?: string;
+    opponentTeam: string;
     opponentDisplay: string;
   };
 }
