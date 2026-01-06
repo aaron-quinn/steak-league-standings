@@ -31,7 +31,7 @@ export default function SteakHistory() {
     const list: SteakManager[] = steakManagers
       .map((m) => {
         const teams = Object.values(m.teams) as TeamYear[];
-        const teamsWithoutCurrent = teams.slice(0, -1);
+        const teamsWithoutCurrent = teams; // TODO: Set teamsWithoutCurrent to include current year: teams.slice(0, -1)
         const numSteaks = teamsWithoutCurrent.reduce(
           (acc, t) => acc + (t.steak ? 1 : 0),
           0,
