@@ -9,6 +9,7 @@ import ViewSwitcher from '../components/ViewSwitcher';
 import LoadingScreen from '../components/LoadingScreen';
 import { useStandingsStore } from '../stores/standings';
 import { getStandings, getWeek } from '../api';
+import ErrorScreen from '@/components/ErrorScreen';
 
 interface MainViewProps {
   live: boolean;
@@ -23,7 +24,7 @@ export default function MainView({ live }: MainViewProps) {
     ? `/live-standings/${year}`
     : `/standings/${year}`;
 
-  const { data: standings, isLoading } = useQuery({
+  const { data: standings, isLoading, isError } = useQuery({
     queryKey: ['standings', year, live],
     queryFn: () => getStandings(standingsAPIURL),
   });
@@ -42,8 +43,12 @@ export default function MainView({ live }: MainViewProps) {
     setLive(live);
   }, [standings, live, setStandings, setLive]);
 
-  if (isLoading || !standings) {
+  if (isLoading) {
     return <LoadingScreen />;
+  }
+
+  if (isError || !standings) {
+    return <ErrorScreen />
   }
 
   return (
