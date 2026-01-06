@@ -3,7 +3,7 @@ import type { Manager } from '../types/Manager';
 export default function getManagers(): Manager[] {
   const managers: Manager[] = [
     {
-      name: 'Jason Shebilske',
+      name: 'Jason Shebilske 🪦',
       teams: {
         2025: {
           league: 'Madison',
@@ -14,7 +14,7 @@ export default function getManagers(): Manager[] {
       },
     },
     {
-      name: 'Lucas Reller',
+      name: 'Lucas Reller 🪦',
       teams: {
         2025: {
           league: 'Madison',
@@ -31,7 +31,7 @@ export default function getManagers(): Manager[] {
           league: 'Madison',
           division: 'Au Poivre',
           teamID: '0002',
-          steak: false,
+          steak: true,
         },
         2024: {
           league: 'Madison',
@@ -119,7 +119,7 @@ export default function getManagers(): Manager[] {
           league: 'Madison',
           division: 'Filet Mignon',
           teamID: '0010',
-          steak: false,
+          steak: true,
         },
         2024: {
           league: 'Madison',
@@ -170,7 +170,7 @@ export default function getManagers(): Manager[] {
           league: 'Madison',
           division: 'Filet Mignon',
           teamID: '0004',
-          steak: false,
+          steak: true,
         },
         2024: {
           league: 'Madison',
@@ -309,7 +309,7 @@ export default function getManagers(): Manager[] {
           league: 'Madison',
           division: 'Filet Mignon',
           teamID: '0012',
-          steak: false,
+          steak: true,
         },
         2024: {
           league: 'Madison',
@@ -359,7 +359,7 @@ export default function getManagers(): Manager[] {
           league: 'Madison',
           division: 'Au Poivre',
           teamID: '0013',
-          steak: false,
+          steak: true,
         },
         2024: {
           league: 'Madison',
@@ -397,7 +397,7 @@ export default function getManagers(): Manager[] {
           league: 'Madison',
           division: 'Filet Mignon',
           teamID: '0005',
-          steak: false,
+          steak: true,
         },
         2024: {
           league: 'Madison',
@@ -611,7 +611,7 @@ export default function getManagers(): Manager[] {
       },
     },
     {
-      name: 'Jake Letarski',
+      name: 'Jake Letarski 🪦',
       teams: {
         2025: {
           league: 'Madison',
@@ -668,7 +668,7 @@ export default function getManagers(): Manager[] {
           league: 'Madison',
           division: 'Au Poivre',
           teamID: '0009',
-          steak: false,
+          steak: true,
         },
         2024: {
           league: 'Madison',
@@ -685,6 +685,7 @@ export default function getManagers(): Manager[] {
           league: 'LA',
           division: 'Taylors',
           teamID: '0001',
+          champion: true,
         },
         2024: {
           league: 'LA',
@@ -716,7 +717,7 @@ export default function getManagers(): Manager[] {
           league: 'LA',
           division: 'Taylors',
           teamID: '0004',
-          steak: false,
+          steak: true,
         },
         2024: {
           league: 'LA',
@@ -772,7 +773,7 @@ export default function getManagers(): Manager[] {
           league: 'LA',
           division: 'Taylors',
           teamID: '0012',
-          steak: false,
+          steak: true,
         },
         2024: {
           league: 'LA',
@@ -917,7 +918,7 @@ export default function getManagers(): Manager[] {
       },
     },
     {
-      name: 'Mike Doria',
+      name: 'Mike Doria 🪦',
       teams: {
         2025: {
           league: 'LA',
@@ -1006,7 +1007,7 @@ export default function getManagers(): Manager[] {
       },
     },
     {
-      name: 'Herb Ilk',
+      name: 'Herb Ilk 🪦',
       teams: {
         2025: {
           league: 'LA',
