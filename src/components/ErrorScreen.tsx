@@ -1,8 +1,9 @@
 interface Props {
     title?: string;
+    message?: string;
   }
   
-  export default function ErrorScreen({ title }: Props) {
+  export default function ErrorScreen({ title, message }: Props) {
     return (
       <div
         className="h-screen bg-gray-950 text-gray-300 flex items-center justify-center p-8 antialiased"
@@ -19,7 +20,7 @@ interface Props {
             {title || 'Something Went Wrong'}
           </div>
           <p className="text-base md:text-lg font-light text-gray-400 text-center">
-            We were unable to load the standings data. This is probably due to a rate limiting issue. Please try again later.
+            {message || 'We were unable to load the standings data. This is probably due to a rate limiting issue. Please try again later.'}
           </p>
         </div>
       </div>

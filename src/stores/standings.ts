@@ -14,7 +14,7 @@ interface StandingsState {
 }
 
 export const useStandingsStore = create<StandingsState>((set) => ({
-  year: 2025,
+  year: 2026,
   standings: {},
   players: [],
   live: false,

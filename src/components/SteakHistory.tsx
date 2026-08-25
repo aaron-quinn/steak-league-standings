@@ -10,6 +10,11 @@ export default function SteakHistory() {
   const managersList = useMemo(() => {
     const managers = getManagers();
 
+    // Steaks go to the top half of the league, so a season with no steak
+    // winners at all has not been scored yet. Leave it out until it is, or an
+    // unplayed season counts as a missed steak against everyone.
+    const isCurrentSeasonScored = managers.some((m) => m.teams[year]?.steak);
+
     const steakManagers = managers
       .filter((t) => t.teams[year] && 'steak' in t.teams[year])
       .map((t) => {
@@ -30,19 +35,20 @@ export default function SteakHistory() {
 
     const list: SteakManager[] = steakManagers
       .map((m) => {
-        const teams = Object.values(m.teams) as TeamYear[];
-        const teamsWithoutCurrent = teams; // TODO: Set teamsWithoutCurrent to include current year: teams.slice(0, -1)
-        const numSteaks = teamsWithoutCurrent.reduce(
+        const countedTeams = Object.entries(m.teams)
+          .filter(
+            ([teamYear]) => isCurrentSeasonScored || Number(teamYear) !== year,
+          )
+          .map(([, teamYear]) => teamYear) as TeamYear[];
+        const numSteaks = countedTeams.reduce(
           (acc, t) => acc + (t.steak ? 1 : 0),
           0,
         );
         return {
           name: m.name,
           numSteaks,
-          steaks: teamsWithoutCurrent.map((t) => t.steak),
-          missedSteaks: teamsWithoutCurrent.filter(
-            (t) => 'steak' in t && !t.steak,
-          ),
+          steaks: countedTeams.map((t) => t.steak),
+          missedSteaks: countedTeams.filter((t) => 'steak' in t && !t.steak),
           steaksWidth: `${20 * numSteaks}px`,
         };
       })

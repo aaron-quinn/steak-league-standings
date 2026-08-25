@@ -7,6 +7,8 @@ import { getMatchups } from '@/api/matchups';
 import MatchupTeams from '@/components/MatchupTeams';
 import { useEffect, useMemo, useState } from 'react';
 import CurrentMatchup from '@/components/CurrentMatchup';
+import ErrorScreen from '@/components/ErrorScreen';
+import MatchupsPlaceholder from '@/components/MatchupsPlaceholder';
 import getManagers from '@/data/managers';
 import TeamMatchup from '@/types/TeamMatchup';
 
@@ -17,7 +19,11 @@ export default function MatchupView({}: MatchupViewProps) {
 
   const matchupsAPIURL = `/live-matchups/${year}`;
 
-  const { data: matchups, isLoading } = useQuery({
+  const {
+    data: matchups,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['matchups', year],
     queryFn: () => getMatchups(matchupsAPIURL),
   });
@@ -73,9 +79,20 @@ export default function MatchupView({}: MatchupViewProps) {
     return teamMap;
   }, [year]);
 
-  if (isLoading || !matchups) {
+  if (isLoading) {
     return <LoadingScreen title="Loading Matchups..." />;
   }
+
+  if (isError || !matchups) {
+    return (
+      <ErrorScreen
+        title="Matchups Unavailable"
+        message="We were unable to load the matchup data. Please try again later."
+      />
+    );
+  }
+
+  const hasMatchups = matchups.length > 0;
 
   return (
     <div className="bg-black min-h-screen py-3 px-2 sm:py-4 sm:px-3 lg:py-8 lg:px-8">
@@ -88,23 +105,29 @@ export default function MatchupView({}: MatchupViewProps) {
 
         {/* Main content grid */}
         <div className="grid grid-cols-1 gap-4 lg:gap-6">
-          {/* All Possible Matchups */}
-          <MatchupTeams
-            matchups={matchups}
-            managersMap={managersMap}
-            currentMatchup={currentMatchup}
-            setCurrentMatchup={setCurrentMatchup}
-          />
-          {/* Current Matchup View */}
-          {currentMatchup !== null && matchups[currentMatchup] ? (
-            <CurrentMatchup
-              matchup={matchups[currentMatchup]}
-              managersMap={managersMap}
-            />
+          {!hasMatchups ? (
+            <MatchupsPlaceholder />
           ) : (
-            <div className="text-center text-gray-400 py-8">
-              No matchup selected.
-            </div>
+            <>
+              {/* All Possible Matchups */}
+              <MatchupTeams
+                matchups={matchups}
+                managersMap={managersMap}
+                currentMatchup={currentMatchup}
+                setCurrentMatchup={setCurrentMatchup}
+              />
+              {/* Current Matchup View */}
+              {currentMatchup !== null && matchups[currentMatchup] ? (
+                <CurrentMatchup
+                  matchup={matchups[currentMatchup]}
+                  managersMap={managersMap}
+                />
+              ) : (
+                <div className="text-center text-gray-400 py-8">
+                  No matchup selected.
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

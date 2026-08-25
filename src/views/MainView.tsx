@@ -77,7 +77,10 @@ export default function MainView({ live }: MainViewProps) {
             )}
 
             {/* Playoffs (priority 2) */}
-            {currentWeek && currentWeek < 15 && <PlayoffLists />}
+            {/* No games played yet means there is no playoff picture to show */}
+            {currentWeek && currentWeek > 1 && currentWeek < 15 && (
+              <PlayoffLists />
+            )}
 
             {/* Steak History & Champions (tabbed) - Hidden during live view */}
             {!live && <HistoryTabs />}

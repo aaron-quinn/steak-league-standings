@@ -423,7 +423,9 @@ export default function StandingsList() {
         gap: Number(gap) === 0 ? 0 : gap.toFixed(2),
         gapOperator,
         pointsInt: pointsPieces[0],
-        pointsDec: pointsPieces[1],
+        // A whole-number total has no decimal piece, which would render a
+        // dangling "." (e.g. "0." before any games are played)
+        pointsDec: pointsPieces[1] ?? '0',
         gapInt: gapPieces[0],
         gapDec: gapPieces[1],
         gapNum: Math.abs(gap),
