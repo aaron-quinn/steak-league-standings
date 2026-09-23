@@ -1,13 +1,7 @@
-import axios from 'axios';
+import fetchJSON from './fetch-json.js';
 
-const api = axios.create({
-  baseURL: 'https://api.myfantasyleague.com',
-  headers: {
-    'Content-type': 'application/json',
-  },
-});
+const baseURL = 'https://api.myfantasyleague.com';
 
-export default async function getData(url) {
-  const { data } = await api.get(url);
-  return data;
+export default async function getData(url, options) {
+  return fetchJSON(`${baseURL}${url}`, options);
 }

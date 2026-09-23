@@ -1,13 +1,7 @@
-import axios from 'axios';
+import fetchJSON from './fetch-json.js';
 
-const api = axios.create({
-  baseURL: 'https://site.api.espn.com',
-  headers: {
-    'Content-type': 'application/json',
-  },
-});
+const baseURL = 'https://site.api.espn.com';
 
-export default async function getSchedule(url) {
-  const { data } = await api.get(url);
-  return data;
+export default async function getSchedule(url, options) {
+  return fetchJSON(`${baseURL}${url}`, options);
 }

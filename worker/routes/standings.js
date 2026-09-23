@@ -2,9 +2,9 @@ import getStandings from '../api/standings.js';
 import getDefaults from '../utils/get-defaults.js';
 import sortTeamList from '../utils/sort-team-list.js';
 
-export default async function standingsYear(request, reply) {
+export default async function standingsYear(c) {
   const { season: defaultSeason, leagues } = getDefaults();
-  const season = request.params.year || defaultSeason;
+  const season = c.req.param('year') || defaultSeason;
 
   const teamList = {};
 
@@ -22,16 +22,18 @@ export default async function standingsYear(request, reply) {
     // MFL rate limits (429) and getStandings reports that by returning only an
     // error, so `teams` is undefined here rather than carrying an error flag.
     if (standingsError || !teams) {
-      request.log.error(
-        standingsError,
+      console.error(
         `Unable to load ${season} standings for ${league.name}`,
+        standingsError,
       );
-      reply.code(503).send({
-        statusCode: 503,
-        error: 'Service Unavailable',
-        message: `Unable to load standings for the ${season} season.`,
-      });
-      return;
+      return c.json(
+        {
+          statusCode: 503,
+          error: 'Service Unavailable',
+          message: `Unable to load standings for the ${season} season.`,
+        },
+        503,
+      );
     }
 
     Object.entries(teams).forEach((team) => {
@@ -45,5 +47,5 @@ export default async function standingsYear(request, reply) {
     team.points = Math.round(team.points * 10) / 10;
   });
 
-  reply.send(sortTeamList(teamList, 'points'));
+  return c.json(sortTeamList(teamList, 'points'));
 }

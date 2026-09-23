@@ -1,9 +1,9 @@
 import getLiveMatchups from '../api/live-matchups.js';
 import getDefaults from '../utils/get-defaults.js';
 
-export default async function getLiveMatchupsYear(request, reply) {
+export default async function getLiveMatchupsYear(c) {
   const { season: defaultSeason, leagues } = getDefaults();
-  const season = request.params.year || defaultSeason;
+  const season = c.req.param('year') || defaultSeason;
 
   const matchupList = [];
   let unavailable = null;
@@ -21,16 +21,18 @@ export default async function getLiveMatchupsYear(request, reply) {
 
     // An unexpected failure is a real error, not an empty week
     if (error) {
-      request.log.error(
-        error,
+      console.error(
         `Unable to load ${season} matchups for ${league.name}`,
+        error,
       );
-      reply.code(503).send({
-        statusCode: 503,
-        error: 'Service Unavailable',
-        message: `Unable to load matchups for the ${season} season.`,
-      });
-      return;
+      return c.json(
+        {
+          statusCode: 503,
+          error: 'Service Unavailable',
+          message: `Unable to load matchups for the ${season} season.`,
+        },
+        503,
+      );
     }
 
     if (leagueUnavailable) {
@@ -45,8 +47,8 @@ export default async function getLiveMatchupsYear(request, reply) {
   // Before the season starts MFL has no live scoring, so there are no
   // matchups to report yet. That is an empty result, not a failure.
   if (unavailable && matchupList.length === 0) {
-    reply.header('x-matchups-unavailable', unavailable);
+    c.header('x-matchups-unavailable', unavailable);
   }
 
-  reply.send(matchupList);
+  return c.json(matchupList);
 }

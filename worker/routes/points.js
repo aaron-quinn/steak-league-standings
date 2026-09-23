@@ -1,11 +1,11 @@
 import getFantasyPoints from '../api/fantasy-points.js';
 import getDefaults from '../utils/get-defaults.js';
 
-export default async function fantasyPointsYear(request, reply) {
+export default async function fantasyPointsYear(c) {
   const { season: defaultSeason } = getDefaults();
-  const season = request.params.year || defaultSeason;
+  const season = c.req.param('year') || defaultSeason;
 
   const playersWithPoints = await getFantasyPoints({ season });
 
-  reply.send(playersWithPoints);
+  return c.json(playersWithPoints);
 }

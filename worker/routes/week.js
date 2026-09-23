@@ -2,19 +2,22 @@ import getLiveScores from '../api/live-scores.js';
 import getStandings from '../api/standings.js';
 import getDefaults from '../utils/get-defaults.js';
 
-export default async function getWeek(request, reply) {
+export default async function getWeek(c) {
   const { season: defaultSeason, leagues } = getDefaults();
-  const season = request.params.year || defaultSeason;
+  const season = c.req.param('year') || defaultSeason;
   // Just use the first league to get the week
   const league = leagues[0];
 
   const unavailable = (error) => {
-    request.log.error(error, `Unable to determine the week for ${season}`);
-    reply.code(503).send({
-      statusCode: 503,
-      error: 'Service Unavailable',
-      message: `Unable to determine the current week for the ${season} season.`,
-    });
+    console.error(`Unable to determine the week for ${season}`, error);
+    return c.json(
+      {
+        statusCode: 503,
+        error: 'Service Unavailable',
+        message: `Unable to determine the current week for the ${season} season.`,
+      },
+      503,
+    );
   };
 
   // Get standings to calculate week based on games played
@@ -27,8 +30,7 @@ export default async function getWeek(request, reply) {
   // A failed request must not look like a season that has not started yet,
   // or a rate limited call would report week 1 mid-season.
   if (standingsError || !standings) {
-    unavailable(standingsError);
-    return;
+    return unavailable(standingsError);
   }
 
   // Calculate week as the max games played (wins + losses + ties) across all teams
@@ -43,8 +45,7 @@ export default async function getWeek(request, reply) {
 
   // If we have games played data, use that as the week
   if (maxGamesPlayed > 0) {
-    reply.send({ week: maxGamesPlayed + 1 }); // Next week is current week
-    return;
+    return c.json({ week: maxGamesPlayed + 1 }); // Next week is current week
   }
 
   // Otherwise fall back to MFL's week
@@ -59,11 +60,10 @@ export default async function getWeek(request, reply) {
   });
 
   if (liveError) {
-    unavailable(liveError);
-    return;
+    return unavailable(liveError);
   }
 
   // No results and no live scoring means the season has not started yet,
   // so the upcoming week is week 1.
-  reply.send({ week: liveUnavailable ? 1 : Number(liveWeek) || 1 });
+  return c.json({ week: liveUnavailable ? 1 : Number(liveWeek) || 1 });
 }

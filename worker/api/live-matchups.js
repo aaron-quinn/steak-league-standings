@@ -3,6 +3,8 @@ import getData from './get-data.js';
 import getPlayerList from './players.js';
 import convertTeamCode from '../utils/convert-team-code.js';
 
+const LIVE_SCORES_CACHE_SECONDS = 30;
+
 export default async function getLiveMatchups({
   season,
   leagueID,
@@ -13,7 +15,7 @@ export default async function getLiveMatchups({
     const liveScoresURL = `/${season}/export?TYPE=liveScoring&L=${leagueID}&DETAILS=1&JSON=1`;
 
     const [liveScoresResponse, players] = await Promise.all([
-      getData(liveScoresURL),
+      getData(liveScoresURL, { cacheSeconds: LIVE_SCORES_CACHE_SECONDS }),
       getPlayerList({ season, leagueID }),
     ]);
 
@@ -31,7 +33,9 @@ export default async function getLiveMatchups({
     const week = liveScoresResponse.liveScoring.week;
 
     const scheduleURL = `/apis/site/v2/sports/football/nfl/scoreboard?week=${week}`;
-    const scheduleResponse = await getSchedule(scheduleURL);
+    const scheduleResponse = await getSchedule(scheduleURL, {
+      cacheSeconds: LIVE_SCORES_CACHE_SECONDS,
+    });
 
     const teamSchedule = {};
     if (scheduleResponse.events) {

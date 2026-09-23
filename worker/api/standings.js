@@ -6,7 +6,9 @@ export default async function getStandings({ season, leagueID, prefix = '' }) {
     // Get the standings from the MFL API
     const weeklyResultsURL = `/${season}/export?TYPE=weeklyResults&L=${leagueID}&W=YTD&JSON=1`;
 
-    const weeklyResultsResponse = await getData(weeklyResultsURL);
+    const weeklyResultsResponse = await getData(weeklyResultsURL, {
+      cacheSeconds: 60,
+    });
     const weeklyResults = weeklyResultsResponse.allWeeklyResults.weeklyResults;
 
     const latestResultWeek =

@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { StandingsData } from '../types/StandingsData';
 
 const api = axios.create({
-  baseURL: import.meta.env.DEV ? '/api' : import.meta.env.VITE_API_URL,
+  baseURL: '/api',
   headers: {
     'Content-type': 'application/json',
   },

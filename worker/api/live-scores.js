@@ -1,7 +1,8 @@
 import getData from './get-data.js';
 import getPlayerList from './players.js';
 
-const scheduleCache = {};
+const LIVE_SCORES_CACHE_SECONDS = 30;
+const SCHEDULE_CACHE_SECONDS = 60 * 60 * 6;
 
 export default async function getLiveScores({ season, leagueID, prefix = '' }) {
   try {
@@ -9,7 +10,7 @@ export default async function getLiveScores({ season, leagueID, prefix = '' }) {
     const liveScoresURL = `/${season}/export?TYPE=liveScoring&L=${leagueID}&JSON=1`;
 
     const [liveScoresResponse, players] = await Promise.all([
-      getData(liveScoresURL),
+      getData(liveScoresURL, { cacheSeconds: LIVE_SCORES_CACHE_SECONDS }),
       getPlayerList({ season, leagueID }),
     ]);
 
@@ -26,15 +27,10 @@ export default async function getLiveScores({ season, leagueID, prefix = '' }) {
 
     const week = liveScoresResponse.liveScoring.week;
 
-    let scheduleResponse;
-    const scheduleKey = `${season}-${week}`;
-    if (scheduleCache[scheduleKey]) {
-      scheduleResponse = scheduleCache[scheduleKey];
-    } else {
-      const scheduleURL = `/${season}/export?TYPE=nflSchedule&W=${week}&JSON=1`;
-      scheduleResponse = await getData(scheduleURL);
-      scheduleCache[scheduleKey] = scheduleResponse;
-    }
+    const scheduleURL = `/${season}/export?TYPE=nflSchedule&W=${week}&JSON=1`;
+    const scheduleResponse = await getData(scheduleURL, {
+      cacheSeconds: SCHEDULE_CACHE_SECONDS,
+    });
 
     const teamSchedule = {};
     if (scheduleResponse.nflSchedule && scheduleResponse.nflSchedule.matchup) {

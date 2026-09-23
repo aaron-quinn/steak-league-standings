@@ -1,21 +1,20 @@
 import getData from './get-data.js';
 
-const playersCache = {};
+// The player list changes rarely and is MFL's largest export
+const PLAYERS_CACHE_SECONDS = 60 * 60 * 12;
 
 export default async function getPlayerList({
   season,
   leagueID = '68362',
   prefix = '',
 }) {
-  if (playersCache[season]) {
-    return playersCache[season];
-  }
-
   try {
     // Get the player list from the MFL API
     const playerListURL = `/${season}/export?TYPE=players&L=${leagueID}&JSON=1`;
 
-    const playerListResponse = await getData(playerListURL);
+    const playerListResponse = await getData(playerListURL, {
+      cacheSeconds: PLAYERS_CACHE_SECONDS,
+    });
     const players = playerListResponse.players.player;
 
     const result = players.map((player) => {
@@ -26,7 +25,6 @@ export default async function getPlayerList({
       return player;
     });
 
-    playersCache[season] = result;
     return result;
   } catch (error) {
     return { error };

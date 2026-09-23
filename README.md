@@ -13,6 +13,11 @@ Built with modern web technologies:
 - **State Management**: [Zustand](https://github.com/pmndrs/zustand)
 - **Data Fetching**: [TanStack Query](https://tanstack.com/query/latest)
 - **Routing**: [React Router](https://reactrouter.com/)
+- **API**: [Hono](https://hono.dev/) on [Cloudflare Workers](https://developers.cloudflare.com/workers/), in `worker/`
+
+The site and its API deploy together as a single Cloudflare Worker. Requests to
+`/api/*` run the Worker, which pulls data from MyFantasyLeague and ESPN; every
+other path is served from the built site.
 
 ## Getting Started
 
@@ -38,7 +43,7 @@ Start the development server:
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173` (or the port shown in your terminal).
+The application will be available at `http://localhost:5173` (or the port shown in your terminal). The API runs inside the same dev server, at `/api`.
 
 ### Building for Production
 
@@ -48,12 +53,19 @@ To create a production build:
 npm run build
 ```
 
-The output will be in the `dist` directory.
+The site is written to `dist/client` and the Worker to `dist/steak`.
 
 ### Preview Production Build
 
-To locally preview the production build:
+To locally preview the production build in the Workers runtime:
 
 ```bash
 npm run preview
+```
+
+### Deploying
+
+```bash
+npx wrangler login # first time only
+npm run deploy
 ```
