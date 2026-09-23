@@ -1,47 +1,25 @@
 import getData from './get-data.js';
 
-// The player list changes rarely and is MFL's largest export
+// Player details change rarely
 const PLAYERS_CACHE_SECONDS = 60 * 60 * 12;
 
-// Parsing the list and indexing it is the costliest part of a live request, so
-// keep the result for as long as this Worker instance stays warm. Both leagues
-// share it, as they share the same player pool.
-const loaded = {};
-
-async function loadPlayers(season, leagueID) {
-  const cached = loaded[season];
-  if (cached && cached.expires > Date.now()) {
-    return cached;
-  }
-
-  // Get the player list from the MFL API
-  const playerListURL = `/${season}/export?TYPE=players&L=${leagueID}&JSON=1`;
-
-  const playerListResponse = await getData(playerListURL, {
-    cacheSeconds: PLAYERS_CACHE_SECONDS,
-  });
-  const players = playerListResponse.players.player;
-
-  // Build new objects rather than renaming in place: the parsed response is
-  // shared with other requests (see fetch-json.js)
-  const list = players.map((player) => {
-    const [lastName, firstName] = player.name.split(', ');
-    return {
-      ...player,
-      name: `${firstName} ${lastName}`,
-      firstName,
-      lastName,
-    };
-  });
-  const byID = new Map(list.map((player) => [player.id, player]));
-
-  loaded[season] = {
-    list,
-    byID,
-    expires: Date.now() + PLAYERS_CACHE_SECONDS * 1000,
+// MFL names players "Last, First"
+function withSplitName(player) {
+  const [lastName, firstName] = player.name.split(', ');
+  return {
+    ...player,
+    name: `${firstName} ${lastName}`,
+    firstName,
+    lastName,
   };
-  return loaded[season];
 }
+
+// MFL returns a single object rather than a one-item array
+const asList = (value) => (Array.isArray(value) ? value : value ? [value] : []);
+
+// The full player list is MFL's largest export, so keep it for as long as this
+// Worker instance stays warm
+const loaded = {};
 
 export default async function getPlayerList({
   season,
@@ -49,19 +27,66 @@ export default async function getPlayerList({
   prefix = '',
 }) {
   try {
-    const { list } = await loadPlayers(season, leagueID);
+    const cached = loaded[season];
+    if (cached && cached.expires > Date.now()) {
+      return cached.list;
+    }
+
+    // Get the player list from the MFL API
+    const playerListURL = `/${season}/export?TYPE=players&L=${leagueID}&JSON=1`;
+
+    const playerListResponse = await getData(playerListURL, {
+      cacheSeconds: PLAYERS_CACHE_SECONDS,
+    });
+
+    // Build new objects rather than renaming in place: the parsed response is
+    // shared with other requests (see fetch-json.js)
+    const list = asList(playerListResponse.players.player).map(withSplitName);
+
+    loaded[season] = {
+      list,
+      expires: Date.now() + PLAYERS_CACHE_SECONDS * 1000,
+    };
     return list;
   } catch (error) {
     return { error };
   }
 }
 
-// Players by MFL ID. Treat the entries as read-only: they are shared.
-export async function getPlayerMap({ season, leagueID = '68362' }) {
+// Players who appear in a liveScoring export, by MFL ID. Asking MFL for just
+// those players returns about a tenth of the full list, which keeps rebuilding
+// the live endpoints within the free plan's CPU limit. Rosters rarely change
+// within a week, so the same request is usually served from the edge cache.
+export async function getLiveScoringPlayers({ season, liveScoring }) {
+  const franchises = [
+    ...asList(liveScoring.matchup).flatMap((matchup) =>
+      asList(matchup.franchise),
+    ),
+    ...asList(liveScoring.franchise),
+  ];
+  const ids = new Set(
+    franchises.flatMap((franchise) =>
+      asList(franchise.players?.player).map((player) => player.id),
+    ),
+  );
+  if (ids.size === 0) {
+    return new Map();
+  }
+
   try {
-    const { byID } = await loadPlayers(season, leagueID);
-    return byID;
+    const playersURL = `/${season}/export?TYPE=players&PLAYERS=${[...ids].sort().join(',')}&JSON=1`;
+    const playersResponse = await getData(playersURL, {
+      cacheSeconds: PLAYERS_CACHE_SECONDS,
+    });
+
+    return new Map(
+      asList(playersResponse.players?.player).map((player) => [
+        player.id,
+        withSplitName(player),
+      ]),
+    );
   } catch (error) {
+    // Without details the players still show, by ID
     return new Map();
   }
 }

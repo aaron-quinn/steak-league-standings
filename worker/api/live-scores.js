@@ -1,5 +1,5 @@
 import getData from './get-data.js';
-import { getPlayerMap } from './players.js';
+import { getLiveScoringPlayers } from './players.js';
 
 const LIVE_SCORES_CACHE_SECONDS = 30;
 const SCHEDULE_CACHE_SECONDS = 60 * 60 * 6;
@@ -19,10 +19,9 @@ export default async function getLiveScores({ season, leagueID, prefix = '' }) {
     // Get the live scores from the MFL API
     const liveScoresURL = `/${season}/export?TYPE=liveScoring&L=${leagueID}&JSON=1`;
 
-    const [liveScoresResponse, playerMap] = await Promise.all([
-      getData(liveScoresURL, { cacheSeconds: LIVE_SCORES_CACHE_SECONDS }),
-      getPlayerMap({ season, leagueID }),
-    ]);
+    const liveScoresResponse = await getData(liveScoresURL, {
+      cacheSeconds: LIVE_SCORES_CACHE_SECONDS,
+    });
 
     // MFL has no live scoring in the offseason and returns an error instead
     if (!liveScoresResponse.liveScoring) {
@@ -38,9 +37,13 @@ export default async function getLiveScores({ season, leagueID, prefix = '' }) {
     const week = liveScoresResponse.liveScoring.week;
 
     const scheduleURL = `/${season}/export?TYPE=nflSchedule&W=${week}&JSON=1`;
-    const scheduleResponse = await getData(scheduleURL, {
-      cacheSeconds: SCHEDULE_CACHE_SECONDS,
-    });
+    const [scheduleResponse, playerMap] = await Promise.all([
+      getData(scheduleURL, { cacheSeconds: SCHEDULE_CACHE_SECONDS }),
+      getLiveScoringPlayers({
+        season,
+        liveScoring: liveScoresResponse.liveScoring,
+      }),
+    ]);
 
     const teamSchedule = {};
     if (scheduleResponse.nflSchedule && scheduleResponse.nflSchedule.matchup) {
