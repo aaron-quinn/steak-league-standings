@@ -1,0 +1,38 @@
+export default function convertTeamCode(code) {
+  // Left is ESPN code, right is MFL code
+  const teamCodeMap = {
+    ATL: 'ATL',
+    ARI: 'ARI',
+    BAL: 'BAL',
+    BUF: 'BUF',
+    CAR: 'CAR',
+    CHI: 'CHI',
+    CIN: 'CIN',
+    CLE: 'CLE',
+    DAL: 'DAL',
+    DEN: 'DEN',
+    DET: 'DET',
+    GB: 'GBP',
+    HOU: 'HOU',
+    IND: 'IND',
+    JAX: 'JAC',
+    KC: 'KCC',
+    LAC: 'LAC',
+    LAR: 'LAR',
+    LV: 'LVR',
+    MIA: 'MIA',
+    MIN: 'MIN',
+    NE: 'NEP',
+    NO: 'NOS',
+    NYG: 'NYG',
+    NYJ: 'NYJ',
+    PHI: 'PHI',
+    PIT: 'PIT',
+    SF: 'SFO',
+    SEA: 'SEA',
+    TB: 'TBB',
+    TEN: 'TEN',
+    WSH: 'WAS',
+  };
+  return teamCodeMap[code] || code;
+}
