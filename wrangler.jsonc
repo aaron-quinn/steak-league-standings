@@ -3,6 +3,10 @@
   "name": "steak",
   "main": "worker/index.js",
   "compatibility_date": "2026-09-01",
+  // steakstandings.com itself redirects to www via a Redirect Rule on the zone
+  "routes": [{ "pattern": "www.steakstandings.com", "custom_domain": true }],
+  // Listing routes turns workers.dev off by default; keep it for testing
+  "workers_dev": true,
   "assets": {
     // Serve index.html for client-side routes like /live and /matchups
     "not_found_handling": "single-page-application",
