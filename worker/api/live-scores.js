@@ -1,17 +1,27 @@
 import getData from './get-data.js';
-import getPlayerList from './players.js';
+import { getPlayerMap } from './players.js';
 
 const LIVE_SCORES_CACHE_SECONDS = 30;
 const SCHEDULE_CACHE_SECONDS = 60 * 60 * 6;
+
+// Creating a formatter is far more expensive than using one, and toLocaleString
+// creates a new one on every call
+const gameTimeFormat = new Intl.DateTimeFormat('en-US', {
+  weekday: 'short',
+  hour: 'numeric',
+  minute: 'numeric',
+  timeZone: 'America/New_York',
+  timeZoneName: 'short',
+});
 
 export default async function getLiveScores({ season, leagueID, prefix = '' }) {
   try {
     // Get the live scores from the MFL API
     const liveScoresURL = `/${season}/export?TYPE=liveScoring&L=${leagueID}&JSON=1`;
 
-    const [liveScoresResponse, players] = await Promise.all([
+    const [liveScoresResponse, playerMap] = await Promise.all([
       getData(liveScoresURL, { cacheSeconds: LIVE_SCORES_CACHE_SECONDS }),
-      getPlayerList({ season, leagueID }),
+      getPlayerMap({ season, leagueID }),
     ]);
 
     // MFL has no live scoring in the offseason and returns an error instead
@@ -42,17 +52,6 @@ export default async function getLiveScores({ season, leagueID, prefix = '' }) {
       });
     }
 
-    const playerMap = {};
-    if (Array.isArray(players)) {
-      players.forEach((player) => {
-        playerMap[player.id] = {
-          name: player.name,
-          position: player.position,
-          team: player.team,
-        };
-      });
-    }
-
     const matchups = liveScoresResponse.liveScoring.matchup;
     const teamsOnBye = liveScoresResponse.liveScoring.franchise;
 
@@ -76,22 +75,28 @@ export default async function getLiveScores({ season, leagueID, prefix = '' }) {
       playersList.forEach((player) => {
         if (player.status === 'starter') {
           const remaining = parseInt(player.gameSecondsRemaining, 10);
-          const playerInfo = playerMap[player.id] || {
-            name: player.id,
-            position: '',
-          };
+          // Only players still to finish are reported, so skip the rest
+          // before doing any per-player work
+          if (!(remaining > 0)) {
+            return;
+          }
+
+          const mflPlayer = playerMap.get(player.id);
+          const playerInfo = mflPlayer
+            ? {
+                name: mflPlayer.name,
+                position: mflPlayer.position,
+                team: mflPlayer.team,
+              }
+            : {
+                name: player.id,
+                position: '',
+              };
 
           let gameTime = '';
           if (playerInfo.team && teamSchedule[playerInfo.team]) {
             const kickoff = teamSchedule[playerInfo.team];
-            const date = new Date(kickoff * 1000);
-            gameTime = date.toLocaleString('en-US', {
-              weekday: 'short',
-              hour: 'numeric',
-              minute: 'numeric',
-              timeZone: 'America/New_York',
-              timeZoneName: 'short',
-            });
+            gameTime = gameTimeFormat.format(new Date(kickoff * 1000));
           }
 
           const playerResult = {

@@ -1,6 +1,6 @@
 import getSchedule from './get-schedule.js';
 import getData from './get-data.js';
-import getPlayerList from './players.js';
+import { getPlayerMap } from './players.js';
 import convertTeamCode from '../utils/convert-team-code.js';
 
 const LIVE_SCORES_CACHE_SECONDS = 30;
@@ -14,9 +14,9 @@ export default async function getLiveMatchups({
     // Get the live scores from the MFL API
     const liveScoresURL = `/${season}/export?TYPE=liveScoring&L=${leagueID}&DETAILS=1&JSON=1`;
 
-    const [liveScoresResponse, players] = await Promise.all([
+    const [liveScoresResponse, playerMap] = await Promise.all([
       getData(liveScoresURL, { cacheSeconds: LIVE_SCORES_CACHE_SECONDS }),
-      getPlayerList({ season, leagueID }),
+      getPlayerMap({ season, leagueID }),
     ]);
 
     // MFL returns an error object instead of liveScoring in the offseason
@@ -68,19 +68,6 @@ export default async function getLiveMatchups({
       });
     }
 
-    const playerMap = {};
-    if (Array.isArray(players)) {
-      players.forEach((player) => {
-        playerMap[player.id] = {
-          name: player.name,
-          firstName: player.firstName,
-          lastName: player.lastName,
-          position: player.position,
-          team: player.team,
-        };
-      });
-    }
-
     const matchups = liveScoresResponse.liveScoring.matchup;
     const teamsOnBye = liveScoresResponse.liveScoring.franchise;
 
@@ -105,10 +92,19 @@ export default async function getLiveMatchups({
 
       playersList.forEach((player) => {
         const remaining = parseInt(player.gameSecondsRemaining, 10);
-        const playerInfo = playerMap[player.id] || {
-          name: player.id,
-          position: '',
-        };
+        const mflPlayer = playerMap.get(player.id);
+        const playerInfo = mflPlayer
+          ? {
+              name: mflPlayer.name,
+              firstName: mflPlayer.firstName,
+              lastName: mflPlayer.lastName,
+              position: mflPlayer.position,
+              team: mflPlayer.team,
+            }
+          : {
+              name: player.id,
+              position: '',
+            };
 
         let gameInfo = null;
         if (playerInfo.team && teamSchedule[playerInfo.team]) {
