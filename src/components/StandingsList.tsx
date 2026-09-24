@@ -416,16 +416,15 @@ export default function StandingsList() {
     const withGap: TeamWithGap[] = teams.map((t) => {
       const gap = Math.round((t.points - steakLinePts) * 10) / 10;
       const gapOperator = gap > 0 ? '+' : '';
-      const pointsPieces = t.points.toString().split('.');
+      // Two decimals, matching the gap column so the numbers line up
+      const pointsPieces = t.points.toFixed(2).split('.');
       const gapPieces = gap.toFixed(2).toString().split('.');
       return {
         ...t,
         gap: Number(gap) === 0 ? 0 : gap.toFixed(2),
         gapOperator,
         pointsInt: pointsPieces[0],
-        // A whole-number total has no decimal piece, which would render a
-        // dangling "." (e.g. "0." before any games are played)
-        pointsDec: pointsPieces[1] ?? '0',
+        pointsDec: pointsPieces[1],
         gapInt: gapPieces[0],
         gapDec: gapPieces[1],
         gapNum: Math.abs(gap),
@@ -469,7 +468,7 @@ export default function StandingsList() {
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-2">
           <div className="h-px flex-1 bg-gradient-to-r from-emerald-600/35 to-transparent" />
-          <span className="text-[10px] uppercase tracking-widest text-emerald-600/65 font-medium">
+          <span className="text-[11px] uppercase tracking-widest text-emerald-600/65 font-medium">
             Eaters
           </span>
           <div className="h-px flex-1 bg-gradient-to-l from-emerald-600/35 to-transparent" />
@@ -531,7 +530,7 @@ export default function StandingsList() {
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="h-px flex-1 bg-gradient-to-r from-gray-600/30 to-transparent" />
-            <span className="text-[10px] uppercase tracking-widest text-gray-500/60 font-medium">
+            <span className="text-[11px] uppercase tracking-widest text-gray-500/60 font-medium">
               Self Buyer
             </span>
             <div className="h-px flex-1 bg-gradient-to-l from-gray-600/30 to-transparent" />
@@ -579,7 +578,7 @@ export default function StandingsList() {
       <div>
         <div className="flex items-center gap-2 mb-2">
           <div className="h-px flex-1 bg-gradient-to-r from-red-500/30 to-transparent" />
-          <span className="text-[10px] uppercase tracking-widest text-red-400/55 font-medium">
+          <span className="text-[11px] uppercase tracking-widest text-red-400/55 font-medium">
             Buyers
           </span>
           <div className="h-px flex-1 bg-gradient-to-l from-red-500/30 to-transparent" />

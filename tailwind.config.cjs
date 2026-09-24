@@ -6,10 +6,10 @@ module.exports = {
   },
   theme: {
     fontFamily: {
-      sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-      display: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-      mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular'],
-      numerals: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      sans: ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      display: ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      mono: ['Geist Mono', 'ui-monospace', 'SFMono-Regular'],
+      numerals: ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
     },
     extend: {
       colors: {

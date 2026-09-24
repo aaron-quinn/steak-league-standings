@@ -6,7 +6,7 @@ export default function LeagueLogo() {
         src="/steak.svg"
         alt="Steak League"
       />
-      <h1 className="text-blue-100 text-sm sm:text-base lg:text-xl font-medium tracking-wide whitespace-nowrap">
+      <h1 className="text-blue-100 text-sm sm:text-base lg:text-xl font-semibold tracking-tight whitespace-nowrap">
         Steak League
       </h1>
       <a

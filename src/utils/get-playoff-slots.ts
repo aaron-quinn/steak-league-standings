@@ -123,7 +123,7 @@ export default function getPlayoffsSlots({
       'Non Division Winner, Most Points': mostPtsNonDiv,
       'Non Division Winner, Best Record': bestRecordNonDiv,
       'Non Division Winner, Second Most Points': secondMostPtsNonDiv,
-      'Non Divison Winner, Second Best Record': secondBestRecord,
+      'Non Division Winner, Second Best Record': secondBestRecord,
     },
     bubbleTeams,
   };
