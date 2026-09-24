@@ -5,5 +5,5 @@ export interface PlayoffSlots {
   'Non Division Winner, Most Points': string;
   'Non Division Winner, Best Record': string;
   'Non Division Winner, Second Most Points': string;
-  'Non Divison Winner, Second Best Record': string;
+  'Non Division Winner, Second Best Record': string;
 }
