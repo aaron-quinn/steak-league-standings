@@ -69,6 +69,11 @@ export async function getLiveScoringPlayers({ season, liveScoring }) {
       asList(franchise.players?.player).map((player) => player.id),
     ),
   );
+  return getPlayersByID({ season, ids });
+}
+
+// Details for just the given MFL player IDs, by ID
+export async function getPlayersByID({ season, ids }) {
   if (ids.size === 0) {
     return new Map();
   }

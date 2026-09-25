@@ -11,9 +11,9 @@ function formatGap(team: BubbleTeam): string {
   if (team.pointsBack === 0) {
     parts.push('Tied in pts');
   } else if (team.pointsBack < 0) {
-    parts.push(`${Math.abs(team.pointsBack).toFixed(1)} pts ahead`);
+    parts.push(`${Math.abs(team.pointsBack).toFixed(2)} pts ahead`);
   } else {
-    parts.push(`${team.pointsBack.toFixed(1)} pts back`);
+    parts.push(`${team.pointsBack.toFixed(2)} pts back`);
   }
 
   if (team.winsBack === 0) {
@@ -22,11 +22,11 @@ function formatGap(team: BubbleTeam): string {
       parts.push('Tied in record (tied in pts)');
     } else if (team.recordSpotPointsBack < 0) {
       parts.push(
-        `Tied in record (${Math.abs(team.recordSpotPointsBack).toFixed(1)} pts ahead)`,
+        `Tied in record (${Math.abs(team.recordSpotPointsBack).toFixed(2)} pts ahead)`,
       );
     } else {
       parts.push(
-        `Tied in record (${team.recordSpotPointsBack.toFixed(1)} pts back)`,
+        `Tied in record (${team.recordSpotPointsBack.toFixed(2)} pts back)`,
       );
     }
   } else if (team.winsBack < 0) {

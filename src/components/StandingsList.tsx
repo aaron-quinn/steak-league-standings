@@ -293,7 +293,7 @@ function RemainingPlayersIndicator({
         <span
           className={`text-[8px] sm:text-[10px] font-mono ${finalTextColor}`}
         >
-          ({weeklyScore.toFixed(1)})
+          ({weeklyScore.toFixed(2)})
         </span>
       </div>
     );
@@ -506,7 +506,7 @@ const StandingsList = forwardRef<StandingsListHandle, StandingsListProps>(
 
       // Add the distance from the steak line
       const withGap: TeamWithGap[] = teams.map((t) => {
-        const gap = Math.round((t.points - steakLinePts) * 10) / 10;
+        const gap = Math.round((t.points - steakLinePts) * 100) / 100;
         const gapOperator = gap > 0 ? '+' : '';
         // Two decimals, matching the gap column so the numbers line up
         const pointsPieces = t.points.toFixed(2).split('.');
@@ -600,7 +600,7 @@ const StandingsList = forwardRef<StandingsListHandle, StandingsListProps>(
                       className="text-[10px] sm:text-xs lg:text-sm tabular-nums whitespace-nowrap text-gray-400 w-12 sm:w-16 lg:w-20 text-right"
                       title={
                         showProjected
-                          ? `${team.actualPoints.toFixed(1)} current + ${(team.projectedRemaining ?? 0).toFixed(1)} projected remaining`
+                          ? `${team.actualPoints.toFixed(2)} current + ${(team.projectedRemaining ?? 0).toFixed(2)} projected remaining`
                           : undefined
                       }
                     >
@@ -658,7 +658,7 @@ const StandingsList = forwardRef<StandingsListHandle, StandingsListProps>(
                     className="text-[10px] sm:text-xs lg:text-sm tabular-nums whitespace-nowrap text-gray-400 w-12 sm:w-16 lg:w-20 text-right"
                     title={
                       showProjected
-                        ? `${teamsWithGap[steakLineTeam].actualPoints.toFixed(1)} current + ${(teamsWithGap[steakLineTeam].projectedRemaining ?? 0).toFixed(1)} projected remaining`
+                        ? `${teamsWithGap[steakLineTeam].actualPoints.toFixed(2)} current + ${(teamsWithGap[steakLineTeam].projectedRemaining ?? 0).toFixed(2)} projected remaining`
                         : undefined
                     }
                   >
@@ -734,7 +734,7 @@ const StandingsList = forwardRef<StandingsListHandle, StandingsListProps>(
                         className="text-[10px] sm:text-xs lg:text-sm tabular-nums whitespace-nowrap text-gray-500 w-12 sm:w-16 lg:w-20 text-right"
                         title={
                           showProjected
-                            ? `${team.actualPoints.toFixed(1)} current + ${(team.projectedRemaining ?? 0).toFixed(1)} projected remaining`
+                            ? `${team.actualPoints.toFixed(2)} current + ${(team.projectedRemaining ?? 0).toFixed(2)} projected remaining`
                             : undefined
                         }
                       >

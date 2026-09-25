@@ -1,6 +1,4 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import LeagueLogo from '../components/LeagueLogo';
-import ViewSwitcher from '../components/ViewSwitcher';
 import { useStandingsStore } from '../stores/standings';
 import { getMatchups } from '@/api/matchups';
 import { getStandings, getWeek } from '@/api';
@@ -12,9 +10,9 @@ import MatchupsPlaceholder from '@/components/MatchupsPlaceholder';
 import MatchupsSkeleton from '@/components/MatchupsSkeleton';
 import SectionLabel from '@/components/SectionLabel';
 import HeaderStatus from '@/components/HeaderStatus';
-import getManagers from '@/data/managers';
 import TeamMatchup from '@/types/TeamMatchup';
-import type { MatchupManager } from '@/types/MatchupManager';
+import { getTeamManagers, rankSteakTeams } from '@/utils/steak-teams';
+import PageShell from '@/components/PageShell';
 
 interface MatchupViewProps {}
 
@@ -71,46 +69,17 @@ export default function MatchupView({}: MatchupViewProps) {
   }, [matchups, setCurrentMatchup]);
 
   const managersMap = useMemo(() => {
-    const managers = getManagers();
+    const teams = getTeamManagers(year);
+    if (!officialStandings) return teams;
 
-    const steakManagers = managers
-      .filter((t) => t.teams[year])
-      .map((t) => {
-        const teamYear = t.teams[year];
-        const league = teamYear.league || '';
-        const teamID = teamYear.teamID || '';
-        const id = `${league.toLowerCase()}${teamID}`;
-        return {
-          id,
-          name: t.name,
-          teamID,
-          steak: 'steak' in t.teams[year] || false,
-        };
-      });
-
-    // Official steak rank: steak teams by total points, ties by name,
-    // matching the ordering in StandingsList
-    const ranks = new Map<string, number>();
-    if (officialStandings) {
-      steakManagers
-        .filter((manager) => manager.steak)
-        .map((manager) => ({
-          ...manager,
-          points: Number(officialStandings[manager.id]?.points) || 0,
-        }))
-        .sort((a, b) =>
-          a.points === b.points
-            ? a.name.localeCompare(b.name)
-            : b.points - a.points,
-        )
-        .forEach((manager, index) => ranks.set(manager.id, index + 1));
-    }
-
-    const teamMap = new Map<string, MatchupManager>();
-    steakManagers.forEach((manager) => {
-      teamMap.set(manager.id, { ...manager, rank: ranks.get(manager.id) });
+    const ranks = rankSteakTeams(
+      teams.values(),
+      (id) => Number(officialStandings[id]?.points) || 0,
+    );
+    teams.forEach((team) => {
+      team.rank = ranks.get(team.id);
     });
-    return teamMap;
+    return teams;
   }, [year, officialStandings]);
 
   if (isError && !matchups) {
@@ -187,29 +156,5 @@ export default function MatchupView({}: MatchupViewProps) {
         )}
       </div>
     </PageShell>
-  );
-}
-
-function PageShell({
-  children,
-  status,
-}: {
-  children: React.ReactNode;
-  status?: React.ReactNode;
-}) {
-  return (
-    <div className="bg-black min-h-screen py-3 px-2 sm:py-4 sm:px-3 lg:py-8 lg:px-8">
-      <div className="w-full max-w-[375px] sm:max-w-6xl mx-auto">
-        {/* Header row - logo and view switcher */}
-        <div className="flex items-end justify-between lg:justify-start gap-1.5 sm:gap-2 lg:gap-4 mb-3 sm:mb-4 lg:mb-6 max-[350px]:flex-col max-[350px]:items-start">
-          <div className="flex h-8 lg:h-10 shrink-0 items-center">
-            <LeagueLogo />
-          </div>
-          <ViewSwitcher />
-          {status}
-        </div>
-        {children}
-      </div>
-    </div>
   );
 }

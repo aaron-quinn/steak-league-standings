@@ -6,6 +6,8 @@ import fantasyPointsYear from './points.js';
 import playersYear from './players.js';
 import liveMatchupsYear from './matchups.js';
 import weekYear from './week.js';
+import weeklyScoresYear from './weekly-scores.js';
+import weekPlayersYear from './week-players.js';
 
 // Cache each finished response at the edge. A hit returns the stored JSON
 // without parsing or rebuilding anything, which keeps most requests far inside
@@ -31,5 +33,7 @@ apiRoutes.get('/points/:year', slow, fantasyPointsYear);
 apiRoutes.get('/players/:year', slow, playersYear);
 apiRoutes.get('/live-matchups/:year', live, liveMatchupsYear);
 apiRoutes.get('/week/:year', recent, weekYear);
+apiRoutes.get('/weekly-scores/:year', recent, weeklyScoresYear);
+apiRoutes.get('/week-players/:year/:week', slow, weekPlayersYear);
 
 export default apiRoutes;

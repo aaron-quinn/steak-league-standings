@@ -59,3 +59,24 @@
     transform: translateY(100vh);
   }
 }
+
+/* Steak Race lines draw in from the first week. Paths set pathLength="1". */
+.steak-draw {
+  stroke-dasharray: 1;
+  animation: steak-draw 900ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@keyframes steak-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steak-draw {
+    animation: none;
+  }
+}

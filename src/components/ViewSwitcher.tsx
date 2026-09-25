@@ -23,6 +23,7 @@ export default function ViewSwitcher({
   const isOfficial = pathname === '/';
   const isLive = pathname === '/live';
   const isMatchups = pathname === '/matchups';
+  const isFun = pathname === '/fun' || pathname.startsWith('/fun/');
   const wantsProjected =
     new URLSearchParams(search).get('view') === 'projected';
   const isProjected = isLive && wantsProjected && projectionsAvailable;
@@ -36,7 +37,9 @@ export default function ViewSwitcher({
         ? 'projected'
         : isMatchups
           ? 'matchups'
-          : null;
+          : isFun
+            ? 'fun'
+            : null;
 
   const { groupRef, indicatorRef } = useSlidingIndicator(
     [activeKey, projectionsAvailable],
@@ -44,7 +47,7 @@ export default function ViewSwitcher({
   );
 
   const segmentClasses =
-    'relative z-10 inline-flex h-6 lg:h-8 items-center justify-center rounded-md px-2 sm:px-2.5 lg:px-3 text-[10px] sm:text-xs lg:text-sm font-medium whitespace-nowrap transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400';
+    'relative z-10 inline-flex h-7 sm:h-6 lg:h-8 flex-1 sm:flex-none items-center justify-center rounded-md px-1.5 sm:px-2.5 lg:px-3 text-[11px] sm:text-xs lg:text-sm font-medium whitespace-nowrap transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400';
   const activeClasses = 'text-gray-50';
   const inactiveClasses = 'text-gray-500 hover:text-gray-200';
 
@@ -68,12 +71,13 @@ export default function ViewSwitcher({
 
   return (
     <nav
-      className="flex h-8 lg:h-10 items-center antialiased"
+      // Fills the header row on phones so every tab is a comfortable target
+      className="flex h-8 lg:h-10 min-w-0 flex-1 sm:flex-none items-center antialiased max-[350px]:w-full"
       aria-label="Standings views"
     >
       <div
         ref={groupRef}
-        className="relative inline-flex h-8 lg:h-10 items-center rounded-lg border border-gray-800 bg-gray-950 p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
+        className="relative flex w-full sm:w-auto sm:inline-flex h-8 lg:h-10 items-center rounded-lg border border-gray-800 bg-gray-950 p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
         role="group"
         aria-label="Standings mode"
       >
@@ -100,6 +104,7 @@ export default function ViewSwitcher({
           className="mx-0.5 h-3.5 lg:h-4 w-px shrink-0 bg-gray-800"
         />
         {segment('matchups', '/matchups', 'Matchups')}
+        {segment('fun', '/fun', 'Fun')}
       </div>
     </nav>
   );

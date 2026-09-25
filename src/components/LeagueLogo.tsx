@@ -14,7 +14,9 @@ export default function LeagueLogo() {
         aria-hidden="true"
       />
       <h1 className="text-gray-50 text-sm sm:text-base lg:text-xl font-semibold tracking-[-0.02em] whitespace-nowrap">
-        Steak League
+        {/* The icon stands in for "Steak" on phones, freeing room for the
+            view switcher */}
+        <span className="sr-only sm:not-sr-only">Steak </span>League
       </h1>
     </Link>
   );

@@ -122,8 +122,8 @@ export default async function standingsYear(c) {
 
   // Round points for each team in standings
   Object.values(teamList).forEach((team) => {
-    team.points = Math.round(team.points * 10) / 10;
-    team.weeklyScore = Math.round(team.weeklyScore * 10) / 10;
+    team.points = Math.round(team.points * 100) / 100;
+    team.weeklyScore = Math.round(team.weeklyScore * 100) / 100;
   });
 
   return c.json(sortTeamList(teamList, 'points'));
