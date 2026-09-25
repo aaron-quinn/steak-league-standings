@@ -13,6 +13,7 @@ interface Props {
 }
 
 const WEEKS_PER_SECOND = 0.7;
+const INTRO_HOLD_MS = 300;
 const SPEEDS = [1, 2, 4];
 
 const easeInOut = (t: number) =>
@@ -35,6 +36,7 @@ export default function RankRace({ season, selected, onSelect }: Props) {
   const [playing, setPlaying] = useState(() => !prefersReducedMotion());
   const [speed, setSpeed] = useState(1);
   const reducedMotion = useRef(prefersReducedMotion());
+  const introPending = useRef(true);
 
   useEffect(() => {
     if (!playing) return;
@@ -49,11 +51,24 @@ export default function RankRace({ season, selected, onSelect }: Props) {
 
     let frame = 0;
     let previous: number | null = null;
+    let introStarted: number | null = null;
     const tick = (now: number) => {
+      if (introPending.current) {
+        introStarted ??= now;
+        if (now - introStarted < INTRO_HOLD_MS) {
+          previous = now;
+          frame = requestAnimationFrame(tick);
+          return;
+        }
+        introPending.current = false;
+      }
       const elapsed = previous === null ? 0 : (now - previous) / 1000;
       previous = now;
       setTime((t) =>
-        Math.min(t + elapsed * WEEKS_PER_SECOND * speed, weekCount),
+        Math.min(
+          t + Math.min(elapsed, 0.05) * WEEKS_PER_SECOND * speed,
+          weekCount,
+        ),
       );
       frame = requestAnimationFrame(tick);
     };
@@ -68,7 +83,7 @@ export default function RankRace({ season, selected, onSelect }: Props) {
   const whole = Math.floor(time);
   const fraction = time - whole;
   // Each week the bars grow first, then the rows glide to their new ranks
-  const growth = easeInOut(Math.min(fraction / 0.6, 1));
+  const growth = easeInOut(Math.min(fraction / (whole === 0 ? 1 : 0.6), 1));
   const shuffle = easeInOut(Math.min(Math.max((fraction - 0.5) / 0.4, 0), 1));
 
   const totalAt = (totals: number[], week: number) =>
@@ -102,7 +117,10 @@ export default function RankRace({ season, selected, onSelect }: Props) {
   const finished = time >= weekCount;
 
   const togglePlay = () => {
-    if (finished) setTime(0);
+    if (finished) {
+      introPending.current = true;
+      setTime(0);
+    }
     setPlaying((p) => !p || finished);
   };
 
@@ -158,7 +176,9 @@ export default function RankRace({ season, selected, onSelect }: Props) {
           value={time}
           onChange={(event) => {
             setPlaying(false);
-            setTime(Number(event.target.value));
+            const nextTime = Number(event.target.value);
+            introPending.current = nextTime === 0;
+            setTime(nextTime);
           }}
           aria-label="Week"
           aria-valuetext={shownWeek ? `Week ${shownWeek}` : 'Kickoff'}
