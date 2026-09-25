@@ -24,6 +24,8 @@ export interface TeamStanding {
   weeklyScore?: number;
   yetToPlay?: number;
   inProgress?: number;
+  projectedRemaining?: number;
+  unprojectedPlayers?: number;
   // Supports both old API (string[]) and new API (PlayerInfo[])
   yetToPlayNames?: (string | PlayerInfo)[];
   inProgressNames?: (string | PlayerInfo)[];

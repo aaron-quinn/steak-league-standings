@@ -6,8 +6,9 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scrollbar-gutter: stable;
   }
-  
+
   body {
     @apply bg-black text-gray-300;
   }

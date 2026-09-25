@@ -8,9 +8,8 @@ interface StandingsState {
   players: Player[];
   live: boolean;
   setYear: (year: number) => void;
-  setStandings: (standings: StandingsData) => void;
+  setStandingsSnapshot: (standings: StandingsData, live: boolean) => void;
   setPlayers: (players: Player[]) => void;
-  setLive: (live: boolean) => void;
 }
 
 export const useStandingsStore = create<StandingsState>((set) => ({
@@ -19,7 +18,11 @@ export const useStandingsStore = create<StandingsState>((set) => ({
   players: [],
   live: false,
   setYear: (year) => set({ year }),
-  setStandings: (standings) => set({ standings }),
+  setStandingsSnapshot: (standings, live) =>
+    set((state) =>
+      state.standings === standings && state.live === live
+        ? state
+        : { standings, live },
+    ),
   setPlayers: (players) => set({ players }),
-  setLive: (live) => set({ live }),
 }));

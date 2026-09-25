@@ -1,4 +1,6 @@
+import clsx from 'clsx';
 import TeamMatchup from '@/types/TeamMatchup';
+import { splitScore } from '@/utils/format-score';
 
 interface Props {
   matchups: TeamMatchup[][];
@@ -16,61 +18,73 @@ export default function MatchupTeams({
   currentMatchup,
   setCurrentMatchup,
 }: Props) {
-  function TeamRow({ team }: { team: TeamMatchup }) {
-    const manager = managersMap.get(team.franchiseID);
-    return (
-      <div className="flex flex-row justify-between sm:gap-x-6">
-        <div
-          className={`text-[10px] leading-tight sm:text-xs font-bold ${
-            manager?.steak ? 'text-blue-400' : 'text-gray-100'
-          }`}
-        >
-          {manager?.name}
-        </div>
-        <div className="text-[10px] leading-tight sm:text-xs text-gray-100 font-bold">
-          {Number(team.score).toFixed(1)}
-          {team.yetToPlay === 0 && team.inProgress == 0 && ' F'}
-        </div>
-      </div>
+  function selectMatchup(idx: number, matchup: TeamMatchup[]) {
+    setCurrentMatchup(idx);
+    if (matchup.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    params.set('id', matchup.map((t) => t.franchiseID).join('_'));
+    window.history.replaceState(
+      {},
+      '',
+      `${window.location.pathname}?${params.toString()}`,
     );
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-4">
-      {matchups.map((matchup, idx) => (
-        <button
-          type="button"
-          key={idx}
-          className={`bg-gray-900/80 rounded-lg p-2 sm:p-4 flex flex-col gap-y-2 min-w-[140px] sm:min-w-[200px] text-left${currentMatchup === idx ? ' ring-2 ring-blue-400' : ''}`}
-          onClick={() => {
-            setCurrentMatchup(idx);
-            if (matchup.length >= 2) {
-              const team1Id = matchup[0].franchiseID;
-              const team2Id = matchup[1].franchiseID;
-              const params = new URLSearchParams(window.location.search);
-              params.set('id', `${team1Id}_${team2Id}`);
-              window.history.replaceState(
-                {},
-                '',
-                `${window.location.pathname}?${params.toString()}`,
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+      {matchups.map((matchup, idx) => {
+        const selected = currentMatchup === idx;
+        const topScore = Math.max(...matchup.map((t) => Number(t.score) || 0));
+        const tied =
+          matchup.length > 1 &&
+          matchup.every((t) => (Number(t.score) || 0) === topScore);
+
+        return (
+          <button
+            type="button"
+            key={idx}
+            aria-pressed={selected}
+            onClick={() => selectMatchup(idx, matchup)}
+            className={clsx(
+              'flex flex-col gap-1 rounded-lg border px-2.5 py-2 sm:px-3 sm:py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
+              selected
+                ? 'border-emerald-600/50 bg-emerald-950/30'
+                : 'border-gray-800/60 bg-gray-950/30 hover:border-gray-700/80 hover:bg-gray-900/40',
+            )}
+          >
+            {matchup.map((team) => {
+              const manager = managersMap.get(team.franchiseID);
+              const leading = !tied && (Number(team.score) || 0) === topScore;
+              const { int, dec } = splitScore(team.score);
+              return (
+                <div
+                  key={team.franchiseID}
+                  className="flex items-baseline justify-between gap-2"
+                >
+                  <span
+                    className={clsx(
+                      'truncate text-[11px] sm:text-sm',
+                      manager?.steak ? 'text-emerald-400' : 'text-gray-300',
+                      leading ? 'font-semibold' : 'opacity-70',
+                    )}
+                  >
+                    {manager?.name ?? 'Unknown'}
+                  </span>
+                  <span
+                    className={clsx(
+                      'shrink-0 font-mono tabular-nums text-[11px] sm:text-sm',
+                      leading ? 'text-gray-100 font-semibold' : 'text-gray-500',
+                    )}
+                  >
+                    {int}
+                    <span className="text-[0.8em] opacity-60">.{dec}</span>
+                  </span>
+                </div>
               );
-            } else if (matchup.length === 1) {
-              const team1Id = matchup[0].franchiseID;
-              const params = new URLSearchParams(window.location.search);
-              params.set('id', `${team1Id}`);
-              window.history.replaceState(
-                {},
-                '',
-                `${window.location.pathname}?${params.toString()}`,
-              );
-            }
-          }}
-        >
-          {matchup.map((team, tIdx) => (
-            <TeamRow key={tIdx} team={team} />
-          ))}
-        </button>
-      ))}
+            })}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -38,12 +38,12 @@ export default function ChampionsList() {
       {championsList.map((manager) => (
         <li
           key={`${manager.name}-${manager.year}`}
-          className="px-2 sm:px-3 py-0.5 sm:py-1 w-full flex items-center"
+          className="px-2.5 sm:px-3 py-1 w-full flex items-center gap-3"
         >
-          <span className="w-9 sm:w-10 text-blue-500 font-mono text-[10px] sm:text-xs">
+          <span className="w-9 sm:w-10 shrink-0 text-gray-500 font-mono tabular-nums text-[10px] sm:text-xs">
             {manager.year}
           </span>
-          <span className="text-gray-200 truncate">{manager.name}</span>
+          <span className="text-gray-300 truncate">{manager.name}</span>
         </li>
       ))}
     </ul>

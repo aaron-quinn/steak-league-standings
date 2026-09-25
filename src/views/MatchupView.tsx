@@ -1,14 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import LeagueLogo from '../components/LeagueLogo';
 import ViewSwitcher from '../components/ViewSwitcher';
-import LoadingScreen from '../components/LoadingScreen';
 import { useStandingsStore } from '../stores/standings';
 import { getMatchups } from '@/api/matchups';
+import { getWeek } from '@/api';
 import MatchupTeams from '@/components/MatchupTeams';
 import { useEffect, useMemo, useState } from 'react';
 import CurrentMatchup from '@/components/CurrentMatchup';
 import ErrorScreen from '@/components/ErrorScreen';
 import MatchupsPlaceholder from '@/components/MatchupsPlaceholder';
+import MatchupsSkeleton from '@/components/MatchupsSkeleton';
+import SectionLabel from '@/components/SectionLabel';
+import HeaderStatus from '@/components/HeaderStatus';
 import getManagers from '@/data/managers';
 import TeamMatchup from '@/types/TeamMatchup';
 
@@ -21,11 +24,19 @@ export default function MatchupView({}: MatchupViewProps) {
 
   const {
     data: matchups,
-    isLoading,
     isError,
+    isFetching,
+    isPlaceholderData,
+    dataUpdatedAt,
   } = useQuery({
     queryKey: ['matchups', year],
     queryFn: () => getMatchups(matchupsAPIURL),
+    placeholderData: keepPreviousData,
+  });
+
+  const { data: weekData } = useQuery({
+    queryKey: ['week', year],
+    queryFn: () => getWeek(year),
   });
 
   const [currentMatchup, setCurrentMatchup] = useState<number | null>(null);
@@ -79,11 +90,7 @@ export default function MatchupView({}: MatchupViewProps) {
     return teamMap;
   }, [year]);
 
-  if (isLoading) {
-    return <LoadingScreen title="Loading Matchups..." />;
-  }
-
-  if (isError || !matchups) {
+  if (isError && !matchups) {
     return (
       <ErrorScreen
         title="Matchups Unavailable"
@@ -92,44 +99,93 @@ export default function MatchupView({}: MatchupViewProps) {
     );
   }
 
+  if (!matchups) {
+    return (
+      <PageShell>
+        <MatchupsSkeleton />
+      </PageShell>
+    );
+  }
+
+  const showingPreviousMatchups = isPlaceholderData && isFetching;
+
   const hasMatchups = matchups.length > 0;
 
   return (
-    <div className="bg-black min-h-screen py-3 px-2 sm:py-4 sm:px-3 lg:py-8 lg:px-8">
-      <div className="w-full max-w-[375px] sm:max-w-none sm:w-fit mx-auto">
-        {/* Header row - logo and view switcher */}
-        <div className="flex items-center justify-between lg:justify-start gap-1.5 sm:gap-2 lg:gap-4 mb-3 sm:mb-4 lg:mb-6">
-          <LeagueLogo />
-          <ViewSwitcher />
-        </div>
+    <PageShell
+      status={
+        <HeaderStatus
+          week={weekData?.week}
+          updatedAt={showingPreviousMatchups ? undefined : dataUpdatedAt}
+          inProgress={matchups.some((matchup) =>
+            matchup.some((team) => team.inProgress > 0),
+          )}
+        />
+      }
+    >
+      {showingPreviousMatchups && (
+        <span className="sr-only" role="status">
+          Updating matchups
+        </span>
+      )}
 
-        {/* Main content grid */}
-        <div className="grid grid-cols-1 gap-4 lg:gap-6">
-          {!hasMatchups ? (
-            <MatchupsPlaceholder />
-          ) : (
-            <>
-              {/* All Possible Matchups */}
+      <div
+        className="grid grid-cols-1 gap-6 lg:gap-8"
+        aria-busy={showingPreviousMatchups}
+      >
+        {!hasMatchups ? (
+          <MatchupsPlaceholder />
+        ) : (
+          <>
+            {/* All Possible Matchups */}
+            <div>
+              <SectionLabel tone="green">
+                {weekData?.week ? `Week ${weekData.week}` : 'Scoreboard'}
+              </SectionLabel>
               <MatchupTeams
                 matchups={matchups}
                 managersMap={managersMap}
                 currentMatchup={currentMatchup}
                 setCurrentMatchup={setCurrentMatchup}
               />
-              {/* Current Matchup View */}
-              {currentMatchup !== null && matchups[currentMatchup] ? (
-                <CurrentMatchup
-                  matchup={matchups[currentMatchup]}
-                  managersMap={managersMap}
-                />
-              ) : (
-                <div className="text-center text-gray-400 py-8">
-                  No matchup selected.
-                </div>
-              )}
-            </>
-          )}
+            </div>
+            {/* Current Matchup View */}
+            {currentMatchup !== null && matchups[currentMatchup] ? (
+              <CurrentMatchup
+                matchup={matchups[currentMatchup]}
+                managersMap={managersMap}
+              />
+            ) : (
+              <div className="text-center text-sm text-gray-500 py-8">
+                No matchup selected.
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </PageShell>
+  );
+}
+
+function PageShell({
+  children,
+  status,
+}: {
+  children: React.ReactNode;
+  status?: React.ReactNode;
+}) {
+  return (
+    <div className="bg-black min-h-screen py-3 px-2 sm:py-4 sm:px-3 lg:py-8 lg:px-8">
+      <div className="w-full max-w-[375px] sm:max-w-6xl mx-auto">
+        {/* Header row - logo and view switcher */}
+        <div className="flex items-end justify-between lg:justify-start gap-1.5 sm:gap-2 lg:gap-4 mb-3 sm:mb-4 lg:mb-6 max-[350px]:flex-col max-[350px]:items-start">
+          <div className="flex h-8 lg:h-10 shrink-0 items-center">
+            <LeagueLogo />
+          </div>
+          <ViewSwitcher />
+          {status}
         </div>
+        {children}
       </div>
     </div>
   );

@@ -1,44 +1,106 @@
 import clsx from 'clsx';
+import { Link, useLocation } from 'react-router-dom';
+import {
+  useSlidingIndicator,
+  type IndicatorPosition,
+} from '@/hooks/useSlidingIndicator';
+import { pillClassName } from './SegmentedTabs';
 
-export default function ViewSwitcher() {
-  const currentPage =
-    window.location.pathname.split('/').filter(Boolean).pop() || '';
+interface ViewSwitcherProps {
+  projectionsAvailable?: boolean;
+  onNavigate?: () => void;
+}
 
-  const tabs = [
-    {
-      name: 'Official',
-      fullName: 'Official Standings',
-      href: '/',
-      current: currentPage === '',
-    },
-    {
-      name: 'Live',
-      fullName: 'Live Standings',
-      href: '/live',
-      current: currentPage === 'live',
-    },
-  ];
+// Each view renders its own switcher, so the pill's last position lives
+// outside the component to let it slide across page changes.
+const lastIndicator: { current: IndicatorPosition } = { current: null };
+
+export default function ViewSwitcher({
+  projectionsAvailable = true,
+  onNavigate,
+}: ViewSwitcherProps) {
+  const { pathname, search } = useLocation();
+  const isOfficial = pathname === '/';
+  const isLive = pathname === '/live';
+  const isMatchups = pathname === '/matchups';
+  const wantsProjected =
+    new URLSearchParams(search).get('view') === 'projected';
+  const isProjected = isLive && wantsProjected && projectionsAvailable;
+  const isLiveCurrent = isLive && !isProjected;
+
+  const activeKey = isOfficial
+    ? 'official'
+    : isLiveCurrent
+      ? 'live'
+      : isProjected
+        ? 'projected'
+        : isMatchups
+          ? 'matchups'
+          : null;
+
+  const { groupRef, indicatorRef } = useSlidingIndicator(
+    [activeKey, projectionsAvailable],
+    lastIndicator,
+  );
+
+  const segmentClasses =
+    'relative z-10 inline-flex h-6 lg:h-8 items-center justify-center rounded-md px-2 sm:px-2.5 lg:px-3 text-[10px] sm:text-xs lg:text-sm font-medium whitespace-nowrap transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400';
+  const activeClasses = 'text-gray-50';
+  const inactiveClasses = 'text-gray-500 hover:text-gray-200';
+
+  const segment = (key: string, to: string, label: string) => {
+    const active = activeKey === key;
+    return (
+      <Link
+        to={to}
+        aria-current={active ? 'page' : undefined}
+        data-active={active || undefined}
+        onClick={active ? undefined : onNavigate}
+        className={clsx(
+          segmentClasses,
+          active ? activeClasses : inactiveClasses,
+        )}
+      >
+        {label}
+      </Link>
+    );
+  };
 
   return (
-    <div className="antialiased">
-      <nav className="flex space-x-0.5 sm:space-x-1" aria-label="Tabs">
-        {tabs.map((tab) => (
-          <a
-            key={tab.name}
-            href={tab.href}
+    <nav
+      className="flex h-8 lg:h-10 items-center antialiased"
+      aria-label="Standings views"
+    >
+      <div
+        ref={groupRef}
+        className="relative inline-flex h-8 lg:h-10 items-center rounded-lg border border-gray-800 bg-gray-950 p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
+        role="group"
+        aria-label="Standings mode"
+      >
+        <span ref={indicatorRef} aria-hidden="true" className={pillClassName} />
+        {segment('official', '/', 'Official')}
+        {segment('live', '/live', 'Live')}
+        {projectionsAvailable ? (
+          segment('projected', '/live?view=projected', 'Projected')
+        ) : (
+          <button
+            type="button"
+            disabled
+            title="Player projections are unavailable"
             className={clsx(
-              'px-2 py-1 sm:px-2.5 sm:py-1.5 lg:px-3 lg:py-1.5 font-medium text-[11px] sm:text-xs lg:text-sm rounded-md whitespace-nowrap transition-colors',
-              tab.current
-                ? 'bg-blue-600/80 text-gray-100'
-                : 'text-gray-500 hover:text-blue-400/80',
+              segmentClasses,
+              'text-gray-500 disabled:opacity-40 disabled:cursor-not-allowed',
             )}
-            aria-current={tab.current ? 'page' : undefined}
           >
-            <span className="lg:hidden">{tab.name}</span>
-            <span className="hidden lg:inline">{tab.fullName}</span>
-          </a>
-        ))}
-      </nav>
-    </div>
+            Projected
+          </button>
+        )}
+        <span
+          aria-hidden="true"
+          className="mx-0.5 h-3.5 lg:h-4 w-px shrink-0 bg-gray-800"
+        />
+        {segment('matchups', '/matchups', 'Matchups')}
+      </div>
+    </nav>
   );
 }

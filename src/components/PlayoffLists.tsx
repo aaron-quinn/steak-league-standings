@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
-import clsx from 'clsx';
 import { useStandingsStore } from '../stores/standings';
 import getManagers from '../data/managers';
 import getPlayoffSlots from '../utils/get-playoff-slots';
 import PlayoffList from './PlayoffList';
+import SectionLabel from './SectionLabel';
+import SegmentedTabs from './SegmentedTabs';
 import type { TeamForPlayoff } from '../types/TeamForPlayoff';
 
 type League = 'madison' | 'la';
@@ -76,40 +77,25 @@ export default function PlayoffLists() {
   const [activeLeague, setActiveLeague] = useState<League>('madison');
 
   return (
-    <div className="rounded-lg overflow-hidden border border-gray-800/60">
-      <div className="flex border-b border-gray-800/60">
-        <button
-          onClick={() => setActiveLeague('madison')}
-          className={clsx(
-            'flex-1 py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-colors',
-            activeLeague === 'madison'
-              ? 'text-blue-400/80 bg-blue-950/20'
-              : 'text-gray-500 hover:text-gray-400',
+    <section aria-label="Playoff picture">
+      <SectionLabel>Playoff Picture</SectionLabel>
+      <div className="rounded-lg border border-gray-800/60 bg-gray-950/30">
+        <div className="p-1.5 sm:p-2 border-b border-gray-800/60">
+          <SegmentedTabs
+            label="League"
+            tabs={[
+              { value: 'madison', label: 'Madison' },
+              { value: 'la', label: 'LA' },
+            ]}
+            value={activeLeague}
+            onChange={setActiveLeague}
+          />
+          {live && (
+            <p className="mt-1.5 sm:mt-2 px-1 text-[10px] sm:text-xs text-gray-500 leading-snug text-pretty text-center">
+              Assumes whoever is winning their matchup right now banks the win.
+            </p>
           )}
-        >
-          Madison
-        </button>
-        <button
-          onClick={() => setActiveLeague('la')}
-          className={clsx(
-            'flex-1 py-1.5 sm:py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-colors',
-            activeLeague === 'la'
-              ? 'text-blue-400/80 bg-blue-950/20'
-              : 'text-gray-500 hover:text-gray-400',
-          )}
-        >
-          LA
-        </button>
-      </div>
-      {live && (
-        <div className="bg-blue-950/10 border-b border-gray-800/60 px-3 py-2 text-center">
-          <p className="text-[10px] sm:text-xs text-gray-500/80 italic leading-tight max-w-[300px] text-pretty mx-auto">
-            These standings assume whoever is currently winning their matchup
-            will bank a win.
-          </p>
         </div>
-      )}
-      <div>
         {activeLeague === 'madison' ? (
           <PlayoffList
             playoffTeams={playoffsMadison}
@@ -122,6 +108,6 @@ export default function PlayoffLists() {
           />
         )}
       </div>
-    </div>
+    </section>
   );
 }

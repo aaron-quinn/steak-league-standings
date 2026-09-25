@@ -14,7 +14,12 @@ const gameTimeFormat = new Intl.DateTimeFormat('en-US', {
   timeZoneName: 'short',
 });
 
-export default async function getLiveScores({ season, leagueID, prefix = '' }) {
+export default async function getLiveScores({
+  season,
+  leagueID,
+  prefix = '',
+  includeProjections = false,
+}) {
   try {
     // Get the live scores from the MFL API
     const liveScoresURL = `/${season}/export?TYPE=liveScoring&L=${leagueID}&JSON=1`;
@@ -37,13 +42,37 @@ export default async function getLiveScores({ season, leagueID, prefix = '' }) {
     const week = liveScoresResponse.liveScoring.week;
 
     const scheduleURL = `/${season}/export?TYPE=nflSchedule&W=${week}&JSON=1`;
-    const [scheduleResponse, playerMap] = await Promise.all([
-      getData(scheduleURL, { cacheSeconds: SCHEDULE_CACHE_SECONDS }),
-      getLiveScoringPlayers({
-        season,
-        liveScoring: liveScoresResponse.liveScoring,
-      }),
-    ]);
+    const projectionsURL = `/${season}/export?TYPE=projectedScores&L=${leagueID}&W=${week}&JSON=1`;
+    const [scheduleResponse, playerMap, projectionsResponse] =
+      await Promise.all([
+        getData(scheduleURL, { cacheSeconds: SCHEDULE_CACHE_SECONDS }),
+        getLiveScoringPlayers({
+          season,
+          liveScoring: liveScoresResponse.liveScoring,
+        }),
+        // Live standings still work if MFL temporarily cannot serve projections.
+        includeProjections
+          ? getData(projectionsURL, { cacheSeconds: 60 * 60 }).catch(
+              (error) => {
+                console.error('Unable to load projected scores', error);
+                return null;
+              },
+            )
+          : null,
+      ]);
+
+    const projectedScores = projectionsResponse?.projectedScores?.playerScore;
+    const projectionByPlayer = new Map(
+      (Array.isArray(projectedScores)
+        ? projectedScores
+        : projectedScores
+          ? [projectedScores]
+          : []
+      )
+        .filter((player) => player.id && player.score !== '')
+        .map((player) => [player.id, Number(player.score)]),
+    );
+    const hasProjections = projectionByPlayer.size > 0;
 
     const teamSchedule = {};
     if (scheduleResponse.nflSchedule && scheduleResponse.nflSchedule.matchup) {
@@ -66,14 +95,16 @@ export default async function getLiveScores({ season, leagueID, prefix = '' }) {
 
       let yetToPlay = 0;
       let inProgress = 0;
+      let projectedRemaining = 0;
+      let unprojectedPlayers = 0;
       const yetToPlayNames = [];
       const inProgressNames = [];
 
       const playersList = Array.isArray(teamPlayers)
         ? teamPlayers
         : teamPlayers
-        ? [teamPlayers]
-        : [];
+          ? [teamPlayers]
+          : [];
 
       playersList.forEach((player) => {
         if (player.status === 'starter') {
@@ -82,6 +113,18 @@ export default async function getLiveScores({ season, leagueID, prefix = '' }) {
           // before doing any per-player work
           if (!(remaining > 0)) {
             return;
+          }
+
+          if (hasProjections) {
+            const projectedScore = projectionByPlayer.get(player.id);
+            if (Number.isFinite(projectedScore)) {
+              // MFL gives a full-game projection. Estimate the unused share
+              // from the player's game clock; actual points are already in score.
+              projectedRemaining +=
+                (projectedScore * Math.min(remaining, 3600)) / 3600;
+            } else {
+              unprojectedPlayers++;
+            }
           }
 
           const mflPlayer = playerMap.get(player.id);
@@ -123,6 +166,10 @@ export default async function getLiveScores({ season, leagueID, prefix = '' }) {
         inProgress,
         yetToPlayNames,
         inProgressNames,
+        ...(hasProjections && {
+          projectedRemaining: Math.round(projectedRemaining * 100) / 100,
+          unprojectedPlayers,
+        }),
       };
     };
 

@@ -1,22 +1,21 @@
+import { Link } from 'react-router-dom';
+
 export default function LeagueLogo() {
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+    <Link
+      to="/"
+      className="flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 shrink-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+      aria-label="Steak League home (Official standings)"
+    >
       <img
-        className="w-5 sm:w-6 lg:w-10 opacity-70"
+        className="w-5 sm:w-6 lg:w-9"
         src="/steak.svg"
-        alt="Steak League"
+        alt=""
+        aria-hidden="true"
       />
-      <h1 className="text-blue-100 text-sm sm:text-base lg:text-xl font-semibold tracking-tight whitespace-nowrap">
+      <h1 className="text-gray-50 text-sm sm:text-base lg:text-xl font-semibold tracking-[-0.02em] whitespace-nowrap">
         Steak League
       </h1>
-      <a
-        href="/matchups"
-        title="Iceman was here"
-        className="opacity-70 text-xs sm:text-base lg:text-lg"
-        role="link"
-      >
-        ⚔️
-      </a>
-    </div>
+    </Link>
   );
 }

@@ -52,49 +52,53 @@ export default function PlayoffList({
   bubbleTeams,
 }: PlayoffListProps) {
   return (
-    <div className="py-1.5 sm:py-2 antialiased">
-      {playoffTeams.map(([qualifier, name], index) => (
-        <div
-          key={name}
-          className="py-1 sm:py-1.5 px-2 sm:px-3 flex items-start gap-1.5 sm:gap-2"
-        >
-          <span className="text-blue-500/70 font-mono text-[10px] sm:text-xs w-4 sm:w-5 relative top-0.5 sm:top-1 shrink-0">
-            #{index + 1}
-          </span>
-          <div className="min-w-0">
-            <div className="text-gray-400 text-xs sm:text-sm truncate">
-              {name}
-            </div>
-            <div className="text-gray-600 text-[10px] sm:text-xs truncate">
-              {qualifier}
-            </div>
-          </div>
-        </div>
-      ))}
-
-      {bubbleTeams.length > 0 && (
-        <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-800/40">
-          <div className="px-2 sm:px-3 pb-1.5 sm:pb-2 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide">
-            In the Race
-          </div>
-          {bubbleTeams.map((team) => (
-            <div
-              key={team.name}
-              className="py-1 sm:py-1.5 px-2 sm:px-3 flex items-start gap-1.5 sm:gap-2"
-            >
-              <span className="text-orange-500/60 font-mono text-[10px] sm:text-xs w-4 sm:w-5 relative top-0.5 sm:top-1 shrink-0">
-                •
-              </span>
-              <div className="min-w-0">
-                <div className="text-gray-500 text-xs sm:text-sm truncate">
-                  {team.name}
-                </div>
-                <div className="text-gray-600 text-[10px] sm:text-xs truncate">
-                  {formatGap(team)}
-                </div>
+    <div className="antialiased">
+      <ol className="divide-y divide-gray-800/40">
+        {playoffTeams.map(([qualifier, name], index) => (
+          <li
+            key={name}
+            className="py-2 px-2.5 sm:px-3 flex items-center gap-2.5 sm:gap-3"
+          >
+            <span className="size-5 sm:size-6 rounded-full bg-gray-800/50 text-gray-400 font-mono text-[10px] sm:text-xs flex items-center justify-center shrink-0">
+              {index + 1}
+            </span>
+            <div className="min-w-0">
+              <div className="text-gray-300 text-xs sm:text-sm font-medium truncate">
+                {name}
+              </div>
+              <div className="text-gray-500 text-[10px] sm:text-xs truncate">
+                {qualifier}
               </div>
             </div>
-          ))}
+          </li>
+        ))}
+      </ol>
+
+      {bubbleTeams.length > 0 && (
+        <div className="border-t border-gray-800/60 pt-2.5 sm:pt-3">
+          <div className="px-2.5 sm:px-3 text-[10px] sm:text-[11px] font-medium text-gray-500 uppercase tracking-widest">
+            In the Race
+          </div>
+          <ul className="divide-y divide-gray-800/40">
+            {bubbleTeams.map((team) => (
+              <li
+                key={team.name}
+                className="py-2 px-2.5 sm:px-3 flex items-center gap-2.5 sm:gap-3"
+              >
+                <span className="size-5 sm:size-6 flex items-center justify-center shrink-0">
+                  <span className="size-1.5 rounded-full bg-amber-500/60" />
+                </span>
+                <div className="min-w-0">
+                  <div className="text-gray-400 text-xs sm:text-sm truncate">
+                    {team.name}
+                  </div>
+                  <div className="text-gray-600 text-[10px] sm:text-xs truncate">
+                    {formatGap(team)}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

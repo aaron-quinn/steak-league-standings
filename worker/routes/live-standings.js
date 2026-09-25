@@ -51,6 +51,7 @@ export default async function standingsYear(c) {
       season,
       leagueID: league.id,
       prefix: `${league.name}`,
+      includeProjections: true,
     });
 
     Object.entries(teamList).map((team) => {
@@ -79,6 +80,8 @@ export default async function standingsYear(c) {
       teamList[teamID].inProgress = liveData.inProgress;
       teamList[teamID].yetToPlayNames = liveData.yetToPlayNames;
       teamList[teamID].inProgressNames = liveData.inProgressNames;
+      teamList[teamID].projectedRemaining = liveData.projectedRemaining;
+      teamList[teamID].unprojectedPlayers = liveData.unprojectedPlayers;
 
       return team;
     });

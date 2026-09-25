@@ -1,4 +1,12 @@
-import { useMemo, useState, useRef, useEffect } from 'react';
+import {
+  forwardRef,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useImperativeHandle,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { useStandingsStore } from '../stores/standings';
 import getManagers from '../data/managers';
@@ -343,273 +351,242 @@ function RemainingPlayersIndicator({
   );
 }
 
-export default function StandingsList() {
-  const standings = useStandingsStore((state) => state.standings);
-  const year = useStandingsStore((state) => state.year);
-  const live = useStandingsStore((state) => state.live);
+export interface StandingsListHandle {
+  capturePositions: () => void;
+}
 
-  const {
-    teamsWithGap,
-    steakLineTeam,
-    selfBuyerSpot,
-    shouldShowRemainingPlayers,
-  } = useMemo(() => {
-    const managers = getManagers();
+interface StandingsListProps {
+  projected: boolean;
+}
 
-    const steakTeams = managers
-      .filter((t) => t.teams[year] && 'steak' in t.teams[year])
-      .map((t) => {
-        const teamYear = t.teams[year];
-        const league = teamYear.league || '';
-        const teamID = teamYear.teamID || '';
-        const division = teamYear.division || '';
-        const id = `${league.toLowerCase()}${teamID}`;
-        const teamStanding = standings[id] || {
-          points: 0,
-          wins: 0,
-          losses: 0,
-          ties: 0,
-        };
+const StandingsList = forwardRef<StandingsListHandle, StandingsListProps>(
+  function StandingsList({ projected }, ref) {
+    const standings = useStandingsStore((state) => state.standings);
+    const year = useStandingsStore((state) => state.year);
+    const live = useStandingsStore((state) => state.live);
+    const listRef = useRef<HTMLDivElement>(null);
+    const previousPositions = useRef<Map<string, DOMRect> | null>(null);
+    const rowAnimations = useRef<Animation[]>([]);
+    const showProjected = live && projected;
+
+    useImperativeHandle(ref, () => ({
+      capturePositions: () => {
+        const positions = new Map<string, DOMRect>();
+        listRef.current
+          ?.querySelectorAll<HTMLElement>('[data-standings-team]')
+          .forEach((row) => {
+            const teamId = row.dataset.standingsTeam;
+            if (teamId) positions.set(teamId, row.getBoundingClientRect());
+          });
+        previousPositions.current = positions;
+      },
+    }));
+
+    useLayoutEffect(() => {
+      const positions = previousPositions.current;
+      if (!positions) return;
+      previousPositions.current = null;
+
+      rowAnimations.current.forEach((animation) => animation.cancel());
+      rowAnimations.current = [];
+
+      const reduceMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
+      listRef.current
+        ?.querySelectorAll<HTMLElement>('[data-standings-team]')
+        .forEach((row) => {
+          const oldRect = positions.get(row.dataset.standingsTeam ?? '');
+          if (!oldRect) return;
+
+          const newRect = row.getBoundingClientRect();
+          const deltaX = oldRect.left - newRect.left;
+          const deltaY = oldRect.top - newRect.top;
+          if (Math.abs(deltaX) < 1 && Math.abs(deltaY) < 1) return;
+
+          row.style.zIndex = '1';
+          const animation = row.animate(
+            reduceMotion
+              ? [{ opacity: 0.65 }, { opacity: 1 }]
+              : [
+                  { transform: `translate(${deltaX}px, ${deltaY}px)` },
+                  { transform: 'translate(0px, 0px)' },
+                ],
+            {
+              duration: reduceMotion ? 150 : 240,
+              easing: reduceMotion
+                ? 'cubic-bezier(0.23, 1, 0.32, 1)'
+                : 'cubic-bezier(0.77, 0, 0.175, 1)',
+            },
+          );
+          const clearStacking = () => {
+            row.style.zIndex = '';
+          };
+          animation.onfinish = clearStacking;
+          animation.oncancel = clearStacking;
+          rowAnimations.current.push(animation);
+        });
+    }, [showProjected, standings]);
+
+    useEffect(
+      () => () =>
+        rowAnimations.current.forEach((animation) => animation.cancel()),
+      [],
+    );
+
+    const {
+      teamsWithGap,
+      steakLineTeam,
+      selfBuyerSpot,
+      shouldShowRemainingPlayers,
+    } = useMemo(() => {
+      const managers = getManagers();
+
+      const steakTeams = managers
+        .filter((t) => t.teams[year] && 'steak' in t.teams[year])
+        .map((t) => {
+          const teamYear = t.teams[year];
+          const league = teamYear.league || '';
+          const teamID = teamYear.teamID || '';
+          const division = teamYear.division || '';
+          const id = `${league.toLowerCase()}${teamID}`;
+          const teamStanding = standings[id] || {
+            points: 0,
+            wins: 0,
+            losses: 0,
+            ties: 0,
+          };
+          const actualPoints = Number(teamStanding.points) || 0;
+          return {
+            id,
+            name: t.name,
+            league,
+            division,
+            teamID,
+            points:
+              actualPoints +
+              (showProjected ? (teamStanding.projectedRemaining ?? 0) : 0),
+            actualPoints,
+            wins: teamStanding.wins,
+            losses: teamStanding.losses,
+            ties: teamStanding.ties,
+            record: `${teamStanding.wins}-${teamStanding.losses}-${teamStanding.ties}`,
+            teams: t.teams,
+            // Live player data
+            weeklyScore: teamStanding.weeklyScore,
+            yetToPlay: teamStanding.yetToPlay,
+            inProgress: teamStanding.inProgress,
+            yetToPlayNames: teamStanding.yetToPlayNames,
+            inProgressNames: teamStanding.inProgressNames,
+            projectedRemaining: teamStanding.projectedRemaining,
+            unprojectedPlayers: teamStanding.unprojectedPlayers,
+          };
+        })
+        .sort((a, b) => {
+          if (a.points === b.points) {
+            return a.name.localeCompare(b.name);
+          }
+          return b.points - a.points;
+        });
+
+      const teams = [...steakTeams];
+
+      // Calculate the number of teams that get a steak
+      const numTeamsGettingASteak = Math.floor(teams.length / 2);
+
+      // Is there a self-buyer spot
+      const selfBuyer = teams.length % 2 !== 0;
+
+      const steakLine = selfBuyer
+        ? numTeamsGettingASteak
+        : numTeamsGettingASteak - 1;
+
+      // Calculate the points scored by the team at the steak line
+      const steakLinePts = teams[steakLine]?.points || 0;
+
+      // Add the distance from the steak line
+      const withGap: TeamWithGap[] = teams.map((t) => {
+        const gap = Math.round((t.points - steakLinePts) * 10) / 10;
+        const gapOperator = gap > 0 ? '+' : '';
+        // Two decimals, matching the gap column so the numbers line up
+        const pointsPieces = t.points.toFixed(2).split('.');
+        const gapPieces = gap.toFixed(2).toString().split('.');
         return {
-          id,
-          name: t.name,
-          league,
-          division,
-          teamID,
-          points: teamStanding.points,
-          wins: teamStanding.wins,
-          losses: teamStanding.losses,
-          ties: teamStanding.ties,
-          record: `${teamStanding.wins}-${teamStanding.losses}-${teamStanding.ties}`,
-          teams: t.teams,
-          // Live player data
-          weeklyScore: teamStanding.weeklyScore,
-          yetToPlay: teamStanding.yetToPlay,
-          inProgress: teamStanding.inProgress,
-          yetToPlayNames: teamStanding.yetToPlayNames,
-          inProgressNames: teamStanding.inProgressNames,
+          ...t,
+          gap: Number(gap) === 0 ? 0 : gap.toFixed(2),
+          gapOperator,
+          pointsInt: pointsPieces[0],
+          pointsDec: pointsPieces[1],
+          gapInt: gapPieces[0],
+          gapDec: gapPieces[1],
+          gapNum: Math.abs(gap),
         };
-      })
-      .sort((a, b) => {
-        if (a.points === b.points) {
-          return a.name.localeCompare(b.name);
-        }
-        return b.points - a.points;
       });
 
-    const teams = [...steakTeams];
+      // Calculate max gaps for heatmap intensity
+      const maxPositiveGap = Math.max(
+        ...withGap.slice(0, steakLine).map((t) => t.gapNum),
+        1,
+      );
+      const maxNegativeGap = Math.max(
+        ...withGap
+          .slice(selfBuyer ? steakLine + 1 : steakLine)
+          .map((t) => t.gapNum),
+        1,
+      );
 
-    // Calculate the number of teams that get a steak
-    const numTeamsGettingASteak = Math.floor(teams.length / 2);
+      // Check if all teams are final with a score of 0
+      const allTeamsFinalWithZeroScore = withGap.every((team) => {
+        const yetToPlay = team.yetToPlay || 0;
+        const inProgress = team.inProgress || 0;
+        const remaining = yetToPlay + inProgress;
+        const weeklyScore = team.weeklyScore ?? 0;
+        return remaining === 0 && weeklyScore === 0;
+      });
 
-    // Is there a self-buyer spot
-    const selfBuyer = teams.length % 2 !== 0;
-
-    const steakLine = selfBuyer
-      ? numTeamsGettingASteak
-      : numTeamsGettingASteak - 1;
-
-    // Calculate the points scored by the team at the steak line
-    const steakLinePts = teams[steakLine]?.points || 0;
-
-    // Add the distance from the steak line
-    const withGap: TeamWithGap[] = teams.map((t) => {
-      const gap = Math.round((t.points - steakLinePts) * 10) / 10;
-      const gapOperator = gap > 0 ? '+' : '';
-      // Two decimals, matching the gap column so the numbers line up
-      const pointsPieces = t.points.toFixed(2).split('.');
-      const gapPieces = gap.toFixed(2).toString().split('.');
       return {
-        ...t,
-        gap: Number(gap) === 0 ? 0 : gap.toFixed(2),
-        gapOperator,
-        pointsInt: pointsPieces[0],
-        pointsDec: pointsPieces[1],
-        gapInt: gapPieces[0],
-        gapDec: gapPieces[1],
-        gapNum: Math.abs(gap),
+        teamsWithGap: withGap,
+        steakLineTeam: steakLine,
+        selfBuyerSpot: selfBuyer,
+        maxPositiveGap,
+        maxNegativeGap,
+        shouldShowRemainingPlayers: !allTeamsFinalWithZeroScore,
       };
-    });
+    }, [standings, year, showProjected]);
 
-    // Calculate max gaps for heatmap intensity
-    const maxPositiveGap = Math.max(
-      ...withGap.slice(0, steakLine).map((t) => t.gapNum),
-      1,
-    );
-    const maxNegativeGap = Math.max(
-      ...withGap
-        .slice(selfBuyer ? steakLine + 1 : steakLine)
-        .map((t) => t.gapNum),
-      1,
-    );
-
-    // Check if all teams are final with a score of 0
-    const allTeamsFinalWithZeroScore = withGap.every((team) => {
-      const yetToPlay = team.yetToPlay || 0;
-      const inProgress = team.inProgress || 0;
-      const remaining = yetToPlay + inProgress;
-      const weeklyScore = team.weeklyScore ?? 0;
-      return remaining === 0 && weeklyScore === 0;
-    });
-
-    return {
-      teamsWithGap: withGap,
-      steakLineTeam: steakLine,
-      selfBuyerSpot: selfBuyer,
-      maxPositiveGap,
-      maxNegativeGap,
-      shouldShowRemainingPlayers: !allTeamsFinalWithZeroScore,
-    };
-  }, [standings, year]);
-
-  return (
-    <div className="w-full antialiased">
-      {/* Teams above the line - getting steaks */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="h-px flex-1 bg-gradient-to-r from-emerald-600/35 to-transparent" />
-          <span className="text-[11px] uppercase tracking-widest text-emerald-600/65 font-medium">
-            Eaters
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-l from-emerald-600/35 to-transparent" />
-        </div>
-        <div className="rounded-lg border border-gray-800/50 overflow-hidden">
-          {teamsWithGap.slice(0, steakLineTeam).map((team, index) => {
-            const cappedGap = Math.min(team.gapNum, 130);
-            const intensity = Math.round((cappedGap / 130) * 45) + 5;
-            return (
-              <div
-                key={team.id}
-                className={`
-                  flex items-center justify-between px-2 sm:px-3 py-2 sm:py-2.5 lg:py-3
-                  ${index !== steakLineTeam - 1 ? 'border-b border-gray-800/30' : ''}
-                  hover:bg-emerald-950/35 transition-colors
-                `}
-                style={{
-                  backgroundColor: `rgba(6, 80, 60, ${intensity / 100})`,
-                }}
-              >
-                <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-900/35 text-emerald-500/90 font-mono text-[10px] sm:text-xs flex items-center justify-center shrink-0">
-                    {index + 1}
-                  </span>
-                  <span className="text-xs sm:text-sm lg:text-base text-gray-300 font-medium truncate">
-                    {team.name}
-                  </span>
-                  {!live && (
-                    <span className="hidden sm:inline text-gray-600 text-xs tabular-nums shrink-0">
-                      {team.record}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-4 font-mono shrink-0">
-                  <span className="text-[10px] sm:text-xs lg:text-sm tabular-nums text-gray-400 w-12 sm:w-16 lg:w-20 text-right">
-                    {Number(team.pointsInt).toLocaleString('en-US')}
-                    <span className="text-[0.75em] text-gray-600">
-                      .{team.pointsDec}
-                    </span>
-                  </span>
-                  <span className="w-14 sm:w-20 lg:w-24 text-right text-xs sm:text-sm lg:text-base tabular-nums text-emerald-500/90 font-semibold">
-                    +{team.gapInt}
-                    <span className="text-[0.75em] text-emerald-500/50">
-                      .{team.gapDec}
-                    </span>
-                  </span>
-                  {live && shouldShowRemainingPlayers && (
-                    <RemainingPlayersIndicator team={team} variant="eater" />
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Self-buyer spot - on the line */}
-      {selfBuyerSpot && teamsWithGap[steakLineTeam] && (
+    return (
+      <div ref={listRef} className="w-full antialiased">
+        {/* Teams above the line - getting steaks */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
-            <div className="h-px flex-1 bg-gradient-to-r from-gray-600/30 to-transparent" />
-            <span className="text-[11px] uppercase tracking-widest text-gray-500/60 font-medium">
-              Self Buyer
+            <div className="h-px flex-1 bg-gradient-to-r from-emerald-600/35 to-transparent" />
+            <span className="text-[11px] uppercase tracking-widest text-emerald-600/65 font-medium">
+              Eaters
             </span>
-            <div className="h-px flex-1 bg-gradient-to-l from-gray-600/30 to-transparent" />
+            <div className="h-px flex-1 bg-gradient-to-l from-emerald-600/35 to-transparent" />
           </div>
-          <div className="rounded-lg border border-gray-700/40 overflow-hidden">
-            <div className="flex items-center justify-between px-2 sm:px-3 py-2 sm:py-2.5 lg:py-3">
-              <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-800/50 text-gray-400 font-mono text-[10px] sm:text-xs flex items-center justify-center shrink-0">
-                  {steakLineTeam + 1}
-                </span>
-                <span className="text-xs sm:text-sm lg:text-base text-gray-300 font-medium truncate">
-                  {teamsWithGap[steakLineTeam].name}
-                </span>
-                {!live && (
-                  <span className="hidden sm:inline text-gray-600 text-xs tabular-nums shrink-0">
-                    {teamsWithGap[steakLineTeam].record}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-4 font-mono shrink-0">
-                <span className="text-[10px] sm:text-xs lg:text-sm tabular-nums text-gray-400 w-12 sm:w-16 lg:w-20 text-right">
-                  {Number(teamsWithGap[steakLineTeam].pointsInt).toLocaleString(
-                    'en-US',
-                  )}
-                  <span className="text-[0.75em] text-gray-600">
-                    .{teamsWithGap[steakLineTeam].pointsDec}
-                  </span>
-                </span>
-                <span className="w-14 sm:w-20 lg:w-24 text-right text-xs sm:text-sm lg:text-base tabular-nums text-gray-500 font-semibold">
-                  —
-                </span>
-                {live && shouldShowRemainingPlayers && (
-                  <RemainingPlayersIndicator
-                    team={teamsWithGap[steakLineTeam]}
-                    variant="self-buyer"
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Teams below the line - buying steaks */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <div className="h-px flex-1 bg-gradient-to-r from-red-500/30 to-transparent" />
-          <span className="text-[11px] uppercase tracking-widest text-red-400/55 font-medium">
-            Buyers
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-l from-red-500/30 to-transparent" />
-        </div>
-        <div className="rounded-lg border border-gray-800/45 overflow-hidden">
-          {teamsWithGap
-            .slice(selfBuyerSpot ? steakLineTeam + 1 : steakLineTeam)
-            .map((team, index) => {
-              const actualIndex = selfBuyerSpot
-                ? steakLineTeam + 1 + index
-                : steakLineTeam + index;
-              const isLast = actualIndex === teamsWithGap.length - 1;
+          <div className="rounded-lg border border-gray-800/50 overflow-visible">
+            {teamsWithGap.slice(0, steakLineTeam).map((team, index) => {
               const cappedGap = Math.min(team.gapNum, 130);
-              const intensity = Math.round((cappedGap / 130) * 40) + 5;
+              const intensity = Math.round((cappedGap / 130) * 45) + 5;
               return (
                 <div
                   key={team.id}
+                  data-standings-team={team.id}
                   className={`
-                    flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 lg:py-2.5
-                    ${!isLast ? 'border-b border-gray-800/25' : ''}
-                    hover:bg-red-950/25 transition-colors
-                  `}
+                  relative first:rounded-t-lg last:rounded-b-lg flex items-center justify-between px-2 sm:px-3 py-2 sm:py-2.5 lg:py-3
+                  ${index !== steakLineTeam - 1 ? 'border-b border-gray-800/30' : ''}
+                  hover:bg-emerald-950/35 transition-colors
+                `}
                   style={{
-                    backgroundColor: `rgba(130, 28, 28, ${intensity / 100})`,
+                    backgroundColor: `rgba(6, 80, 60, ${intensity / 100})`,
                   }}
                 >
                   <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                    <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-800/35 text-gray-500 font-mono text-[10px] sm:text-xs flex items-center justify-center shrink-0">
-                      {actualIndex + 1}
+                    <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-900/35 text-emerald-500/90 font-mono text-[10px] sm:text-xs flex items-center justify-center shrink-0">
+                      {index + 1}
                     </span>
-                    <span className="text-xs sm:text-sm lg:text-base text-gray-400 truncate">
+                    <span className="text-xs sm:text-sm lg:text-base text-gray-300 font-medium truncate">
                       {team.name}
                     </span>
                     {!live && (
@@ -619,27 +596,174 @@ export default function StandingsList() {
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-4 font-mono shrink-0">
-                    <span className="text-[10px] sm:text-xs lg:text-sm tabular-nums text-gray-500 w-12 sm:w-16 lg:w-20 text-right">
+                    <span
+                      className="text-[10px] sm:text-xs lg:text-sm tabular-nums whitespace-nowrap text-gray-400 w-12 sm:w-16 lg:w-20 text-right"
+                      title={
+                        showProjected
+                          ? `${team.actualPoints.toFixed(1)} current + ${(team.projectedRemaining ?? 0).toFixed(1)} projected remaining`
+                          : undefined
+                      }
+                    >
                       {Number(team.pointsInt).toLocaleString('en-US')}
                       <span className="text-[0.75em] text-gray-600">
                         .{team.pointsDec}
                       </span>
                     </span>
-                    <span className="w-14 sm:w-20 lg:w-24 text-right text-xs sm:text-sm lg:text-base tabular-nums text-red-500/80 font-semibold">
-                      {team.gapInt}
-                      <span className="text-[0.75em] text-red-500/45">
+                    <span className="w-14 sm:w-20 lg:w-24 text-right text-xs sm:text-sm lg:text-base tabular-nums whitespace-nowrap text-emerald-500/90 font-semibold">
+                      +{team.gapInt}
+                      <span className="text-[0.75em] text-emerald-500/50">
                         .{team.gapDec}
                       </span>
                     </span>
                     {live && shouldShowRemainingPlayers && (
-                      <RemainingPlayersIndicator team={team} variant="buyer" />
+                      <RemainingPlayersIndicator team={team} variant="eater" />
                     )}
                   </div>
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Self-buyer spot - on the line */}
+        {selfBuyerSpot && teamsWithGap[steakLineTeam] && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-px flex-1 bg-gradient-to-r from-gray-600/30 to-transparent" />
+              <span className="text-[11px] uppercase tracking-widest text-gray-500/60 font-medium">
+                Self Buyer
+              </span>
+              <div className="h-px flex-1 bg-gradient-to-l from-gray-600/30 to-transparent" />
+            </div>
+            <div className="rounded-lg border border-gray-700/40 overflow-visible">
+              <div
+                data-standings-team={teamsWithGap[steakLineTeam].id}
+                className="relative rounded-lg flex items-center justify-between px-2 sm:px-3 py-2 sm:py-2.5 lg:py-3"
+              >
+                <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-800/50 text-gray-400 font-mono text-[10px] sm:text-xs flex items-center justify-center shrink-0">
+                    {steakLineTeam + 1}
+                  </span>
+                  <span className="text-xs sm:text-sm lg:text-base text-gray-300 font-medium truncate">
+                    {teamsWithGap[steakLineTeam].name}
+                  </span>
+                  {!live && (
+                    <span className="hidden sm:inline text-gray-600 text-xs tabular-nums shrink-0">
+                      {teamsWithGap[steakLineTeam].record}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-4 font-mono shrink-0">
+                  <span
+                    className="text-[10px] sm:text-xs lg:text-sm tabular-nums whitespace-nowrap text-gray-400 w-12 sm:w-16 lg:w-20 text-right"
+                    title={
+                      showProjected
+                        ? `${teamsWithGap[steakLineTeam].actualPoints.toFixed(1)} current + ${(teamsWithGap[steakLineTeam].projectedRemaining ?? 0).toFixed(1)} projected remaining`
+                        : undefined
+                    }
+                  >
+                    {Number(
+                      teamsWithGap[steakLineTeam].pointsInt,
+                    ).toLocaleString('en-US')}
+                    <span className="text-[0.75em] text-gray-600">
+                      .{teamsWithGap[steakLineTeam].pointsDec}
+                    </span>
+                  </span>
+                  <span className="w-14 sm:w-20 lg:w-24 text-right text-xs sm:text-sm lg:text-base tabular-nums whitespace-nowrap text-gray-500 font-semibold">
+                    —
+                  </span>
+                  {live && shouldShowRemainingPlayers && (
+                    <RemainingPlayersIndicator
+                      team={teamsWithGap[steakLineTeam]}
+                      variant="self-buyer"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Teams below the line - buying steaks */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="h-px flex-1 bg-gradient-to-r from-red-500/30 to-transparent" />
+            <span className="text-[11px] uppercase tracking-widest text-red-400/55 font-medium">
+              Buyers
+            </span>
+            <div className="h-px flex-1 bg-gradient-to-l from-red-500/30 to-transparent" />
+          </div>
+          <div className="rounded-lg border border-gray-800/45 overflow-visible">
+            {teamsWithGap
+              .slice(selfBuyerSpot ? steakLineTeam + 1 : steakLineTeam)
+              .map((team, index) => {
+                const actualIndex = selfBuyerSpot
+                  ? steakLineTeam + 1 + index
+                  : steakLineTeam + index;
+                const isLast = actualIndex === teamsWithGap.length - 1;
+                const cappedGap = Math.min(team.gapNum, 130);
+                const intensity = Math.round((cappedGap / 130) * 40) + 5;
+                return (
+                  <div
+                    key={team.id}
+                    data-standings-team={team.id}
+                    className={`
+                    relative first:rounded-t-lg last:rounded-b-lg flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 lg:py-2.5
+                    ${!isLast ? 'border-b border-gray-800/25' : ''}
+                    hover:bg-red-950/25 transition-colors
+                  `}
+                    style={{
+                      backgroundColor: `rgba(130, 28, 28, ${intensity / 100})`,
+                    }}
+                  >
+                    <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                      <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-800/35 text-gray-500 font-mono text-[10px] sm:text-xs flex items-center justify-center shrink-0">
+                        {actualIndex + 1}
+                      </span>
+                      <span className="text-xs sm:text-sm lg:text-base text-gray-400 truncate">
+                        {team.name}
+                      </span>
+                      {!live && (
+                        <span className="hidden sm:inline text-gray-600 text-xs tabular-nums shrink-0">
+                          {team.record}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-4 font-mono shrink-0">
+                      <span
+                        className="text-[10px] sm:text-xs lg:text-sm tabular-nums whitespace-nowrap text-gray-500 w-12 sm:w-16 lg:w-20 text-right"
+                        title={
+                          showProjected
+                            ? `${team.actualPoints.toFixed(1)} current + ${(team.projectedRemaining ?? 0).toFixed(1)} projected remaining`
+                            : undefined
+                        }
+                      >
+                        {Number(team.pointsInt).toLocaleString('en-US')}
+                        <span className="text-[0.75em] text-gray-600">
+                          .{team.pointsDec}
+                        </span>
+                      </span>
+                      <span className="w-14 sm:w-20 lg:w-24 text-right text-xs sm:text-sm lg:text-base tabular-nums whitespace-nowrap text-red-500/80 font-semibold">
+                        {team.gapInt}
+                        <span className="text-[0.75em] text-red-500/45">
+                          .{team.gapDec}
+                        </span>
+                      </span>
+                      {live && shouldShowRemainingPlayers && (
+                        <RemainingPlayersIndicator
+                          team={team}
+                          variant="buyer"
+                        />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  },
+);
+
+export default StandingsList;

@@ -3,6 +3,7 @@ import type { PlayerInfo } from './TeamStanding';
 
 // Team with gap from steak line
 export interface TeamWithGap extends TeamWithStandings {
+  actualPoints: number;
   gap: string | number;
   gapOperator: string;
   pointsInt: string;
@@ -14,6 +15,8 @@ export interface TeamWithGap extends TeamWithStandings {
   weeklyScore?: number;
   yetToPlay?: number;
   inProgress?: number;
+  projectedRemaining?: number;
+  unprojectedPlayers?: number;
   // Supports both old API (string[]) and new API (PlayerInfo[])
   yetToPlayNames?: (string | PlayerInfo)[];
   inProgressNames?: (string | PlayerInfo)[];
