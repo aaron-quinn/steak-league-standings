@@ -17,42 +17,6 @@ function withSplitName(player) {
 // MFL returns a single object rather than a one-item array
 const asList = (value) => (Array.isArray(value) ? value : value ? [value] : []);
 
-// The full player list is MFL's largest export, so keep it for as long as this
-// Worker instance stays warm
-const loaded = {};
-
-export default async function getPlayerList({
-  season,
-  leagueID = '68362',
-  prefix = '',
-}) {
-  try {
-    const cached = loaded[season];
-    if (cached && cached.expires > Date.now()) {
-      return cached.list;
-    }
-
-    // Get the player list from the MFL API
-    const playerListURL = `/${season}/export?TYPE=players&L=${leagueID}&JSON=1`;
-
-    const playerListResponse = await getData(playerListURL, {
-      cacheSeconds: PLAYERS_CACHE_SECONDS,
-    });
-
-    // Build new objects rather than renaming in place: the parsed response is
-    // shared with other requests (see fetch-json.js)
-    const list = asList(playerListResponse.players.player).map(withSplitName);
-
-    loaded[season] = {
-      list,
-      expires: Date.now() + PLAYERS_CACHE_SECONDS * 1000,
-    };
-    return list;
-  } catch (error) {
-    return { error };
-  }
-}
-
 // Players who appear in a liveScoring export, by MFL ID. Asking MFL for just
 // those players returns about a tenth of the full list, which keeps rebuilding
 // the live endpoints within the free plan's CPU limit. Rosters rarely change

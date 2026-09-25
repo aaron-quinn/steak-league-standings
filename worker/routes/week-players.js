@@ -1,5 +1,9 @@
 import { getPlayersByID } from '../api/players.js';
 import getDefaults from '../utils/get-defaults.js';
+import {
+  FINAL_RESPONSE_SECONDS,
+  isFinishedSeason,
+} from '../utils/season-cache.js';
 import { loadWeeks } from './weekly-scores.js';
 
 // Every rostered player's score for one played week, highest first. A player
@@ -46,6 +50,15 @@ export default async function weekPlayersYear(c) {
       };
     })
     .sort((a, b) => b.score - a.score);
+
+  // MFL's stat corrections land on the latest played week, so refresh it as
+  // often as the standings. An earlier week no longer changes.
+  const latest =
+    !isFinishedSeason(season) && week === weeks[weeks.length - 1].week;
+  c.header(
+    'Cache-Control',
+    `max-age=${latest ? 60 : FINAL_RESPONSE_SECONDS}`,
+  );
 
   return c.json({ week, players });
 }

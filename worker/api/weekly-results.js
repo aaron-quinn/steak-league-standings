@@ -1,4 +1,5 @@
 import getData from './get-data.js';
+import { seasonDataSeconds } from '../utils/season-cache.js';
 
 // MFL returns a single object rather than a one-item array
 const asList = (value) => (Array.isArray(value) ? value : value ? [value] : []);
@@ -8,7 +9,9 @@ const asList = (value) => (Array.isArray(value) ? value : value ? [value] : []);
 export default async function getWeeklyResults({ season, leagueID, prefix }) {
   try {
     const weeklyResultsURL = `/${season}/export?TYPE=weeklyResults&L=${leagueID}&W=YTD&JSON=1`;
-    const response = await getData(weeklyResultsURL, { cacheSeconds: 60 });
+    const response = await getData(weeklyResultsURL, {
+      cacheSeconds: seasonDataSeconds(season, 60),
+    });
 
     const weeks = [];
     asList(response.allWeeklyResults?.weeklyResults).forEach((result) => {

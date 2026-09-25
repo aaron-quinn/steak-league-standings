@@ -8,16 +8,23 @@ export default async function getLiveMatchupsYear(c) {
   const matchupList = [];
   let unavailable = null;
 
-  for (const league of leagues) {
+  // Ask MFL for both leagues at once rather than one after the other
+  const results = await Promise.all(
+    leagues.map((league) =>
+      getLiveMatchups({
+        season,
+        leagueID: league.id,
+        prefix: `${league.name}`,
+      }),
+    ),
+  );
+
+  for (const [i, league] of leagues.entries()) {
     const {
       matchups: liveMatchups,
       error,
       unavailable: leagueUnavailable,
-    } = await getLiveMatchups({
-      season,
-      leagueID: league.id,
-      prefix: `${league.name}`,
-    });
+    } = results[i];
 
     // An unexpected failure is a real error, not an empty week
     if (error) {

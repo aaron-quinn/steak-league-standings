@@ -6,12 +6,15 @@ export async function loadWeeks(c, season) {
   const { leagues } = getDefaults();
   const byWeek = new Map();
 
-  for (const league of leagues) {
-    const { weeks, error } = await getWeeklyResults({
-      season,
-      leagueID: league.id,
-      prefix: league.name,
-    });
+  // Ask MFL for both leagues at once rather than one after the other
+  const results = await Promise.all(
+    leagues.map((league) =>
+      getWeeklyResults({ season, leagueID: league.id, prefix: league.name }),
+    ),
+  );
+
+  for (const [i, league] of leagues.entries()) {
+    const { weeks, error } = results[i];
 
     if (error || !weeks) {
       console.error(

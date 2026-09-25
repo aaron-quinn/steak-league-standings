@@ -13,6 +13,7 @@ import HeaderStatus from '@/components/HeaderStatus';
 import TeamMatchup from '@/types/TeamMatchup';
 import { getTeamManagers, rankSteakTeams } from '@/utils/steak-teams';
 import PageShell from '@/components/PageShell';
+import { liveRefetchInterval } from '@/utils/live-refetch';
 
 interface MatchupViewProps {}
 
@@ -31,6 +32,8 @@ export default function MatchupView({}: MatchupViewProps) {
     queryKey: ['matchups', year],
     queryFn: () => getMatchups(matchupsAPIURL),
     placeholderData: keepPreviousData,
+    refetchInterval: (query) =>
+      liveRefetchInterval(query.state.data?.flat() ?? []),
   });
 
   const { data: weekData } = useQuery({

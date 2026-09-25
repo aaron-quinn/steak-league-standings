@@ -1,5 +1,6 @@
 import getData from './get-data.js';
 import sortTeamList from '../utils/sort-team-list.js';
+import { seasonDataSeconds } from '../utils/season-cache.js';
 
 export default async function getStandings({ season, leagueID, prefix = '' }) {
   try {
@@ -7,7 +8,7 @@ export default async function getStandings({ season, leagueID, prefix = '' }) {
     const weeklyResultsURL = `/${season}/export?TYPE=weeklyResults&L=${leagueID}&W=YTD&JSON=1`;
 
     const weeklyResultsResponse = await getData(weeklyResultsURL, {
-      cacheSeconds: 60,
+      cacheSeconds: seasonDataSeconds(season, 60),
     });
     const weeklyResults = weeklyResultsResponse.allWeeklyResults.weeklyResults;
 

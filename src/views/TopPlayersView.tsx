@@ -10,6 +10,7 @@ import FollowSelect from '@/components/fun/FollowSelect';
 import { getWeeklyScores, getWeekPlayers } from '@/api/fun';
 import { getWeek } from '@/api';
 import { getMatchups } from '@/api/matchups';
+import { liveRefetchInterval } from '@/utils/live-refetch';
 import { useStandingsStore } from '@/stores/standings';
 import type { WeekPlayer } from '@/types/Fun';
 import { getTeamManagers } from '@/utils/steak-teams';
@@ -61,6 +62,8 @@ export default function TopPlayersView({ bench }: Props) {
   const { data: matchups, isError: liveError } = useQuery({
     queryKey: ['matchups', year],
     queryFn: () => getMatchups(`/live-matchups/${year}`),
+    refetchInterval: (query) =>
+      liveRefetchInterval(query.state.data?.flat() ?? []),
   });
 
   const playedWeeks = weeklyScores?.map((w) => w.week) ?? [];

@@ -14,6 +14,7 @@ import { useStandingsStore } from '../stores/standings';
 import { getStandings, getWeek } from '../api';
 import ErrorScreen from '@/components/ErrorScreen';
 import type { StandingsData } from '../types/StandingsData';
+import { liveRefetchInterval } from '@/utils/live-refetch';
 
 interface MainViewProps {
   live: boolean;
@@ -43,6 +44,11 @@ export default function MainView({ live }: MainViewProps) {
   } = useQuery({
     queryKey: ['standings', year, live],
     queryFn: () => getStandings(standingsAPIURL),
+    // Official standings only change once a week is final
+    refetchInterval: (query) =>
+      live && query.state.data
+        ? liveRefetchInterval(Object.values(query.state.data))
+        : false,
   });
 
   const { data: weekData } = useQuery({

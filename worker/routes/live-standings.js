@@ -9,16 +9,33 @@ export default async function standingsYear(c) {
 
   const teamList = {};
 
-  for (const league of leagues) {
+  // Ask MFL for every league's standings and live scores at once rather than
+  // one after the other
+  const results = await Promise.all(
+    leagues.map((league) =>
+      Promise.all([
+        getStandings({
+          season,
+          leagueID: league.id,
+          prefix: `${league.name}`,
+        }),
+        getLiveScores({
+          season,
+          leagueID: league.id,
+          prefix: `${league.name}`,
+          includeProjections: true,
+        }),
+      ]),
+    ),
+  );
+
+  for (const [i, league] of leagues.entries()) {
+    const [standingsResult, liveResult] = results[i];
     const {
       latestResultWeek,
       standings: teams,
       error: standingsError,
-    } = await getStandings({
-      season,
-      leagueID: league.id,
-      prefix: `${league.name}`,
-    });
+    } = standingsResult;
 
     // MFL rate limits (429) and getStandings reports that by returning only an
     // error, so `teams` is undefined here rather than carrying an error flag.
@@ -47,12 +64,7 @@ export default async function standingsYear(c) {
       error: liveError,
       matchups,
       week,
-    } = await getLiveScores({
-      season,
-      leagueID: league.id,
-      prefix: `${league.name}`,
-      includeProjections: true,
-    });
+    } = liveResult;
 
     Object.entries(teamList).map((team) => {
       const [teamID, teamData] = team;
