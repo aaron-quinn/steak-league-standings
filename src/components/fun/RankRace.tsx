@@ -73,15 +73,10 @@ export default function RankRace({ season, selected, onSelect }: Props) {
 
   const totalAt = (totals: number[], week: number) =>
     week <= 0 ? 0 : totals[Math.min(week, weekCount) - 1];
-  // Before kickoff everyone is level, listed alphabetically
-  const alphabetical = new Map(
-    [...teams]
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((team, index) => [team.id, index]),
-  );
+  // Start in week one's order while the bars grow from zero.
   const slotAt = (team: (typeof teams)[number], week: number) =>
     week <= 0
-      ? (alphabetical.get(team.id) ?? 0)
+      ? team.ranks[0] - 1
       : team.ranks[Math.min(week, weekCount) - 1] - 1;
 
   const rows = teams.map((team) => {
