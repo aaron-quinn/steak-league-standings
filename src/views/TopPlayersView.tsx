@@ -295,7 +295,7 @@ export default function TopPlayersView({ bench }: Props) {
                 <ol
                   className={clsx(
                     'rounded-lg border border-gray-800/60 bg-gray-950/30 divide-y divide-gray-800/40',
-                    !bench && 'lg:grid lg:grid-cols-2 lg:divide-y-0 lg:gap-x-6',
+                    !bench && 'lg:divide-y-0',
                   )}
                 >
                   {listed.slice(0, shown).map((player) => (
