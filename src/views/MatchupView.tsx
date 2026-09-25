@@ -3,7 +3,7 @@ import LeagueLogo from '../components/LeagueLogo';
 import ViewSwitcher from '../components/ViewSwitcher';
 import { useStandingsStore } from '../stores/standings';
 import { getMatchups } from '@/api/matchups';
-import { getWeek } from '@/api';
+import { getStandings, getWeek } from '@/api';
 import MatchupTeams from '@/components/MatchupTeams';
 import { useEffect, useMemo, useState } from 'react';
 import CurrentMatchup from '@/components/CurrentMatchup';
@@ -14,6 +14,7 @@ import SectionLabel from '@/components/SectionLabel';
 import HeaderStatus from '@/components/HeaderStatus';
 import getManagers from '@/data/managers';
 import TeamMatchup from '@/types/TeamMatchup';
+import type { MatchupManager } from '@/types/MatchupManager';
 
 interface MatchupViewProps {}
 
@@ -37,6 +38,12 @@ export default function MatchupView({}: MatchupViewProps) {
   const { data: weekData } = useQuery({
     queryKey: ['week', year],
     queryFn: () => getWeek(year),
+  });
+
+  // Same query as the Official view, so the cache is shared between pages
+  const { data: officialStandings } = useQuery({
+    queryKey: ['standings', year, false],
+    queryFn: () => getStandings(`/standings/${year}`),
   });
 
   const [currentMatchup, setCurrentMatchup] = useState<number | null>(null);
@@ -80,15 +87,31 @@ export default function MatchupView({}: MatchupViewProps) {
           steak: 'steak' in t.teams[year] || false,
         };
       });
-    const teamMap = new Map<
-      string,
-      { id: string; name: string; teamID: string; steak: boolean }
-    >();
+
+    // Official steak rank: steak teams by total points, ties by name,
+    // matching the ordering in StandingsList
+    const ranks = new Map<string, number>();
+    if (officialStandings) {
+      steakManagers
+        .filter((manager) => manager.steak)
+        .map((manager) => ({
+          ...manager,
+          points: Number(officialStandings[manager.id]?.points) || 0,
+        }))
+        .sort((a, b) =>
+          a.points === b.points
+            ? a.name.localeCompare(b.name)
+            : b.points - a.points,
+        )
+        .forEach((manager, index) => ranks.set(manager.id, index + 1));
+    }
+
+    const teamMap = new Map<string, MatchupManager>();
     steakManagers.forEach((manager) => {
-      teamMap.set(manager.id, manager);
+      teamMap.set(manager.id, { ...manager, rank: ranks.get(manager.id) });
     });
     return teamMap;
-  }, [year]);
+  }, [year, officialStandings]);
 
   if (isError && !matchups) {
     return (

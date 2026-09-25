@@ -1,13 +1,11 @@
 import clsx from 'clsx';
 import TeamMatchup from '@/types/TeamMatchup';
+import type { MatchupManager } from '@/types/MatchupManager';
 import { splitScore } from '@/utils/format-score';
 
 interface Props {
   matchups: TeamMatchup[][];
-  managersMap: Map<
-    string,
-    { id: string; name: string; teamID: string; steak: boolean }
-  >;
+  managersMap: Map<string, MatchupManager>;
   currentMatchup: number | null;
   setCurrentMatchup: (matchup: number | null) => void;
 }
@@ -61,14 +59,30 @@ export default function MatchupTeams({
                   key={team.franchiseID}
                   className="flex items-baseline justify-between gap-2"
                 >
-                  <span
-                    className={clsx(
-                      'truncate text-[11px] sm:text-sm',
-                      manager?.steak ? 'text-emerald-400' : 'text-gray-300',
-                      leading ? 'font-semibold' : 'opacity-70',
-                    )}
-                  >
-                    {manager?.name ?? 'Unknown'}
+                  <span className="flex min-w-0 items-baseline gap-1.5">
+                    {/* Always reserve the slot so names line up across tiles */}
+                    <span
+                      className={clsx(
+                        'w-4 shrink-0 text-right font-mono tabular-nums text-[10px] sm:text-xs',
+                        manager?.rank ? 'text-gray-500' : 'text-gray-700',
+                      )}
+                      title={
+                        manager?.rank
+                          ? `Official steak rank: ${manager.rank}`
+                          : undefined
+                      }
+                    >
+                      {manager?.rank ?? '–'}
+                    </span>
+                    <span
+                      className={clsx(
+                        'truncate text-[11px] sm:text-sm',
+                        manager?.steak ? 'text-emerald-400' : 'text-gray-300',
+                        leading ? 'font-semibold' : 'opacity-70',
+                      )}
+                    >
+                      {manager?.name ?? 'Unknown'}
+                    </span>
                   </span>
                   <span
                     className={clsx(

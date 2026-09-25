@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import CurrentMatchupPlayer from './CurrentMatchupPlayer';
 import SectionLabel from './SectionLabel';
 import { splitScore } from '@/utils/format-score';
+import type { MatchupManager } from '@/types/MatchupManager';
 
 // Position sort order: QB, RB, WR, TE, K/PK, then IDPs
 const POSITION_ORDER: Record<string, number> = {
@@ -52,11 +53,12 @@ function playersFor(team: TeamMatchup | null, starters: boolean) {
 interface TeamHeaderProps {
   team: TeamMatchup;
   name: string;
+  rank?: number;
   leading: boolean;
   isTeam2?: boolean;
 }
 
-function TeamHeader({ team, name, leading, isTeam2 }: TeamHeaderProps) {
+function TeamHeader({ team, name, rank, leading, isTeam2 }: TeamHeaderProps) {
   const { int, dec } = splitScore(team.score);
   const final = team.inProgress === 0 && team.yetToPlay === 0;
 
@@ -75,6 +77,15 @@ function TeamHeader({ team, name, leading, isTeam2 }: TeamHeaderProps) {
             leading ? 'text-gray-100' : 'text-gray-400',
           )}
         >
+          <span
+            className={clsx(
+              'mr-1.5 sm:mr-2 font-mono tabular-nums font-normal text-[0.8em]',
+              rank !== undefined ? 'text-gray-500' : 'text-gray-700',
+            )}
+            title={rank !== undefined ? `Official steak rank: ${rank}` : undefined}
+          >
+            {rank ?? '–'}
+          </span>
           {name}
         </div>
         <div className="mt-0.5 text-[10px] sm:text-xs text-gray-500 tabular-nums">
@@ -141,7 +152,7 @@ function PlayerList({
 
 export interface CurrentMatchupProps {
   matchup: TeamMatchup[];
-  managersMap: Map<string, { id: string; name: string; teamID: string }>;
+  managersMap: Map<string, MatchupManager>;
 }
 
 function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
@@ -161,7 +172,7 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
   const score1 = Number(team1.score) || 0;
   const score2 = team2 ? Number(team2.score) || 0 : 0;
 
-  const hasBench = team1Bench.length > 0 || team2Bench.length > 0;
+  const hasBench =team1Bench.length > 0 || team2Bench.length > 0;
 
   return (
     <section
@@ -178,6 +189,7 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
           <TeamHeader
             team={team1}
             name={manager1?.name ?? 'Unknown Manager'}
+            rank={manager1?.rank}
             leading={!team2 || score1 > score2}
           />
           {team2 && (
@@ -189,6 +201,7 @@ function CurrentMatchup({ matchup, managersMap }: CurrentMatchupProps) {
               <TeamHeader
                 team={team2}
                 name={manager2?.name ?? 'Unknown Manager'}
+                rank={manager2?.rank}
                 leading={score2 > score1}
                 isTeam2
               />
