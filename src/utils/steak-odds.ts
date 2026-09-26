@@ -235,9 +235,21 @@ export interface HistorySeason {
   season: SteakSeason;
 }
 
-// The deepest hole any team was in at exactly that point of a season and
-// still climbed out of to reach the target, by weeks played (index 1 is after
-// week one)
+// The week of a finished past season with as many weeks left as after the
+// given week of this one, so a 17-week season lines up with an 18-week one by
+// what's still to play. Null when the past season hadn't started yet.
+export function matchingWeek(
+  past: SteakSeason,
+  played: number,
+  seasonWeeks: number,
+) {
+  const week = past.weeks.length - (seasonWeeks - played);
+  return week >= 1 ? week : null;
+}
+
+// The deepest hole any team was in with the same weeks left and still climbed
+// out of to reach the target, by weeks played in this season (index 1 is
+// after week one)
 export function getWeekComebacks(
   history: HistorySeason[],
   seasonWeeks: number,
@@ -249,12 +261,14 @@ export function getWeekComebacks(
     const last = season.weeks.length - 1;
     const rank = targetRank(season.teams.length, target);
     const made = season.teams.filter((team) => team.ranks[last] <= rank);
-    for (let played = 1; played <= season.weeks.length; played++) {
-      const deficits = getDeficits(season, played, target);
+    for (let played = 1; played <= seasonWeeks; played++) {
+      const week = matchingWeek(season, played, seasonWeeks);
+      if (week === null) continue;
+      const deficits = getDeficits(season, week, target);
       made.forEach((team) => {
         const deficit = deficits.get(team.id) ?? 0;
-        if (played <= seasonWeeks && deficit >= (best[played]?.deficit ?? 0)) {
-          best[played] = { name: team.name, year, played, deficit };
+        if (deficit >= (best[played]?.deficit ?? 0)) {
+          best[played] = { name: team.name, year, played: week, deficit };
         }
       });
     }
@@ -319,8 +333,8 @@ export interface Collapse {
   lead: number;
 }
 
-// The biggest lead any team blew from exactly that point of a season, by
-// weeks played (index 1 is after week one)
+// The biggest lead any team blew with the same weeks left, by weeks played in
+// this season (index 1 is after week one)
 export function getWeekCollapses(
   history: HistorySeason[],
   seasonWeeks: number,
@@ -332,16 +346,14 @@ export function getWeekCollapses(
     const last = season.weeks.length - 1;
     const rank = targetRank(season.teams.length, target);
     const missed = season.teams.filter((team) => team.ranks[last] > rank);
-    for (let played = 1; played <= season.weeks.length; played++) {
-      const cushions = getCushions(season, played, target);
+    for (let played = 1; played <= seasonWeeks; played++) {
+      const week = matchingWeek(season, played, seasonWeeks);
+      if (week === null) continue;
+      const cushions = getCushions(season, week, target);
       missed.forEach((team) => {
         const lead = cushions.get(team.id) ?? 0;
-        if (
-          played <= seasonWeeks &&
-          lead > 0 &&
-          lead >= (worst[played]?.lead ?? 0)
-        ) {
-          worst[played] = { name: team.name, year, played, lead };
+        if (lead > 0 && lead >= (worst[played]?.lead ?? 0)) {
+          worst[played] = { name: team.name, year, played: week, lead };
         }
       });
     }

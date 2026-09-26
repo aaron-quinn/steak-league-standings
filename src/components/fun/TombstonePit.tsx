@@ -13,6 +13,7 @@ import {
   getWeekComebacks,
   isLocked,
   isTombstoned,
+  matchingWeek,
   targetRank,
   type ChaseTarget,
   type Collapse,
@@ -202,13 +203,14 @@ function getNuggets({
   // How past chasers at this point of the season fared, and how many of them
   // were already buried
   const pastSeasons = history.filter(
-    ({ season: past }) => past.weeks.length >= played,
+    ({ season: past }) => matchingWeek(past, played, seasonWeeks) !== null,
   );
   let chasers = 0;
   let cameBack = 0;
   let buriedBefore = 0;
   pastSeasons.forEach(({ season: past }) => {
-    const deficits = getDeficits(past, played, target);
+    const week = matchingWeek(past, played, seasonWeeks)!;
+    const deficits = getDeficits(past, week, target);
     const rank = targetRank(past.teams.length, target);
     const last = past.weeks.length - 1;
     past.teams.forEach((team) => {
@@ -332,13 +334,14 @@ function getLockNuggets({
     ({ cushion }) => !isLocked(cushion, played, lockLine, seasonWeeks),
   );
   const pastSeasons = history.filter(
-    ({ season: past }) => past.weeks.length >= played,
+    ({ season: past }) => matchingWeek(past, played, seasonWeeks) !== null,
   );
   let lockedBefore = 0;
   let leaders = 0;
   let held = 0;
   pastSeasons.forEach(({ season: past }) => {
-    const pastCushions = getCushions(past, played, target);
+    const week = matchingWeek(past, played, seasonWeeks)!;
+    const pastCushions = getCushions(past, week, target);
     const rank = targetRank(past.teams.length, target);
     const last = past.weeks.length - 1;
     past.teams.forEach((team) => {
