@@ -479,6 +479,43 @@ export default function SteakOddsView() {
                 </p>
               </div>
             </div>
+
+            <div>
+              <SectionLabel>How accurate is it</SectionLabel>
+              {/* From replaying 2016–2025, each season's odds fit on the other
+                  nine seasons only (3,055 team-weeks), in September 2026 */}
+              <div className="space-y-2 rounded-lg border border-gray-800/60 bg-gray-950/30 px-3 py-2.5 text-[11px] sm:text-xs leading-relaxed text-gray-400">
+                <p>
+                  Replayed week by week over the 2016–2025 seasons, with each
+                  season kept out of its own odds:
+                </p>
+                <ul className="list-disc space-y-1.5 pl-4 marker:text-gray-600">
+                  <li>
+                    At <Stat>95%</Stat> or better, <Stat>501</Stat> of{' '}
+                    <Stat>503</Stat> teams ate.
+                  </li>
+                  <li>
+                    At <Stat>5%</Stat> or less, <Stat>2</Stat> of{' '}
+                    <Stat>544</Stat> did.
+                  </li>
+                  <li>
+                    In between, the odds match what happened: teams given{' '}
+                    <span className="whitespace-nowrap">70–90%</span> ate{' '}
+                    <Stat>79%</Stat> of the time, and teams given{' '}
+                    <span className="whitespace-nowrap">30–50%</span> ate{' '}
+                    <Stat>42%</Stat>. Every range lands within about two points.
+                  </li>
+                  <li>
+                    A tombstoned team came back to eat <Stat>7</Stat> times in{' '}
+                    <Stat>560</Stat>.
+                  </li>
+                  <li>
+                    About 40 other models, including ones built on rosters and
+                    MFL’s own projections, didn’t beat it.
+                  </li>
+                </ul>
+              </div>
+            </div>
           </aside>
 
           <section className="lg:col-span-12">
@@ -496,6 +533,11 @@ export default function SteakOddsView() {
       )}
     </PageShell>
   );
+}
+
+// A figure in running text, set like the model's numbers above it
+function Stat({ children }: { children: React.ReactNode }) {
+  return <span className="font-mono text-gray-200">{children}</span>;
 }
 
 function WeekStepper({
