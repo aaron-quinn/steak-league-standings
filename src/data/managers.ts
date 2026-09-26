@@ -24,7 +24,7 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'Madison',
-          division: 'Filet Mignon',
+          division: 'Au Poivre',
           teamID: '0006',
           steak: false,
         },
@@ -41,7 +41,7 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'Madison',
-          division: 'Au Poivre',
+          division: 'Filet Mignon',
           teamID: '0002',
           steak: false,
         },
@@ -76,18 +76,33 @@ export default function getManagers(): Manager[] {
           steak: false,
         },
         2020: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0002',
           steak: true,
         },
         2019: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0002',
           steak: true,
         },
         2018: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0002',
           steak: true,
         },
         2017: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0002',
           steak: true,
         },
         2016: {
+          league: 'Madison',
+          division: 'Division 2',
+          teamID: '0002',
           steak: true,
         },
       },
@@ -114,18 +129,33 @@ export default function getManagers(): Manager[] {
           steak: true,
         },
         2020: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0014',
           steak: true,
         },
         2019: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0014',
           steak: true,
         },
         2018: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0014',
           steak: true,
         },
         2017: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0014',
           steak: false,
         },
         2016: {
+          league: 'Madison',
+          division: 'Division 1',
+          teamID: '0014',
           steak: false,
         },
       },
@@ -170,19 +200,34 @@ export default function getManagers(): Manager[] {
           steak: false,
         },
         2020: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0010',
           steak: true,
         },
         2019: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0010',
           steak: false,
         },
         2018: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0010',
           steak: true,
         },
         2017: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0010',
           steak: true,
           champion: true,
         },
         2016: {
+          league: 'Madison',
+          division: 'Division 2',
+          teamID: '0010',
           steak: false,
         },
       },
@@ -192,7 +237,7 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'Madison',
-          division: 'Filet Mignon',
+          division: 'Au Poivre',
           teamID: '0004',
           steak: false,
         },
@@ -227,10 +272,28 @@ export default function getManagers(): Manager[] {
           steak: false,
         },
         2020: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0004',
           steak: true,
         },
         2019: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0004',
           steak: true,
+        },
+        2018: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0004',
+          steak: false,
+        },
+        2016: {
+          league: 'Madison',
+          division: 'Division 2',
+          teamID: '0012',
+          steak: false,
         },
       },
     },
@@ -239,7 +302,7 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'Madison',
-          division: 'Au Poivre',
+          division: 'Filet Mignon',
           teamID: '0003',
           steak: false,
         },
@@ -278,10 +341,34 @@ export default function getManagers(): Manager[] {
           teamID: '0003',
           steak: false,
         },
+        2020: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0003',
+          steak: false,
+        },
+        2019: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0003',
+          steak: false,
+        },
+        2018: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0003',
+          steak: false,
+        },
         2017: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0003',
           steak: true,
         },
         2016: {
+          league: 'Madison',
+          division: 'Division 2',
+          teamID: '0003',
           steak: true,
         },
       },
@@ -291,7 +378,7 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'Madison',
-          division: 'Au Poivre',
+          division: 'Filet Mignon',
           teamID: '0011',
           steak: false,
         },
@@ -327,19 +414,34 @@ export default function getManagers(): Manager[] {
           champion: true,
         },
         2020: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0011',
           steak: true,
           champion: true,
         },
         2019: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0011',
           steak: true,
         },
         2018: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0011',
           steak: true,
         },
         2017: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0011',
           steak: true,
         },
         2016: {
+          league: 'Madison',
+          division: 'Division 2',
+          teamID: '0011',
           steak: true,
         },
       },
@@ -349,7 +451,7 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'Madison',
-          division: 'Filet Mignon',
+          division: 'Au Poivre',
           teamID: '0012',
           steak: false,
         },
@@ -384,19 +486,28 @@ export default function getManagers(): Manager[] {
           steak: false,
         },
         2020: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0012',
           steak: true,
         },
         2019: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0012',
           steak: false,
         },
         2018: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0012',
           steak: false,
         },
         2017: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0012',
           steak: true,
-        },
-        2016: {
-          steak: false,
         },
       },
     },
@@ -439,7 +550,16 @@ export default function getManagers(): Manager[] {
           teamID: '0013',
           steak: false,
         },
+        2020: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0013',
+          steak: false,
+        },
         2019: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0013',
           steak: true,
         },
       },
@@ -484,6 +604,9 @@ export default function getManagers(): Manager[] {
           steak: true,
         },
         2020: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0005',
           steak: false,
         },
       },
@@ -528,18 +651,33 @@ export default function getManagers(): Manager[] {
           steak: false,
         },
         2020: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0001',
           steak: false,
         },
         2019: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0001',
           steak: false,
         },
         2018: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0001',
           steak: true,
         },
         2017: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0001',
           steak: false,
         },
         2016: {
+          league: 'Madison',
+          division: 'Division 2',
+          teamID: '0001',
           steak: true,
         },
         2014: {
@@ -565,7 +703,7 @@ export default function getManagers(): Manager[] {
       },
     },
     {
-      name: 'Nick Rawling',
+      name: 'Nick Rawlings',
       teams: {
         2022: {
           league: 'Madison',
@@ -584,11 +722,35 @@ export default function getManagers(): Manager[] {
           teamID: '0006',
           steak: false,
         },
+        2020: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0006',
+          steak: false,
+        },
         2019: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0006',
           steak: true,
         },
         2018: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0006',
           steak: true,
+        },
+        2017: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0006',
+          steak: false,
+        },
+        2016: {
+          league: 'Madison',
+          division: 'Division 2',
+          teamID: '0006',
+          steak: false,
         },
       },
     },
@@ -610,7 +772,7 @@ export default function getManagers(): Manager[] {
       },
     },
     {
-      name: 'Alan Seslowski',
+      name: 'Alan Seslowsky',
       teams: {
         2022: {
           league: 'Madison',
@@ -666,18 +828,33 @@ export default function getManagers(): Manager[] {
           steak: true,
         },
         2020: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0007',
           steak: false,
         },
         2019: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0007',
           steak: false,
         },
         2018: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0007',
           steak: false,
         },
         2017: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0007',
           steak: false,
         },
         2016: {
+          league: 'Madison',
+          division: 'Division 1',
+          teamID: '0007',
           steak: true,
         },
       },
@@ -723,19 +900,34 @@ export default function getManagers(): Manager[] {
           steak: true,
         },
         2020: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0008',
           steak: true,
         },
         2019: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0008',
           steak: true,
         },
         2018: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0008',
           steak: true,
         },
         2017: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0008',
           steak: false,
         },
         2016: {
-          steak: false,
+          league: 'Madison',
+          division: 'Division 1',
+          teamID: '0008',
+          steak: true,
         },
       },
     },
@@ -767,7 +959,7 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0001',
         },
         2025: {
@@ -784,7 +976,7 @@ export default function getManagers(): Manager[] {
         },
         2023: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0001',
         },
         2022: {
@@ -797,6 +989,16 @@ export default function getManagers(): Manager[] {
           division: 'Taylors',
           teamID: '0001',
         },
+        2020: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0001',
+        },
+        2019: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0001',
+        },
       },
     },
     {
@@ -804,19 +1006,19 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0004',
           steak: false,
         },
         2025: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0004',
           steak: true,
         },
         2024: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0004',
           steak: true,
         },
@@ -839,18 +1041,33 @@ export default function getManagers(): Manager[] {
           steak: false,
         },
         2020: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0004',
           steak: false,
         },
         2019: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0004',
           steak: true,
         },
         2018: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0004',
           steak: false,
         },
         2017: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0004',
           steak: false,
         },
         2016: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0004',
           steak: false,
         },
         2010: {
@@ -866,19 +1083,19 @@ export default function getManagers(): Manager[] {
       teams: {
         2025: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0012',
           steak: true,
         },
         2024: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0012',
           steak: false,
         },
         2023: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0012',
           steak: false,
         },
@@ -893,6 +1110,31 @@ export default function getManagers(): Manager[] {
           division: 'Taylors',
           teamID: '0012',
           steak: true,
+        },
+        2020: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0012',
+        },
+        2019: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0012',
+        },
+        2018: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0012',
+        },
+        2017: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0012',
+        },
+        2016: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0012',
         },
       },
     },
@@ -912,7 +1154,7 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0006',
         },
         2025: {
@@ -927,7 +1169,7 @@ export default function getManagers(): Manager[] {
         },
         2023: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0006',
         },
         2022: {
@@ -940,8 +1182,31 @@ export default function getManagers(): Manager[] {
           division: 'Taylors',
           teamID: '0006',
         },
+        2020: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0006',
+        },
         2019: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0006',
           champion: true,
+        },
+        2018: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0006',
+        },
+        2017: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0006',
+        },
+        2016: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0006',
         },
       },
     },
@@ -965,7 +1230,7 @@ export default function getManagers(): Manager[] {
         },
         2023: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0009',
         },
         2022: {
@@ -974,6 +1239,31 @@ export default function getManagers(): Manager[] {
           teamID: '0009',
         },
         2021: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0009',
+        },
+        2020: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0009',
+        },
+        2019: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0009',
+        },
+        2018: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0009',
+        },
+        2017: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0009',
+        },
+        2016: {
           league: 'LA',
           division: 'Taylors',
           teamID: '0009',
@@ -988,19 +1278,19 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0010',
           steak: false,
         },
         2025: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0010',
           steak: false,
         },
         2024: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0010',
           steak: true,
         },
@@ -1023,18 +1313,33 @@ export default function getManagers(): Manager[] {
           steak: false,
         },
         2020: {
-          steak: false,
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0010',
+          steak: true,
         },
         2019: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0010',
           steak: false,
         },
         2018: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0010',
           steak: false,
         },
         2017: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0010',
           steak: true,
         },
         2016: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0010',
           steak: true,
         },
       },
@@ -1062,7 +1367,7 @@ export default function getManagers(): Manager[] {
         },
         2023: {
           league: 'LA',
-          division: 'Taylors',
+          division: 'Tornado Room',
           teamID: '0003',
           steak: true,
         },
@@ -1079,18 +1384,33 @@ export default function getManagers(): Manager[] {
           steak: true,
         },
         2020: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0003',
           steak: true,
         },
         2019: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0003',
           steak: false,
         },
         2018: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0003',
           steak: true,
         },
         2017: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0003',
           steak: true,
         },
         2016: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0003',
           steak: false,
         },
         2012: {
@@ -1103,22 +1423,22 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0005',
         },
         2025: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0005',
         },
         2024: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0005',
         },
         2023: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0005',
         },
         2022: {
@@ -1129,6 +1449,31 @@ export default function getManagers(): Manager[] {
         2021: {
           league: 'LA',
           division: 'Tornado Room',
+          teamID: '0005',
+        },
+        2020: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0005',
+        },
+        2019: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0005',
+        },
+        2018: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0005',
+        },
+        2017: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0005',
+        },
+        2016: {
+          league: 'LA',
+          division: 'Taylors',
           teamID: '0005',
         },
         2007: {
@@ -1144,19 +1489,19 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0011',
           steak: false,
         },
         2025: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0011',
           steak: false,
         },
         2024: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0011',
           steak: true,
         },
@@ -1179,18 +1524,33 @@ export default function getManagers(): Manager[] {
           steak: true,
         },
         2020: {
-          steak: true,
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0011',
+          steak: false,
         },
         2019: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0011',
           steak: true,
         },
         2018: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0011',
           steak: false,
         },
         2017: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0011',
           steak: false,
         },
         2016: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0011',
           steak: false,
         },
       },
@@ -1215,7 +1575,7 @@ export default function getManagers(): Manager[] {
         },
         2023: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0008',
         },
         2022: {
@@ -1228,8 +1588,31 @@ export default function getManagers(): Manager[] {
           division: 'Tornado Room',
           teamID: '0008',
         },
+        2020: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0008',
+        },
+        2019: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0008',
+        },
         2018: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0008',
           champion: true,
+        },
+        2017: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0008',
+        },
+        2016: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0008',
         },
       },
     },
@@ -1266,6 +1649,31 @@ export default function getManagers(): Manager[] {
           division: 'Tornado Room',
           teamID: '0007',
         },
+        2020: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0007',
+        },
+        2019: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0007',
+        },
+        2018: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0007',
+        },
+        2017: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0007',
+        },
+        2016: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0007',
+        },
         2003: {
           champion: true,
         },
@@ -1291,7 +1699,7 @@ export default function getManagers(): Manager[] {
         },
         2023: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0013',
         },
         2022: {
@@ -1304,6 +1712,31 @@ export default function getManagers(): Manager[] {
           division: 'Tornado Room',
           teamID: '0013',
         },
+        2020: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0013',
+        },
+        2019: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0013',
+        },
+        2018: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0013',
+        },
+        2017: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0013',
+        },
+        2016: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0013',
+        },
       },
     },
     {
@@ -1311,7 +1744,7 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0002',
         },
         2025: {
@@ -1326,7 +1759,7 @@ export default function getManagers(): Manager[] {
         },
         2023: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0002',
         },
         2022: {
@@ -1339,7 +1772,30 @@ export default function getManagers(): Manager[] {
           division: 'Tornado Room',
           teamID: '0002',
         },
+        2020: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0002',
+        },
+        2019: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0002',
+        },
+        2018: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0002',
+        },
+        2017: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0002',
+        },
         2016: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0002',
           champion: true,
         },
         2013: {
@@ -1352,22 +1808,22 @@ export default function getManagers(): Manager[] {
       teams: {
         2026: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0014',
         },
         2025: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0014',
         },
         2024: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0014',
         },
         2023: {
           league: 'LA',
-          division: 'Tornado Room',
+          division: 'Taylors',
           teamID: '0014',
           champion: true,
         },
@@ -1381,11 +1837,48 @@ export default function getManagers(): Manager[] {
           division: 'Tornado Room',
           teamID: '0014',
         },
+        2020: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0014',
+        },
+        2019: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0014',
+        },
+        2018: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0014',
+        },
+        2017: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0014',
+        },
+        2016: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0014',
+        },
       },
     },
     {
       name: 'Derek VanRiper',
       teams: {
+        2017: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0004',
+          steak: true,
+        },
+        2016: {
+          league: 'Madison',
+          division: 'Division 1',
+          teamID: '0004',
+          steak: true,
+        },
         2015: {
           champion: true,
         },
@@ -1423,6 +1916,123 @@ export default function getManagers(): Manager[] {
         },
         2009: {
           champion: true,
+        },
+      },
+    },
+    {
+      name: 'Mike Gay',
+      teams: {
+        2019: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0005',
+          steak: false,
+        },
+        2018: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0005',
+          steak: true,
+        },
+        2017: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0005',
+          steak: false,
+        },
+        2016: {
+          league: 'Madison',
+          division: 'Division 1',
+          teamID: '0005',
+          steak: false,
+        },
+      },
+    },
+    {
+      name: 'Peter Merrill',
+      teams: {
+        2016: {
+          league: 'Madison',
+          division: 'Division 1',
+          teamID: '0009',
+          steak: true,
+        },
+      },
+    },
+    {
+      name: 'Nick Whalen',
+      teams: {
+        2018: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0013',
+          steak: false,
+        },
+        2017: {
+          league: 'Madison',
+          division: 'Filet Mignon',
+          teamID: '0013',
+          steak: false,
+        },
+        2016: {
+          league: 'Madison',
+          division: 'Division 1',
+          teamID: '0013',
+          steak: false,
+        },
+      },
+    },
+    {
+      name: 'The Ramblers',
+      teams: {
+        2016: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0001',
+        },
+      },
+    },
+    {
+      name: 'AJ Scholz',
+      teams: {
+        2020: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0009',
+          steak: false,
+        },
+        2019: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0009',
+          steak: false,
+        },
+        2018: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0009',
+          steak: false,
+        },
+        2017: {
+          league: 'Madison',
+          division: 'Au Poivre',
+          teamID: '0009',
+          steak: true,
+        },
+      },
+    },
+    {
+      name: 'Tim McCaigue',
+      teams: {
+        2018: {
+          league: 'LA',
+          division: 'Taylors',
+          teamID: '0001',
+        },
+        2017: {
+          league: 'LA',
+          division: 'Tornado Room',
+          teamID: '0001',
         },
       },
     },
