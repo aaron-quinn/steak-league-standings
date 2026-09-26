@@ -69,3 +69,17 @@ npm run preview
 npx wrangler login # first time only
 npm run deploy
 ```
+
+### Archiving a Finished Season
+
+Past seasons' MyFantasyLeague exports are saved in `public/mfl/<year>/` and
+served with the site. The Worker reads those instead of asking MFL, and only
+goes to MFL for the current season or a file that isn't there. Once a season
+ends and the default season in `worker/utils/get-defaults.js` moves on, save it:
+
+```bash
+node scripts/archive-mfl.mjs 2026
+```
+
+Run it with no year to fill in any missing season, or add `--force` to
+download files again.
