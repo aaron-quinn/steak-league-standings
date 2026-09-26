@@ -33,6 +33,7 @@ export const POSITION_FILTERS = [
   { value: 'RB', label: 'RB', positions: ['RB'] },
   { value: 'WR', label: 'WR', positions: ['WR'] },
   { value: 'TE', label: 'TE', positions: ['TE'] },
+  { value: 'FLEX', label: 'FLEX', positions: ['RB', 'WR', 'TE'] },
   { value: 'K', label: 'K', positions: ['TMPK', 'PK', 'K'] },
   { value: 'DL', label: 'DL', positions: ['DE', 'DT', 'DL'] },
   { value: 'LB', label: 'LB', positions: ['LB'] },

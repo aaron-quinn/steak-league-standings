@@ -7,6 +7,8 @@ import SectionLabel from '@/components/SectionLabel';
 import MatchupsPlaceholder from '@/components/MatchupsPlaceholder';
 import FunNav from '@/components/fun/FunNav';
 import FollowSelect from '@/components/fun/FollowSelect';
+import PositionBadge from '@/components/fun/PositionBadge';
+import PositionFilters from '@/components/fun/PositionFilters';
 import { getWeeklyScores, getWeekPlayers } from '@/api/fun';
 import { getWeek } from '@/api';
 import { getMatchups } from '@/api/matchups';
@@ -18,20 +20,10 @@ import {
   POSITION_FILTERS,
   matchesPosition,
   playersFromMatchups,
-  positionLabel,
   type PositionFilter,
 } from '@/utils/week-players';
 
 const PAGE_SIZE = 25;
-
-const positionColors: Record<string, string> = {
-  QB: 'bg-rose-500/15 text-rose-300',
-  RB: 'bg-emerald-500/15 text-emerald-300',
-  WR: 'bg-sky-500/15 text-sky-300',
-  TE: 'bg-amber-500/15 text-amber-300',
-  K: 'bg-gray-500/15 text-gray-300',
-};
-const idpColor = 'bg-violet-500/15 text-violet-300';
 
 const medalColors = ['text-amber-300', 'text-gray-300', 'text-orange-400'];
 
@@ -203,36 +195,13 @@ export default function TopPlayersView({ bench }: Props) {
         />
       </div>
 
-      {/* Position filters, scrolling sideways on narrow screens */}
-      <div
-        role="group"
-        aria-label="Position"
-        className="-mx-2 mb-4 flex gap-1.5 overflow-x-auto px-2 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {POSITION_FILTERS.map((filter) => {
-          const active = filter.value === position;
-          return (
-            <button
-              type="button"
-              key={filter.value}
-              aria-pressed={active}
-              onClick={() =>
-                updateParams({
-                  pos: filter.value === 'all' ? null : filter.value,
-                })
-              }
-              className={clsx(
-                'h-7 shrink-0 rounded-full border px-3 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
-                active
-                  ? 'border-emerald-500/60 bg-emerald-500/15 text-emerald-200'
-                  : 'border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700 hover:text-gray-200',
-              )}
-            >
-              {filter.label}
-            </button>
-          );
-        })}
-      </div>
+      <PositionFilters
+        value={position}
+        onChange={(value) =>
+          updateParams({ pos: value === 'all' ? null : value })
+        }
+        className="mb-4"
+      />
 
       {failed ? (
         <MatchupsPlaceholder
@@ -421,7 +390,6 @@ function PlayerRow({
   showBenchTag: boolean;
   followed: string | null;
 }) {
-  const label = positionLabel(player.position);
   const [int, dec] = player.score.toFixed(2).split('.');
   const highlighted = player.owners.some(
     (owner) => owner.franchiseID === followed,
@@ -449,14 +417,7 @@ function PlayerRow({
           <span className="truncate text-sm font-medium text-gray-100">
             {player.name}
           </span>
-          <span
-            className={clsx(
-              'shrink-0 rounded px-1 py-px font-mono text-[9px] sm:text-[10px] font-semibold',
-              positionColors[label] ?? idpColor,
-            )}
-          >
-            {label}
-          </span>
+          <PositionBadge position={player.position} />
           <span className="shrink-0 text-[10px] sm:text-xs text-gray-600">
             {player.team}
           </span>
