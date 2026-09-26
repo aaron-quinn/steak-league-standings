@@ -1,6 +1,6 @@
 import { getAllPlayers } from '../api/players.js';
 import getPlayerScores from '../api/player-scores.js';
-import getDefaults from '../utils/get-defaults.js';
+import getDefaults, { leaguesFor } from '../utils/get-defaults.js';
 import valueDraft from '../utils/draft-value.js';
 import { loadWeeks } from './weekly-scores.js';
 import draft2026 from '../data/draft/2026.json';
@@ -13,8 +13,9 @@ const drafts = { 2026: draft2026 };
 // Every auction pick with what his season has been worth through the last
 // finished week
 export default async function draftYear(c) {
-  const { season: defaultSeason, leagues } = getDefaults();
+  const { season: defaultSeason } = getDefaults();
   const season = c.req.param('year') || defaultSeason;
+  const leagues = leaguesFor(season);
 
   const draft = drafts[season];
   if (!draft) {

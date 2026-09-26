@@ -1,9 +1,10 @@
 import getLiveMatchups from '../api/live-matchups.js';
-import getDefaults from '../utils/get-defaults.js';
+import getDefaults, { leaguesFor } from '../utils/get-defaults.js';
 
 export default async function getLiveMatchupsYear(c) {
-  const { season: defaultSeason, leagues } = getDefaults();
+  const { season: defaultSeason } = getDefaults();
   const season = c.req.param('year') || defaultSeason;
+  const leagues = leaguesFor(season);
 
   const matchupList = [];
   let unavailable = null;

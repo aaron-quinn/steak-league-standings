@@ -1,9 +1,9 @@
 import getWeeklyResults from '../api/weekly-results.js';
-import getDefaults from '../utils/get-defaults.js';
+import getDefaults, { leaguesFor } from '../utils/get-defaults.js';
 
 // Both leagues' played weeks merged by week number, or a 503 response
 export async function loadWeeks(c, season) {
-  const { leagues } = getDefaults();
+  const leagues = leaguesFor(season);
   const byWeek = new Map();
 
   // Ask MFL for both leagues at once rather than one after the other

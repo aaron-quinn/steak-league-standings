@@ -1,10 +1,11 @@
 import getStandings from '../api/standings.js';
-import getDefaults from '../utils/get-defaults.js';
+import getDefaults, { leaguesFor } from '../utils/get-defaults.js';
 import sortTeamList from '../utils/sort-team-list.js';
 
 export default async function standingsYear(c) {
-  const { season: defaultSeason, leagues } = getDefaults();
+  const { season: defaultSeason } = getDefaults();
   const season = c.req.param('year') || defaultSeason;
+  const leagues = leaguesFor(season);
 
   const teamList = {};
 

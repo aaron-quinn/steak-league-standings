@@ -4,7 +4,7 @@ import {
   getWaiverBudget,
   getWeekDeadlines,
 } from '../api/waivers.js';
-import getDefaults from '../utils/get-defaults.js';
+import getDefaults, { leaguesFor } from '../utils/get-defaults.js';
 import { loadWeeks } from './weekly-scores.js';
 
 // Keeps each players export request well inside MFL's URL length limit
@@ -15,8 +15,9 @@ const round = (value) => Math.round(value * 100) / 100;
 // Every pickup of the season in both leagues, with what it cost and what the
 // player scored for the team that added him
 export default async function waiversYear(c) {
-  const { season: defaultSeason, leagues } = getDefaults();
+  const { season: defaultSeason } = getDefaults();
   const season = c.req.param('year') || defaultSeason;
+  const leagues = leaguesFor(season);
 
   const unavailable = (error) => {
     console.error(`Unable to load ${season} waiver pickups`, error);
