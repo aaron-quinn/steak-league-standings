@@ -2,6 +2,9 @@ import getData from './get-data.js';
 import sortTeamList from '../utils/sort-team-list.js';
 import { seasonDataSeconds } from '../utils/season-cache.js';
 
+// MFL returns a single object rather than a one-item array
+const asList = (value) => (Array.isArray(value) ? value : value ? [value] : []);
+
 export default async function getStandings({ season, leagueID, prefix = '' }) {
   try {
     // Get the standings from the MFL API
@@ -10,20 +13,25 @@ export default async function getStandings({ season, leagueID, prefix = '' }) {
     const weeklyResultsResponse = await getData(weeklyResultsURL, {
       cacheSeconds: seasonDataSeconds(season, 60),
     });
-    const weeklyResults = weeklyResultsResponse.allWeeklyResults.weeklyResults;
+    const weeklyResults = asList(
+      weeklyResultsResponse.allWeeklyResults.weeklyResults,
+    );
 
     const latestResultWeek =
       weeklyResults[weeklyResults.length - 1]?.week || '1';
 
     const standings = {};
     weeklyResults.forEach((weeklyResult) => {
-      const matchups = weeklyResult.matchup || []; // array of head-to-head matchups
-      const franchises = weeklyResult.franchise || []; // array of teams without a weekly matchup
+      const matchups = asList(weeklyResult.matchup); // head-to-head matchups
+      const franchises = asList(weeklyResult.franchise); // teams without a weekly matchup
+      // MFL can put a team in two playoff games in one week (LA's 2024 week
+      // 15), listing the same score twice. It only counts once.
+      const scored = new Set();
 
       // Parse matchups
       matchups.forEach((matchup) => {
         const isRegularSeasonMatchup = (matchup.regularSeason || '0') === '1';
-        const teams = matchup.franchise || [];
+        const teams = asList(matchup.franchise);
 
         // MFL pre-populates the entire schedule before the season starts and
         // marks every unplayed game as a tie. Only a game that has actually
@@ -44,7 +52,10 @@ export default async function getStandings({ season, leagueID, prefix = '' }) {
           }
 
           // Add to running tally of points for
-          standings[`${prefix}${team.id}`].points += Number(team.score || 0);
+          if (!scored.has(team.id)) {
+            scored.add(team.id);
+            standings[`${prefix}${team.id}`].points += Number(team.score || 0);
+          }
 
           // Only count wins/losses/ties for regular season games once played
           if (isRegularSeasonMatchup && hasBeenPlayed) {
@@ -69,7 +80,10 @@ export default async function getStandings({ season, leagueID, prefix = '' }) {
         }
 
         // Add to running tally of points for
-        standings[`${prefix}${team.id}`].points += Number(team.score || 0);
+        if (!scored.has(team.id)) {
+          scored.add(team.id);
+          standings[`${prefix}${team.id}`].points += Number(team.score || 0);
+        }
       });
     });
 
