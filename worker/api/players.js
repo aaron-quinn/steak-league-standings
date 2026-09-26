@@ -36,6 +36,24 @@ export async function getLiveScoringPlayers({ season, liveScoring }) {
   return getPlayersByID({ season, ids });
 }
 
+// Every player MFL lists for the season, by MFL ID. Ten times the size of a
+// live scoring request's players, but still quick to parse, and only the
+// draft values need it: finding each position's baseline means knowing the
+// position of every player who has scored, drafted or not.
+export async function getAllPlayers({ season }) {
+  const playersURL = `/${season}/export?TYPE=players&JSON=1`;
+  const playersResponse = await getData(playersURL, {
+    cacheSeconds: PLAYERS_CACHE_SECONDS,
+  });
+
+  return new Map(
+    asList(playersResponse.players?.player).map((player) => [
+      player.id,
+      withSplitName(player),
+    ]),
+  );
+}
+
 // Details for just the given MFL player IDs, by ID
 export async function getPlayersByID({ season, ids }) {
   if (ids.size === 0) {
