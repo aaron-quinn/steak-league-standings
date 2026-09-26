@@ -497,9 +497,7 @@ const StandingsList = forwardRef<StandingsListHandle, StandingsListProps>(
       // Is there a self-buyer spot
       const selfBuyer = teams.length % 2 !== 0;
 
-      const steakLine = selfBuyer
-        ? numTeamsGettingASteak
-        : numTeamsGettingASteak - 1;
+      const steakLine = numTeamsGettingASteak;
 
       // Calculate the points scored by the team at the steak line
       const steakLinePts = teams[steakLine]?.points || 0;

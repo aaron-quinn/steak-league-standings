@@ -6,7 +6,8 @@ import type { MatchupManager } from '@/types/MatchupManager';
 export function getTeamManagers(year: number): Map<string, MatchupManager> {
   const teams = new Map<string, MatchupManager>();
   getManagers()
-    .filter((manager) => manager.teams[year])
+    // A steak result recorded without a team has no scores to show
+    .filter((manager) => manager.teams[year]?.teamID)
     .forEach((manager) => {
       const teamYear = manager.teams[year];
       const teamID = teamYear.teamID || '';
@@ -45,9 +46,10 @@ export type SteakZone = 'eater' | 'self-buyer' | 'buyer';
 // Half the field eats; with an odd count the middle team buys its own. Mirrors
 // the steak line in StandingsList.
 export function getSteakLine(teamCount: number) {
-  const selfBuyer = teamCount % 2 !== 0;
-  const half = Math.floor(teamCount / 2);
-  return { eaters: selfBuyer ? half : half - 1, selfBuyer };
+  return {
+    eaters: Math.floor(teamCount / 2),
+    selfBuyer: teamCount % 2 !== 0,
+  };
 }
 
 export function getSteakZone(rank: number, teamCount: number): SteakZone {
