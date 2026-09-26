@@ -1020,7 +1020,7 @@ export default function getManagers(): Manager[] {
           league: 'LA',
           division: 'Taylors',
           teamID: '0010',
-          steak: true,
+          steak: false,
         },
         2020: {
           steak: false,
