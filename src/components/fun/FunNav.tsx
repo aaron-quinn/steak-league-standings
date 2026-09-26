@@ -10,6 +10,11 @@ export const FUN_SCREENS = [
     description: 'Every team’s official steak rank, week by week.',
   },
   {
+    to: '/fun/steak-odds',
+    label: 'Steak Odds',
+    description: 'Each team’s chances of eating, and who’s been tombstoned.',
+  },
+  {
     to: '/fun/top-players',
     label: 'Top Players',
     description: 'The week’s biggest fantasy scorers and who rosters them.',
@@ -18,6 +23,16 @@ export const FUN_SCREENS = [
     to: '/fun/bench',
     label: 'Bench Points',
     description: 'The best performances left sitting on a bench.',
+  },
+  {
+    to: '/fun/draft',
+    label: 'Draft',
+    description: 'Every auction price, and which picks paid off.',
+  },
+  {
+    to: '/fun/waivers',
+    label: 'Waivers',
+    description: 'The season’s best (and worst) waiver pickups.',
   },
 ];
 
@@ -38,10 +53,14 @@ export default function FunNav() {
   );
 
   return (
-    <nav aria-label="Fun screens" className="mb-4 lg:mb-6">
+    // Scrolls sideways if the screens outgrow a phone's width
+    <nav
+      aria-label="Fun screens"
+      className="-mx-2 mb-4 overflow-x-auto px-2 [scrollbar-width:none] lg:mb-6 [&::-webkit-scrollbar]:hidden"
+    >
       <div
         ref={groupRef}
-        className="relative flex rounded-lg border border-gray-800 bg-gray-950 p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:inline-flex"
+        className="relative flex w-max min-w-full rounded-lg border border-gray-800 bg-gray-950 p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:inline-flex sm:min-w-0"
       >
         <span ref={indicatorRef} aria-hidden="true" className={pillClassName} />
         {FUN_SCREENS.map((screen) => {

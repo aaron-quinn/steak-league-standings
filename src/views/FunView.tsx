@@ -19,6 +19,53 @@ const art: Record<string, React.ReactNode> = {
       <circle cx="76" cy="6" r="3" className="fill-emerald-400 stroke-none" />
     </>
   ),
+  // Chances split into eat, self-buy and buy, and a headstone for the hopeless
+  '/fun/steak-odds': (
+    <>
+      {[
+        [32, 12],
+        [20, 24],
+        [8, 36],
+      ].map(([eat, buy], index) => (
+        <g key={eat} className="stroke-none">
+          <rect
+            x={4}
+            y={9 + index * 9}
+            width={eat}
+            height={4}
+            rx={1.5}
+            className="fill-emerald-400"
+          />
+          <rect
+            x={6 + eat}
+            y={9 + index * 9}
+            width={3}
+            height={4}
+            rx={1}
+            className="fill-gray-600"
+          />
+          <rect
+            x={11 + eat}
+            y={9 + index * 9}
+            width={buy}
+            height={4}
+            rx={1.5}
+            className="fill-red-400/80"
+          />
+        </g>
+      ))}
+      <path
+        d="M62 34 V21 a7 7 0 0 1 14 0 V34 Z"
+        className="stroke-gray-500"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M66 24 H72 M66 28 H72"
+        className="stroke-gray-600"
+        strokeWidth="1.5"
+      />
+    </>
+  ),
   '/fun/top-players': (
     <>
       {[30, 24, 19, 15, 12, 10].map((height, index) => (
@@ -45,6 +92,46 @@ const art: Record<string, React.ReactNode> = {
       <path d="M14 24 V34 M66 24 V34" className="stroke-gray-600" />
       <path d="M14 18 V8 M66 18 V8 M14 8 H66" className="stroke-gray-700" />
       <circle cx="40" cy="12" r="3.5" className="fill-amber-400 stroke-none" />
+    </>
+  ),
+  // Price against worth: a steal above the fair-value line, a bust below
+  '/fun/draft': (
+    <>
+      <path d="M6 34 L74 6" className="stroke-gray-700" strokeDasharray="2 3" />
+      {[
+        [16, 26],
+        [30, 23],
+        [44, 15],
+        [58, 14],
+      ].map(([cx, cy]) => (
+        <circle
+          key={cx}
+          cx={cx}
+          cy={cy}
+          r="2"
+          className="fill-gray-600 stroke-none"
+        />
+      ))}
+      <circle
+        cx="22"
+        cy="10"
+        r="3.5"
+        className="fill-emerald-400 stroke-none"
+      />
+      <circle cx="66" cy="30" r="3.5" className="fill-red-400/80 stroke-none" />
+    </>
+  ),
+  '/fun/waivers': (
+    <>
+      {/* A price tag that climbs */}
+      <path
+        d="M8 22 L18 12 H34 V32 H18 Z"
+        className="stroke-gray-600"
+        strokeLinejoin="round"
+      />
+      <circle cx="17" cy="22" r="2" className="fill-gray-600 stroke-none" />
+      <path d="M44 32 C 54 30, 60 22, 72 8" className="stroke-emerald-400" />
+      <path d="M64 8 H72 V16" className="stroke-emerald-400" />
     </>
   ),
 };

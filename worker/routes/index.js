@@ -6,6 +6,8 @@ import liveMatchupsYear from './matchups.js';
 import weekYear from './week.js';
 import weeklyScoresYear from './weekly-scores.js';
 import weekPlayersYear from './week-players.js';
+import waiversYear from './waivers.js';
+import draftYear from './draft.js';
 import {
   FINAL_RESPONSE_SECONDS,
   isFinishedSeason,
@@ -47,5 +49,7 @@ apiRoutes.get('/live-matchups/:year', ...live, liveMatchupsYear);
 apiRoutes.get('/week/:year', ...recent, weekYear);
 apiRoutes.get('/weekly-scores/:year', ...recent, weeklyScoresYear);
 apiRoutes.get('/week-players/:year/:week', ...slow, weekPlayersYear);
+apiRoutes.get('/waivers/:year', ...recent, waiversYear);
+apiRoutes.get('/draft/:year', ...slow, draftYear);
 
 export default apiRoutes;
