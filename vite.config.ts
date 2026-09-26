@@ -7,6 +7,10 @@ import { cloudflare } from '@cloudflare/vite-plugin';
 // server, so /api/* works locally without a separate server or proxy.
 export default defineConfig({
   plugins: [react(), cloudflare()],
+  server: {
+    // Reach the dev server over Tailscale (npm run dev -- --host)
+    allowedHosts: ['aaron-laptop.taild7f967.ts.net'],
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
