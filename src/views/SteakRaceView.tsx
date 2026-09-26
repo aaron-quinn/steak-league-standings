@@ -17,7 +17,7 @@ import { buildSteakSeason, getSeasonFacts } from '@/utils/steak-season';
 import { getSteakZone } from '@/utils/steak-teams';
 
 // Seasons with both leagues in the managers data
-const FIRST_SEASON = 2021;
+const FIRST_SEASON = 2016;
 
 type Mode = 'chart' | 'race';
 

@@ -28,13 +28,14 @@ import {
   getWeekComebacks,
   isTombstoned,
   simulateSteakOdds,
+  weeksInSeason,
   type ChaseTarget,
   type Comeback,
   type SteakOdds,
 } from '@/utils/steak-odds';
 
 // Seasons with both leagues in the managers data
-const FIRST_SEASON = 2021;
+const FIRST_SEASON = 2016;
 
 // Kept outside the component so the combined data only changes when a
 // season's scores do
@@ -189,7 +190,11 @@ export default function SteakOddsView() {
       { length: currentYear - FIRST_SEASON },
       (_, i) => FIRST_SEASON + i,
     ).filter((season) => season !== year);
-    const model = fitScoringModel(pastYears.map(scores));
+    const model = {
+      ...fitScoringModel(pastYears.map(scores)),
+      // Played out to the on-screen season's length, not the longest past one
+      seasonWeeks: weeksInSeason(year),
+    };
     const history = pastYears.map((season) => ({
       year: season,
       season: buildSteakSeason(season, scores(season)),

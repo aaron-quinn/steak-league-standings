@@ -33,7 +33,7 @@ import {
 } from '@/utils/waivers';
 
 // Seasons with both leagues in the managers data
-const FIRST_SEASON = 2021;
+const FIRST_SEASON = 2016;
 const PAGE_SIZE = 25;
 // A week this big fills a sparkline bar
 const SPARK_MAX = 30;

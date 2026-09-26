@@ -18,6 +18,9 @@ export interface ScoringModel {
   seasonWeeks: number;
 }
 
+// Weeks in the given season. The NFL added an 18th week in 2021.
+export const weeksInSeason = (year: number) => (year < 2021 ? 17 : 18);
+
 // Simulated seasons behind each set of odds. Enough that a rerun moves no
 // team's odds by more than a point.
 const RUNS = 10000;
