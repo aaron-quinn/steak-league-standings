@@ -179,6 +179,24 @@
   }
 }
 
+/* A team's nuggets settle in under its row when it's tapped */
+.team-open {
+  animation: team-open 300ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes team-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-open {
+    animation: none;
+  }
+}
+
 /* Last week's spot and trail fade in once the team has moved */
 .pit-trail {
   animation: pit-trail 400ms 450ms ease-out backwards;

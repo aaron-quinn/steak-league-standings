@@ -12,8 +12,10 @@ import TombstonePit, {
   TombstoneNuggets,
   hasSelfBuyer,
 } from '@/components/fun/TombstonePit';
+import TeamNuggets from '@/components/fun/TeamNuggets';
 import { zoneText } from '@/components/fun/zone-colors';
 import { getWeeklyScores } from '@/api/fun';
+import { formatChance, ordinal } from '@/utils/format-score';
 import { useStandingsStore } from '@/stores/standings';
 import type { WeeklyScores } from '@/types/Fun';
 import {
@@ -25,7 +27,9 @@ import { getSteakLine, getSteakZone } from '@/utils/steak-teams';
 import {
   fitScoringModel,
   getDeficits,
+  getLockLine,
   getTombstoneLine,
+  getWeekCollapses,
   getWeekComebacks,
   isTombstoned,
   simulateSteakOdds,
@@ -51,15 +55,6 @@ function combineSeasons(results: UseQueryResult<WeeklyScores[]>[]) {
   };
 }
 
-const ordinal = (n: number) => {
-  const suffix =
-    n % 100 >= 11 && n % 100 <= 13
-      ? 'th'
-      : (({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ??
-        'th');
-  return `${n}${suffix}`;
-};
-
 // "2021–2025", or "2021–2023 and 2025" around a gap
 function formatYears(years: number[]) {
   const runs: number[][] = [];
@@ -74,13 +69,6 @@ function formatYears(years: number[]) {
   return parts.length > 1
     ? `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`
     : parts[0];
-}
-
-// Whole percents, without claiming a certainty the simulation can't show
-function formatChance(chance: number, settled: boolean) {
-  if (!settled && chance > 0.995) return '>99%';
-  if (!settled && chance < 0.005) return '<1%';
-  return `${Math.round(chance * 100)}%`;
 }
 
 interface Outlook {
@@ -212,6 +200,7 @@ export default function SteakOddsView() {
       history,
       weekComebacks,
       line: getTombstoneLine(weekComebacks),
+      lockLine: getLockLine(getWeekCollapses(history, model.seasonWeeks)),
       season: buildSteakSeason(year, scores(year)),
     };
   }, [data, year, currentYear]);
@@ -225,19 +214,26 @@ export default function SteakOddsView() {
   const setPlayed = (week: number) =>
     updateParams({ week: week === weeksPlayed ? null : String(week) });
 
+  // Each week's odds, simulated the first time they're asked for, so stepping
+  // through weeks or opening a team's trend doesn't rerun them
+  const oddsAfter = useMemo(() => {
+    const cache = new Map<number, Map<string, SteakOdds>>();
+    return (week: number) => {
+      let weekOdds = cache.get(week);
+      if (!weekOdds) {
+        weekOdds = simulateSteakOdds(board!.season, week, board!.model);
+        cache.set(week, weekOdds);
+      }
+      return weekOdds;
+    };
+  }, [board]);
   const odds = useMemo(
-    () =>
-      board && played > 0
-        ? simulateSteakOdds(board.season, played, board.model)
-        : null,
-    [board, played],
+    () => (board && played > 0 ? oddsAfter(played) : null),
+    [board, played, oddsAfter],
   );
   const before = useMemo(
-    () =>
-      board && played > 0
-        ? simulateSteakOdds(board.season, played - 1, board.model)
-        : null,
-    [board, played],
+    () => (board && played > 0 ? oddsAfter(played - 1) : null),
+    [board, played, oddsAfter],
   );
   const rows = useMemo(
     () =>
@@ -262,6 +258,22 @@ export default function SteakOddsView() {
     updateParams({
       follow: board?.season.teams.find((team) => team.id === id)?.name ?? null,
     });
+
+  // The followed team's story, opened under its row in the detail view
+  const followedRow = rows.find((row) => row.team.id === selected);
+  const story = board && followedRow && (
+    <TeamNuggets
+      team={followedRow.team}
+      season={board.season}
+      history={board.history}
+      year={year}
+      played={played}
+      model={board.model}
+      line={board.line}
+      lockLine={board.lockLine}
+      oddsAfter={oddsAfter}
+    />
+  );
 
   const alive = rows.filter((row) => !row.tombstoned);
   const buried = rows.filter((row) => row.tombstoned);
@@ -413,6 +425,7 @@ export default function SteakOddsView() {
                     settled={settled}
                     followed={selected}
                     onSelect={setSelected}
+                    story={row.team.id === selected ? story : null}
                   />
                 ))}
               </ol>
@@ -426,13 +439,14 @@ export default function SteakOddsView() {
                 played={played}
                 followed={selected}
                 onSelect={setSelected}
+                story={followedRow?.tombstoned ? story : null}
               />
             )}
 
             <p className="mt-2 text-[11px] sm:text-xs text-gray-600">
               {settled
-                ? 'Final steak standings.'
-                : `Chances from playing out the last ${seasonWeeks - played} week${seasonWeeks - played === 1 ? '' : 's'} 10,000 times. Tap a team to follow it.`}
+                ? 'Final steak standings. Tap a team for how its season went.'
+                : `Chances from playing out the last ${seasonWeeks - played} week${seasonWeeks - played === 1 ? '' : 's'} 10,000 times. Tap a team to follow it and see where it stands.`}
             </p>
           </section>
 
@@ -671,23 +685,27 @@ function OddsRow({
   settled,
   followed,
   onSelect,
+  story,
 }: {
   row: Outlook;
   teamCount: number;
   settled: boolean;
   followed: string | null;
   onSelect: (id: string | null) => void;
+  // The team's nuggets, opened under the row while it's followed
+  story: React.ReactNode;
 }) {
   const { team, rank, margin, odds, change, risen, finish } = row;
   const isFollowed = team.id === followed;
   const ate = finish !== null && getSteakZone(finish, teamCount) === 'eater';
 
   return (
-    <li>
+    <li className={clsx(story && 'bg-amber-300/[0.04]')}>
       <button
         type="button"
         onClick={() => onSelect(isFollowed ? null : team.id)}
         aria-pressed={isFollowed}
+        aria-expanded={isFollowed}
         className={clsx(
           'grid w-full grid-cols-[1.25rem_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1.5 px-2.5 py-2 text-left transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400 sm:grid-cols-[1.5rem_minmax(0,11rem)_minmax(0,1fr)_3rem_2.75rem_2.75rem_2.25rem] sm:gap-x-3 sm:px-3',
           isFollowed
@@ -755,6 +773,10 @@ function OddsRow({
           <Change change={change} settled={settled} />
         </span>
       </button>
+      {/* Lined up under the team's name */}
+      {story && (
+        <div className="px-2.5 pb-3.5 pt-1 sm:px-3 sm:pl-12">{story}</div>
+      )}
     </li>
   );
 }
@@ -913,6 +935,7 @@ function Graveyard({
   played,
   followed,
   onSelect,
+  story,
 }: {
   rows: Outlook[];
   teamCount: number;
@@ -920,6 +943,8 @@ function Graveyard({
   played: number;
   followed: string | null;
   onSelect: (id: string | null) => void;
+  // The followed team's nuggets, when it's one of the buried
+  story: React.ReactNode;
 }) {
   return (
     <section className="mt-5">
@@ -937,6 +962,11 @@ function Graveyard({
             />
           ))}
         </ul>
+        {story && (
+          <div className="mt-5 rounded-lg border border-amber-300/20 bg-black/40 px-3 pb-3.5 pt-3">
+            {story}
+          </div>
+        )}
         <p className="mt-4 text-center text-[11px] sm:text-xs text-gray-500">
           {record.deficit > 0
             ? `After week ${played}, no team has come back from more than ${record.deficit.toFixed(1)} points behind the last eater. ${record.name} climbed out from that deep after week ${record.played} in ${record.year}.`
@@ -969,6 +999,7 @@ function Headstone({
         type="button"
         onClick={() => onSelect(isFollowed ? null : team.id)}
         aria-pressed={isFollowed}
+        aria-expanded={isFollowed}
         aria-label={`${team.name}, tombstoned since week ${buriedSince}, ${Math.abs(margin).toFixed(1)} points back`}
         title={`${formatChance(odds.eater, false)} by the math`}
         className="w-full overflow-hidden rounded-t-[2.75rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"

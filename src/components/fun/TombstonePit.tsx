@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import { useMemo } from 'react';
 import SegmentedTabs from '@/components/SegmentedTabs';
+import { Num, NuggetList, type Nugget } from '@/components/fun/Nuggets';
 import { useElementWidth } from '@/hooks/useElementWidth';
 import type { SteakSeason } from '@/utils/steak-season';
 import { getSteakLine, getSteakZone } from '@/utils/steak-teams';
@@ -84,17 +85,6 @@ function listNames(names: string[]) {
 function niceCeil(value: number) {
   const step = value > 100 ? 50 : 25;
   return Math.ceil(value / step) * step;
-}
-
-function Num({ children }: { children: React.ReactNode }) {
-  return <span className="font-mono text-gray-100">{children}</span>;
-}
-
-interface Nugget {
-  key: string;
-  emoji: string;
-  title: string;
-  body: React.ReactNode;
 }
 
 interface NuggetInput {
@@ -478,21 +468,7 @@ export function TombstoneNuggets(props: Props) {
           <h3 className="mb-2 text-[10px] font-medium uppercase tracking-widest text-gray-600">
             {group.title}
           </h3>
-          <ul className="space-y-3 text-xs sm:text-sm leading-relaxed text-gray-400">
-            {group.nuggets.map((nugget) => (
-              <li key={nugget.key} className="flex gap-2.5">
-                <span aria-hidden="true" className="w-5 shrink-0 text-center">
-                  {nugget.emoji}
-                </span>
-                <p>
-                  <span className="font-medium text-gray-200">
-                    {nugget.title}:
-                  </span>{' '}
-                  {nugget.body}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <NuggetList nuggets={group.nuggets} />
         </div>
       ))}
     </div>
