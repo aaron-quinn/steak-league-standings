@@ -4,6 +4,7 @@ import { useQueries, type UseQueryResult } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import PageShell from '@/components/PageShell';
 import SectionLabel from '@/components/SectionLabel';
+import SegmentedTabs from '@/components/SegmentedTabs';
 import MatchupsPlaceholder from '@/components/MatchupsPlaceholder';
 import FunNav from '@/components/fun/FunNav';
 import FollowSelect from '@/components/fun/FollowSelect';
@@ -36,6 +37,9 @@ import {
 
 // Seasons with both leagues in the managers data
 const FIRST_SEASON = 2016;
+
+// The full breakdown, or every team on one card to screenshot and send
+type View = 'detail' | 'snapshot';
 
 // Kept outside the component so the combined data only changes when a
 // season's scores do
@@ -162,6 +166,8 @@ export default function SteakOddsView() {
   const year = seasons.includes(requestedSeason)
     ? requestedSeason
     : currentYear;
+  const view: View =
+    searchParams.get('view') === 'snapshot' ? 'snapshot' : 'detail';
 
   const updateParams = (changes: Record<string, string | null>) => {
     const next = new URLSearchParams(searchParams);
@@ -281,6 +287,19 @@ export default function SteakOddsView() {
       <FunNav />
 
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="w-44 sm:w-48">
+          <SegmentedTabs
+            label="Odds view"
+            tabs={[
+              { value: 'detail', label: 'Detail' },
+              { value: 'snapshot', label: 'Snapshot' },
+            ]}
+            value={view}
+            onChange={(value) =>
+              updateParams({ view: value === 'snapshot' ? 'snapshot' : null })
+            }
+          />
+        </div>
         <WeekStepper
           label={
             !board
@@ -352,6 +371,15 @@ export default function SteakOddsView() {
         <MatchupsPlaceholder
           title="No Weeks Played Yet"
           message="The odds start moving once the first week of the season is in the books."
+        />
+      ) : view === 'snapshot' ? (
+        <OddsSnapshot
+          rows={rows}
+          year={year}
+          played={played}
+          settled={settled}
+          followed={selected}
+          onSelect={setSelected}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-x-12">
@@ -686,6 +714,152 @@ function OddsRow({
         </span>
       </button>
     </li>
+  );
+}
+
+// Rank, team, points from the steak line, eat chance and its weekly change
+const snapshotColumns =
+  'grid-cols-[1.25rem_minmax(0,1fr)_3.25rem_2.75rem_2rem] gap-x-2';
+
+// Every team on one card, in steak order and small enough to fit a phone
+// screen, so a screenshot tells the whole story
+function OddsSnapshot({
+  rows,
+  year,
+  played,
+  settled,
+  followed,
+  onSelect,
+}: {
+  rows: Outlook[];
+  year: number;
+  played: number;
+  settled: boolean;
+  followed: string | null;
+  onSelect: (id: string | null) => void;
+}) {
+  const teamCount = rows.length;
+  const { eaters, selfBuyer } = getSteakLine(teamCount);
+  const anyBuried = rows.some((row) => row.tombstoned);
+
+  return (
+    <section className="mx-auto w-full max-w-md">
+      <div className="rounded-xl border border-gray-800/60 bg-gray-950/40 px-2 pb-2.5 pt-3 sm:px-3">
+        <header className="mb-2.5 flex items-center justify-between gap-3 px-1">
+          <div className="flex min-w-0 items-center gap-2">
+            <img src="/steak.svg" alt="" className="h-6 w-6 shrink-0" />
+            <div className="min-w-0 leading-tight">
+              <h2 className="text-sm font-semibold text-gray-100">
+                {year} Steak Odds
+              </h2>
+              <p className="text-[11px] text-gray-500">
+                {settled ? 'Final' : `After week ${played}`}
+              </p>
+            </div>
+          </div>
+          <span className="shrink-0 text-[10px] text-gray-600">
+            steakstandings.com
+          </span>
+        </header>
+
+        <div
+          className={clsx(
+            'grid px-1 pb-1 text-[10px] uppercase tracking-wide text-gray-600',
+            snapshotColumns,
+          )}
+        >
+          <span className="text-right">#</span>
+          <span>Team</span>
+          <span className="text-right">Line</span>
+          <span className="text-right">Eat</span>
+          <span className="text-right">{settled ? '' : 'Wk'}</span>
+        </div>
+
+        <ol>
+          {rows.map(({ team, rank, margin, odds, change, tombstoned }) => {
+            const isFollowed = team.id === followed;
+            return (
+              <li
+                key={team.id}
+                className={clsx(
+                  // The steak line, and the self-buyer's spot just under it
+                  rank === eaters &&
+                    'border-b border-dashed border-emerald-400/40',
+                  selfBuyer &&
+                    rank === eaters + 1 &&
+                    'border-b border-dashed border-gray-600/60',
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => onSelect(isFollowed ? null : team.id)}
+                  aria-pressed={isFollowed}
+                  className={clsx(
+                    // A fixed height, so the ▲▼ glyphs' fallback font can't
+                    // stretch some rows taller than others
+                    'relative grid h-6 w-full items-center rounded px-1 text-left leading-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-400',
+                    snapshotColumns,
+                    isFollowed ? 'bg-amber-300/10' : 'hover:bg-gray-900/40',
+                  )}
+                >
+                  {/* The chance of eating, as a wash behind the row */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-y-px left-0 rounded-sm bg-emerald-400/[0.07]"
+                    style={{ width: `${odds.eater * 100}%` }}
+                  />
+                  <span
+                    className={clsx(
+                      'relative text-right font-mono text-xs tabular-nums',
+                      zoneText[getSteakZone(rank, teamCount)],
+                    )}
+                  >
+                    {rank}
+                  </span>
+                  <span
+                    className={clsx(
+                      'relative truncate text-[13px]',
+                      isFollowed
+                        ? 'text-amber-200'
+                        : tombstoned
+                          ? 'text-gray-500'
+                          : 'text-gray-100',
+                    )}
+                  >
+                    {tombstoned && '🪦 '}
+                    {team.name}
+                  </span>
+                  <span className="relative text-right font-mono text-[11px] text-gray-500 tabular-nums">
+                    {margin >= 0 ? '+' : '−'}
+                    {Math.abs(margin).toFixed(1)}
+                  </span>
+                  <span className="relative text-right font-mono text-[13px] font-semibold text-gray-100 tabular-nums">
+                    {formatChance(odds.eater, settled)}
+                  </span>
+                  <span className="relative text-right">
+                    <Change change={change} settled={settled} />
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+
+        <footer className="mt-2.5 space-y-1 px-1 text-[10px] leading-snug text-gray-600">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <ZoneKey className="bg-emerald-400/80">Eat</ZoneKey>
+            {selfBuyer && <ZoneKey className="bg-gray-500">Self-buy</ZoneKey>}
+            <ZoneKey className="bg-red-400/70">Buy</ZoneKey>
+            {anyBuried && <span>🪦 Tombstoned</span>}
+          </div>
+          <p>
+            {settled
+              ? 'Line is points clear of, or behind, the steak line.'
+              : `Line is points clear of, or behind, the steak line. Eat is the chance of finishing top ${eaters} over 10,000 simulated seasons; Wk is its change ${played === 1 ? 'since preseason' : 'since last week'}.`}
+          </p>
+        </footer>
+      </div>
+    </section>
   );
 }
 
