@@ -13,10 +13,23 @@ import {
   isFinishedSeason,
 } from '../utils/season-cache.js';
 
+const CACHE_CONTROL_COPY = 'X-Steak-Cache-Control';
+
 // Cache each finished response at the edge. A hit returns the stored JSON
 // without parsing or rebuilding anything, which keeps most requests far inside
 // the free plan's CPU limit. Only 200s are cached, so errors are retried.
 const cacheFor = (seconds) => [
+  // A response read back from the edge cache arrives with the zone's Browser
+  // Cache TTL (4 hours) in place of our Cache-Control, so browsers would keep
+  // replaying old live scores to every refetch. Restore our own lifetime,
+  // which is saved alongside the response.
+  async (c, next) => {
+    await next();
+    const cacheControl = c.res.headers.get(CACHE_CONTROL_COPY);
+    if (!cacheControl) return;
+    c.res.headers.set('Cache-Control', cacheControl);
+    c.res.headers.delete(CACHE_CONTROL_COPY);
+  },
   cache({
     cacheName: 'steak-api',
     // The API takes no query parameters, so ignore them rather than let them
@@ -29,11 +42,14 @@ const cacheFor = (seconds) => [
     await next();
     // Leave errors uncached, so a browser retries them too. A route may also
     // choose its own lifetime for a particular response.
-    if (!c.res.ok || c.res.headers.has('Cache-Control')) return;
-    const maxAge = isFinishedSeason(c.req.param('year'))
-      ? FINAL_RESPONSE_SECONDS
-      : seconds;
-    c.header('Cache-Control', `max-age=${maxAge}`);
+    if (!c.res.ok) return;
+    if (!c.res.headers.has('Cache-Control')) {
+      const maxAge = isFinishedSeason(c.req.param('year'))
+        ? FINAL_RESPONSE_SECONDS
+        : seconds;
+      c.header('Cache-Control', `max-age=${maxAge}`);
+    }
+    c.header(CACHE_CONTROL_COPY, c.res.headers.get('Cache-Control'));
   },
 ];
 
