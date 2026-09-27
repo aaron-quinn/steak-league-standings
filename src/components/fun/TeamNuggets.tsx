@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useElementWidth } from '@/hooks/useElementWidth';
 import { Num, NuggetList, type Nugget } from '@/components/fun/Nuggets';
 import { formatChance, ordinal } from '@/utils/format-score';
@@ -10,6 +10,7 @@ import {
   isLocked,
   isTombstoned,
   matchingWeek,
+  projectFinals,
   type Collapse,
   type Comeback,
   type HistorySeason,
@@ -29,6 +30,8 @@ interface Props {
   lockLine: (Collapse | null)[];
   // Every team's odds after the given number of played weeks
   oddsAfter: (week: number) => Map<string, SteakOdds>;
+  // The same for any season, as its own page shows them
+  oddsFor: (year: number, week: number) => Map<string, SteakOdds>;
 }
 
 const average = (values: number[]) =>
@@ -45,6 +48,17 @@ function listYears(years: number[]) {
     : `${years[0] ?? ''}`;
 }
 
+// "never", "once" or "8 times"
+function times(count: number) {
+  if (count === 0) return 'never';
+  if (count === 1) return 'once';
+  return (
+    <>
+      <Num>{count}</Num> times
+    </>
+  );
+}
+
 // Past teams within this many points of a spot, widened when too few were
 const SPOT_BANDS = [10, 25];
 const ENOUGH_TEAMS = 10;
@@ -52,7 +66,7 @@ const ENOUGH_TEAMS = 10;
 // One team's situation: where it stands, how its odds got here, how it's
 // scoring and how teams in its spot have fared before
 function getTeamNuggets(
-  { team, season, history, year, played, model, line, lockLine }: Props,
+  { team, season, history, played, model, line, lockLine }: Props,
   trend: number[],
 ): Nugget[] {
   const teamCount = season.teams.length;
@@ -393,15 +407,132 @@ function getTeamNuggets(
       ),
   });
 
-  // The manager's earlier steak seasons
-  const earlier = history
+  return nuggets;
+}
+
+// One manager's finished seasons before the one on screen, oldest first,
+// with the numbers their history nuggets are built from
+function getCareer(
+  name: string,
+  history: HistorySeason[],
+  year: number,
+  played: number,
+  seasonWeeks: number,
+) {
+  return history
     .filter((past) => past.year < year)
     .flatMap(({ year: pastYear, season: past }) => {
-      const pastTeam = past.teams.find((other) => other.name === team.name);
+      const pastTeam = past.teams.find((other) => other.name === name);
       if (!pastTeam) return [];
-      const final = pastTeam.ranks[pastTeam.ranks.length - 1];
-      return [{ year: pastYear, zone: getSteakZone(final, past.teams.length) }];
+      const weeks = past.weeks.length;
+      const final = pastTeam.ranks[weeks - 1];
+      const { eaters } = getSteakLine(past.teams.length);
+      const week = matchingWeek(past, played, seasonWeeks);
+      const byRank = [...past.teams].sort(
+        (a, b) => a.ranks[weeks - 1] - b.ranks[weeks - 1],
+      );
+      const relative = pastTeam.weekly.map(
+        (score, i) =>
+          score - average(past.teams.map((other) => other.weekly[i])),
+      );
+      const level = average(relative);
+      const weekRanks = pastTeam.weekly.map(
+        (score, i) =>
+          1 + past.teams.filter((other) => other.weekly[i] > score).length,
+      );
+      return [
+        {
+          year: pastYear,
+          season: past,
+          team: pastTeam,
+          final,
+          zone: getSteakZone(final, past.teams.length),
+          eaters,
+          byRank,
+          // Its rank with as many weeks left as now, when that season had
+          // started by then
+          then: week === null ? null : pastTeam.ranks[week - 1],
+          relative: level,
+          high: Math.max(...pastTeam.weekly),
+          // How far it scored from its own level each week, squared, and
+          // how many weeks that spread is judged over
+          squares: relative.reduce((sum, r) => sum + (r - level) ** 2, 0),
+          degrees: weeks - 1,
+          // Against the field, over the last four weeks and the rest
+          closing: average(relative.slice(-CLOSING_WEEKS)),
+          opening: average(relative.slice(0, -CLOSING_WEEKS)),
+          tops: weekRanks.filter((rank) => rank === 1).length,
+          bottoms: weekRanks.filter((rank) => rank === past.teams.length)
+            .length,
+          // Points clear of the first team out when it ate, or behind the
+          // last eater when it didn't
+          margin:
+            final <= eaters
+              ? getCushions(past, weeks).get(pastTeam.id)!
+              : getDeficits(past, weeks).get(pastTeam.id)!,
+          // The team on the other side of the steak line from it
+          across: final <= eaters ? byRank[eaters] : byRank[eaters - 1],
+        },
+      ];
     });
+}
+
+type Career = ReturnType<typeof getCareer>;
+
+// How far a manager's weekly scores land from their own level, pooled over
+// their seasons
+const careerSpread = (career: Career) =>
+  Math.sqrt(
+    career.reduce((sum, past) => sum + past.squares, 0) /
+      career.reduce((sum, past) => sum + past.degrees, 0),
+  );
+
+// How much better a manager scores in the last weeks than before them
+const closingKick = (career: Career) =>
+  average(career.map((past) => past.closing - past.opening));
+
+// Its place among every manager with enough seasons, 1 being the highest
+function standing(
+  value: number,
+  all: Map<string, Career>,
+  measure: (career: Career) => number,
+) {
+  const values = [...all.values()].map(measure);
+  return {
+    place: 1 + values.filter((other) => other > value + 1e-9).length,
+    of: values.length,
+  };
+}
+
+// Seasons a manager needs before they're ranked against the others
+const RANKED_SEASONS = 3;
+// The closing stretch, in weeks
+const CLOSING_WEEKS = 4;
+// A finish counts as a close call within this many points of the line
+const CLOSE_CALL = 30;
+// A comeback or collapse needs odds at least this much against how it ended
+const TURNAROUND = 2 / 3;
+
+// A manager's story before this season: how they've done, how they tend to
+// play the weeks from here, and the people and moments along the way
+function getHistoryNuggets({
+  team,
+  season,
+  history,
+  year,
+  played,
+  model,
+}: Props): Nugget[] {
+  const { seasonWeeks } = model;
+  const teamCount = season.teams.length;
+  const { eaters } = getSteakLine(teamCount);
+  const settled = played >= seasonWeeks;
+  const weeksLeft = seasonWeeks - played;
+  const rank = team.ranks[played - 1];
+  const inside = rank <= eaters;
+  const nuggets: Nugget[] = [];
+
+  const earlier = getCareer(team.name, history, year, played, seasonWeeks);
   const ateIn = earlier
     .filter((past) => past.zone === 'eater')
     .map((past) => past.year);
@@ -429,13 +560,438 @@ function getTeamNuggets(
       ),
   });
 
+  // Their run of seasons eating or missing, counting this one once it's over
+  const runs: { ate: boolean; years: number[] }[] = [];
+  [
+    ...earlier.map((past) => ({ year: past.year, ate: past.zone === 'eater' })),
+    ...(settled ? [{ year, ate: inside }] : []),
+  ].forEach((result) => {
+    const last = runs[runs.length - 1];
+    if (last?.ate === result.ate) last.years.push(result.year);
+    else runs.push({ ate: result.ate, years: [result.year] });
+  });
+  const seasonCount = runs.reduce((sum, run) => sum + run.years.length, 0);
+  if (seasonCount >= 2) {
+    const current = runs[runs.length - 1];
+    const previous = runs[runs.length - 2];
+    const span = ({ years }: (typeof runs)[number]) =>
+      `${years[0]}–${years[years.length - 1]}`;
+    const longest = (ate: boolean) =>
+      runs
+        .filter((run) => run.ate === ate)
+        .reduce<
+          (typeof runs)[number] | null
+        >((a, b) => (!a || b.years.length > a.years.length ? b : a), null);
+    const longestEating = longest(true);
+    const n = current.years.length;
+    nuggets.push({
+      key: 'streak',
+      emoji: current.ate ? '🔥' : '🧊',
+      title: 'Streak',
+      body: (
+        <>
+          {n >= 2 ? (
+            <>
+              {current.ate ? 'Ate' : 'Missed'} <Num>{n}</Num> seasons in a row (
+              {span(current)})
+              {longest(current.ate) === current &&
+                runs.some(
+                  (run) => run !== current && run.ate === current.ate,
+                ) &&
+                ', their longest yet'}
+              .
+            </>
+          ) : (
+            <>
+              {current.ate ? 'Ate' : 'Missed'} in {current.years[0]}, after{' '}
+              {previous.ate ? 'eating' : 'missing'}{' '}
+              {previous.years.length >= 2 ? (
+                <>
+                  <Num>{previous.years.length}</Num> in a row
+                </>
+              ) : (
+                `in ${previous.years[0]}`
+              )}
+              .
+            </>
+          )}
+          {longestEating &&
+            longestEating !== current &&
+            longestEating.years.length >= 2 && (
+              <>
+                {' '}
+                Longest eating run: <Num>{longestEating.years.length}</Num>{' '}
+                seasons ({span(longestEating)}).
+              </>
+            )}
+        </>
+      ),
+    });
+  }
+
+  // The narrowest they've eaten or missed by, when it was close
+  const narrowest = (ate: boolean) =>
+    earlier
+      .filter((past) => past.final <= past.eaters === ate)
+      .reduce<
+        (typeof earlier)[number] | null
+      >((a, b) => (!a || b.margin < a.margin ? b : a), null);
+  const calls = [narrowest(false), narrowest(true)]
+    .filter((past) => past !== null && past.margin <= CLOSE_CALL)
+    .sort((a, b) => a!.margin - b!.margin) as Career;
+  if (calls.length > 0) {
+    nuggets.push({
+      key: 'closest',
+      emoji: '😬',
+      title: calls.length > 1 ? 'Closest calls' : 'Closest call',
+      body: calls.map((past, i) => (
+        <span key={past.year}>
+          {i > 0 && ' '}
+          {past.final <= past.eaters ? 'Ate' : 'Missed'} by{' '}
+          <Num>{past.margin.toFixed(1)}</Num> in {past.year},{' '}
+          {past.final <= past.eaters ? 'ahead of' : 'behind'} {past.across.name}
+          .
+        </span>
+      )),
+    });
+  }
+
+  // The manager they've finished right next to most often
+  const neighbors = new Map<string, number[]>();
+  earlier.forEach((past) => {
+    const at = past.byRank.indexOf(past.team);
+    [past.byRank[at - 1], past.byRank[at + 1]].forEach((other) => {
+      if (other) {
+        neighbors.set(other.name, [
+          ...(neighbors.get(other.name) ?? []),
+          past.year,
+        ]);
+      }
+    });
+  });
+  const [rival, besideYears] = [...neighbors].reduce<
+    [string, number[]] | [null, number[]]
+  >((a, b) => (b[1].length > a[1].length ? b : a), [null, []]);
+  if (rival && besideYears.length >= 2) {
+    const together = earlier.flatMap((past) => {
+      const them = past.season.teams.find((other) => other.name === rival);
+      return them ? [past.final < them.ranks[them.ranks.length - 1]] : [];
+    });
+    const now = season.teams.find((other) => other.name === rival);
+    nuggets.push({
+      key: 'rival',
+      emoji: '🤝',
+      title: 'Rival',
+      body: (
+        <>
+          Finished right next to {rival} in <Num>{besideYears.length}</Num>{' '}
+          seasons ({listYears(besideYears)}), and ahead of them in{' '}
+          <Num>{together.filter(Boolean).length}</Num> of{' '}
+          <Num>{together.length}</Num> seasons together.
+          {now && (
+            <>
+              {' '}
+              {settled ? 'Finished' : 'Now'} {ordinal(rank)} to their{' '}
+              {ordinal(now.ranks[played - 1])}.
+            </>
+          )}
+        </>
+      ),
+    });
+  }
+
+  // Where the manager has usually stood with as many weeks left as now
+  const lined = earlier.flatMap(({ then, ...past }) =>
+    then === null ? [] : [{ ...past, then }],
+  );
+  if (lined.length >= 2) {
+    const best = lined.reduce((a, b) => (b.then < a.then ? b : a));
+    const worst = lined.reduce((a, b) => (b.then > a.then ? b : a));
+    nuggets.push({
+      key: 'usual-spot',
+      emoji: '📅',
+      title: settled ? 'Usual finish' : 'Usual spot',
+      body: (
+        <>
+          {settled
+            ? 'Finished '
+            : `With ${weeksLeft} week${weeksLeft === 1 ? '' : 's'} left, stood `}
+          <Num>{average(lined.map((past) => past.then)).toFixed(1)}</Num> on
+          average across <Num>{lined.length}</Num> earlier seasons, against{' '}
+          {ordinal(rank)} {settled ? 'this time' : 'now'}. Best{' '}
+          {ordinal(best.then)} in {best.year}, worst {ordinal(worst.then)} in{' '}
+          {worst.year}.
+        </>
+      ),
+    });
+  }
+
+  // How the manager's earlier seasons went from this point on
+  if (!settled && lined.length >= 2) {
+    const moved = average(lined.map((past) => past.then - past.final));
+    const wasIn = lined.filter((past) => past.then <= past.eaters);
+    const wasOut = lined.filter((past) => past.then > past.eaters);
+    const heldOn = wasIn.filter((past) => past.final <= past.eaters).length;
+    const climbed = wasOut.filter((past) => past.final <= past.eaters).length;
+    const inside = wasIn.length > 0 && (
+      <>
+        inside the steak line here {times(wasIn.length)} and held on in{' '}
+        <Num>{heldOn}</Num>
+      </>
+    );
+    const outside = wasOut.length > 0 && (
+      <>
+        outside {times(wasOut.length)} and climbed in{' '}
+        {climbed === 0 ? 'none' : <Num>{climbed}</Num>}
+      </>
+    );
+    nuggets.push({
+      key: 'stretch',
+      emoji: '🏃',
+      title: 'Down the stretch',
+      body: (
+        <>
+          {Math.abs(moved) < 0.05 ? (
+            'Has held about level from here to the finish'
+          ) : (
+            <>
+              Has {moved > 0 ? 'climbed' : 'slipped'}{' '}
+              <Num>{Math.abs(moved).toFixed(1)}</Num> spots on average from here
+              to the finish
+            </>
+          )}
+          . Was {inside}
+          {inside && outside && '; '}
+          {outside}.
+        </>
+      ),
+    });
+  }
+
+  // Points so far against the same week of their best season
+  const bestSeason = earlier.reduce<(typeof earlier)[number] | null>(
+    (a, b) =>
+      !a ||
+      b.final < a.final ||
+      (b.final === a.final &&
+        b.team.totals[b.team.totals.length - 1] >
+          a.team.totals[a.team.totals.length - 1])
+        ? b
+        : a,
+    null,
+  );
+  if (!settled && bestSeason && bestSeason.season.weeks.length >= played) {
+    const ahead = team.totals[played - 1] - bestSeason.team.totals[played - 1];
+    nuggets.push({
+      key: 'pace',
+      emoji: '⏱️',
+      title: 'Pace',
+      body: (
+        <>
+          <Num>{Math.abs(ahead).toFixed(1)}</Num>{' '}
+          {ahead >= 0 ? 'ahead of' : 'behind'} their {bestSeason.year} pace
+          after week {played}. They finished {ordinal(bestSeason.final)} that
+          season, their best.
+        </>
+      ),
+    });
+  }
+
+  // The manager's scoring over earlier seasons, and their best week
+  if (earlier.length > 0) {
+    const top = earlier.reduce((a, b) => (b.high > a.high ? b : a));
+    const peak = earlier.reduce((a, b) => (b.relative > a.relative ? b : a));
+    const thisHigh = Math.max(...team.weekly.slice(0, played));
+    nuggets.push({
+      key: 'career',
+      emoji: '🏆',
+      title: 'Career scoring',
+      body: (
+        <>
+          <Num>{signed(average(earlier.map((past) => past.relative)))}</Num> a
+          week against the average steak team across <Num>{earlier.length}</Num>{' '}
+          earlier season
+          {earlier.length === 1 ? '' : 's'}
+          {earlier.length > 1 && (
+            <>
+              , best <Num>{signed(peak.relative)}</Num> in {peak.year}
+            </>
+          )}
+          . High week: <Num>{top.high.toFixed(1)}</Num> in {top.year}
+          {thisHigh > top.high && (
+            <>
+              , topped by <Num>{thisHigh.toFixed(1)}</Num> this season
+            </>
+          )}
+          .
+        </>
+      ),
+    });
+  }
+
+  // Every manager with enough seasons, to rank this one against
+  const careers = new Map(
+    [
+      ...new Set(
+        history
+          .filter((past) => past.year < year)
+          .flatMap((past) => past.season.teams.map((other) => other.name)),
+      ),
+    ]
+      .map(
+        (name) =>
+          [name, getCareer(name, history, year, played, seasonWeeks)] as const,
+      )
+      .filter(([, career]) => career.length >= RANKED_SEASONS),
+  );
+  const ranked = earlier.length >= RANKED_SEASONS;
+
+  // How much their weekly scores swing, and their weeks at the very top and
+  // bottom
+  if (earlier.length > 0) {
+    const spread = careerSpread(earlier);
+    const typical = Math.sqrt(
+      earlier.reduce(
+        (sum, past) =>
+          sum +
+          past.season.teams.reduce((teamSum, other) => {
+            const weekly = other.weekly.map(
+              (score, i) =>
+                score -
+                average(past.season.teams.map((each) => each.weekly[i])),
+            );
+            const level = average(weekly);
+            return teamSum + weekly.reduce((s, r) => s + (r - level) ** 2, 0);
+          }, 0),
+        0,
+      ) /
+        earlier.reduce(
+          (sum, past) => sum + past.season.teams.length * past.degrees,
+          0,
+        ),
+    );
+    const { place, of } = standing(spread, careers, careerSpread);
+    const tops = earlier.reduce((sum, past) => sum + past.tops, 0);
+    const bottoms = earlier.reduce((sum, past) => sum + past.bottoms, 0);
+    const steady = place > of / 2;
+    nuggets.push({
+      key: 'swing',
+      emoji: '🎢',
+      title: 'Boom or bust',
+      body: (
+        <>
+          Weekly scores land <Num>{spread.toFixed(1)}</Num> from their usual
+          level, against <Num>{typical.toFixed(1)}</Num> for the typical steak
+          team
+          {ranked && (
+            <>
+              , the{' '}
+              {steady
+                ? `${place === of ? '' : `${ordinal(of - place + 1)} `}steadiest`
+                : `${place === 1 ? '' : `${ordinal(place)} `}wildest`}{' '}
+              of <Num>{of}</Num> managers
+            </>
+          )}
+          . The week’s top score {times(tops)}, the bottom {times(bottoms)}.
+        </>
+      ),
+    });
+  }
+
+  // How they score in the closing stretch against the rest of the season
+  if (earlier.length >= 2) {
+    const kick = closingKick(earlier);
+    const { place, of } = standing(kick, careers, closingKick);
+    nuggets.push({
+      key: 'closing',
+      emoji: '🏇',
+      title: 'Closing kick',
+      body: (
+        <>
+          Scores <Num>{Math.abs(kick).toFixed(1)}</Num> a week{' '}
+          {kick >= 0 ? 'better' : 'worse'} against the field over the last four
+          weeks than before them, across <Num>{earlier.length}</Num> seasons
+          {ranked && (
+            <>
+              , the{' '}
+              {place <= of / 2
+                ? `${place === 1 ? '' : `${ordinal(place)} `}strongest finisher`
+                : `${place === of ? '' : `${ordinal(of - place + 1)} `}weakest finisher`}{' '}
+              of <Num>{of}</Num>
+            </>
+          )}
+          .
+        </>
+      ),
+    });
+  }
+
   return nuggets;
+}
+
+// A past season's low point in eat chance if the manager ate that year, or
+// high point if they didn't, as that season's own page shows it. Only the
+// two weeks where its projection looked furthest from how it ended are
+// simulated, so a season takes two simulations, not seventeen.
+function findTurn(
+  past: Career[number],
+  model: ScoringModel,
+  oddsFor: Props['oddsFor'],
+) {
+  const weeks = past.season.weeks.length;
+  const pastModel = { ...model, seasonWeeks: weeks };
+  const ate = past.final <= past.eaters;
+  const index = past.season.teams.indexOf(past.team);
+  // How many spreads its projected total sat clear of the last seat, leaving
+  // out the final week, when the odds are just the result
+  const candidates = Array.from({ length: weeks - 1 }, (_, i) => {
+    const { expected, spread } = projectFinals(past.season, i + 1, pastModel);
+    const others = expected
+      .filter((_, other) => other !== index)
+      .sort((a, b) => b - a);
+    return {
+      week: i + 1,
+      margin: (expected[index] - others[past.eaters - 1]) / spread,
+    };
+  })
+    .sort((a, b) => (ate ? a.margin - b.margin : b.margin - a.margin))
+    .slice(0, 2);
+  const turn = candidates
+    .map(({ week }) => ({
+      week,
+      chance: oddsFor(past.year, week).get(past.team.id)?.eater ?? 0,
+    }))
+    .reduce((a, b) =>
+      ate ? (b.chance < a.chance ? b : a) : b.chance > a.chance ? b : a,
+    );
+  return { year: past.year, ate, ...turn };
+}
+
+type Turn = ReturnType<typeof findTurn>;
+
+// The lowest eat chance a manager climbed back from to eat, and the highest
+// they let slip
+function pickTurnarounds(turns: Turn[]) {
+  const comebacks = turns.filter(
+    (turn) => turn.ate && turn.chance <= 1 - TURNAROUND,
+  );
+  const collapses = turns.filter(
+    (turn) => !turn.ate && turn.chance >= TURNAROUND,
+  );
+  return {
+    comeback: comebacks.length
+      ? comebacks.reduce((a, b) => (b.chance < a.chance ? b : a))
+      : null,
+    collapse: collapses.length
+      ? collapses.reduce((a, b) => (b.chance > a.chance ? b : a))
+      : null,
+  };
 }
 
 // A team's story, opened under its row: its eat chance week by week, then
 // the nuggets
 export default function TeamNuggets(props: Props) {
-  const { team, played, model, oddsAfter } = props;
+  const { team, played, model, oddsAfter, history, year, oddsFor } = props;
   // From preseason (week 0) to the week on screen
   const trend = useMemo(
     () =>
@@ -446,12 +1002,74 @@ export default function TeamNuggets(props: Props) {
     [oddsAfter, team.id, played],
   );
 
+  // Found after the story opens, a season per task, since the first time
+  // takes a couple of dozen simulations and would otherwise hold up the tap.
+  // Kept with the manager and season it's for, so switching teams never
+  // shows the last one's.
+  const turnsFor = `${team.name}:${year}`;
+  const [turns, setTurns] = useState<{
+    key: string;
+    found: ReturnType<typeof pickTurnarounds>;
+  } | null>(null);
+  useEffect(() => {
+    const career = getCareer(team.name, history, year, 1, model.seasonWeeks);
+    const found: Turn[] = [];
+    let timer: ReturnType<typeof setTimeout>;
+    const next = () => {
+      if (found.length === career.length) {
+        setTurns({ key: turnsFor, found: pickTurnarounds(found) });
+        return;
+      }
+      found.push(findTurn(career[found.length], model, oddsFor));
+      timer = setTimeout(next);
+    };
+    timer = setTimeout(next);
+    return () => clearTimeout(timer);
+  }, [turnsFor, team.name, history, year, model, oddsFor]);
+  const found = turns?.key === turnsFor ? turns.found : null;
+
+  const historyNuggets = getHistoryNuggets(props);
+  if (found?.comeback) {
+    const { chance, week, year: pastYear } = found.comeback;
+    historyNuggets.push({
+      key: 'comeback',
+      emoji: '🧟',
+      title: 'Best comeback',
+      body: (
+        <>
+          Down to <Num>{formatChance(chance, false)}</Num> after week {week} in{' '}
+          {pastYear}, and still ate.
+        </>
+      ),
+    });
+  }
+  if (found?.collapse) {
+    const { chance, week, year: pastYear } = found.collapse;
+    historyNuggets.push({
+      key: 'collapse',
+      emoji: '💥',
+      title: 'Worst collapse',
+      body: (
+        <>
+          Up to <Num>{formatChance(chance, false)}</Num> after week {week} in{' '}
+          {pastYear}, and missed.
+        </>
+      ),
+    });
+  }
+
   return (
     <div className="team-open space-y-4">
       {played >= 2 && (
         <OddsTrend trend={trend} seasonWeeks={model.seasonWeeks} />
       )}
       <NuggetList nuggets={getTeamNuggets(props, trend)} />
+      <div>
+        <h3 className="mb-3 text-[10px] font-medium uppercase tracking-widest text-gray-600">
+          {team.name}’s history
+        </h3>
+        <NuggetList nuggets={historyNuggets} />
+      </div>
     </div>
   );
 }

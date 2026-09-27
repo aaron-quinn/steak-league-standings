@@ -113,6 +113,38 @@ const toOdds = ([eater, selfBuyer, buyer]: number[]): SteakOdds => ({
   buyer,
 });
 
+// Where each team's final total is headed after the given number of played
+// weeks, in season order, and how far either way it could land. Needs at
+// least one week played.
+export function projectFinals(
+  season: SteakSeason,
+  played: number,
+  model: ScoringModel,
+) {
+  const { teams } = season;
+  const weeksLeft = Math.max(model.seasonWeeks - played, 0);
+  const weekAverages = Array.from({ length: played }, (_, week) =>
+    average(teams.map((team) => team.weekly[week])),
+  );
+  const trust = played / (played + model.priorWeeks);
+  const expected = teams.map((team) => {
+    const level =
+      trust *
+      average(
+        team.weekly
+          .slice(0, played)
+          .map((score, week) => score - weekAverages[week]),
+      );
+    return team.totals[played - 1] + weeksLeft * level;
+  });
+  // Luck in the weeks left, plus the chance a team is better or worse than
+  // it has looked so far, which counts once for every week left
+  const spread =
+    model.weeklySpread *
+    Math.sqrt(weeksLeft + weeksLeft ** 2 / (played + model.priorWeeks));
+  return { expected, spread };
+}
+
 // Every team's odds after the given number of played weeks, from playing out
 // the rest of the season many times. A team's level is its scoring so far,
 // pulled toward the league average; each run it lands somewhere around that
@@ -145,26 +177,7 @@ export function simulateSteakOdds(
     );
   }
 
-  const weekAverages = Array.from({ length: played }, (_, week) =>
-    average(teams.map((team) => team.weekly[week])),
-  );
-  const trust = played / (played + model.priorWeeks);
-  const expected = teams.map((team) => {
-    const level =
-      trust *
-      average(
-        team.weekly
-          .slice(0, played)
-          .map((score, week) => score - weekAverages[week]),
-      );
-    return team.totals[played - 1] + weeksLeft * level;
-  });
-  // Luck in the weeks left, plus the chance a team is better or worse than
-  // it has looked so far, which counts once for every week left
-  const spread =
-    model.weeklySpread *
-    Math.sqrt(weeksLeft + weeksLeft ** 2 / (played + model.priorWeeks));
-
+  const { expected, spread } = projectFinals(season, played, model);
   const normal = normalRandom(seededRandom(played * 7919 + teamCount));
   const counts = new Float64Array(teamCount * 3);
   const finals = new Float64Array(teamCount);

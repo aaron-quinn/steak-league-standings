@@ -36,6 +36,7 @@ import {
   weeksInSeason,
   type ChaseTarget,
   type Comeback,
+  type ScoringModel,
   type SteakOdds,
 } from '@/utils/steak-odds';
 
@@ -174,24 +175,65 @@ export default function SteakOddsView() {
     combine: combineSeasons,
   });
 
-  // The model and graveyard come from every finished season except the one
-  // on screen, so a past season is judged as if it hadn't happened yet
-  const board = useMemo(() => {
+  // Any season's standings and model. The model comes from every finished
+  // season except the one asked for, so a past season is judged as if it
+  // hadn't happened yet. Each is built once, along with its odds after each
+  // week, simulated the first time they're asked for, so stepping through
+  // weeks, switching seasons or opening a team's story doesn't rerun them.
+  const judge = useMemo(() => {
+    if (data.some((weeks) => !weeks)) return null;
     const scores = (season: number) =>
       data[currentYear - season] as WeeklyScores[];
-    if (data.some((weeks) => !weeks)) return null;
-    const pastYears = Array.from(
-      { length: currentYear - FIRST_SEASON },
-      (_, i) => FIRST_SEASON + i,
-    ).filter((season) => season !== year);
-    const model = {
-      ...fitScoringModel(pastYears.map(scores)),
-      // Played out to the on-screen season's length, not the longest past one
-      seasonWeeks: weeksInSeason(year),
+    const seasons = new Map<
+      number,
+      {
+        pastYears: number[];
+        model: ScoringModel;
+        season: SteakSeason;
+        odds: Map<number, Map<string, SteakOdds>>;
+      }
+    >();
+    const judged = (year: number) => {
+      let judgedSeason = seasons.get(year);
+      if (!judgedSeason) {
+        const pastYears = Array.from(
+          { length: currentYear - FIRST_SEASON },
+          (_, i) => FIRST_SEASON + i,
+        ).filter((season) => season !== year);
+        judgedSeason = {
+          pastYears,
+          model: {
+            ...fitScoringModel(pastYears.map(scores)),
+            // Played out to this season's length, not the longest past one
+            seasonWeeks: weeksInSeason(year),
+          },
+          season: buildSteakSeason(year, scores(year)),
+          odds: new Map(),
+        };
+        seasons.set(year, judgedSeason);
+      }
+      return judgedSeason;
     };
-    const history = pastYears.map((season) => ({
-      year: season,
-      season: buildSteakSeason(season, scores(season)),
+    const oddsFor = (year: number, week: number) => {
+      const { season, model, odds } = judged(year);
+      let weekOdds = odds.get(week);
+      if (!weekOdds) {
+        weekOdds = simulateSteakOdds(season, week, model);
+        odds.set(week, weekOdds);
+      }
+      return weekOdds;
+    };
+    return { judged, oddsFor };
+  }, [data, currentYear]);
+
+  // The graveyard and lock line come from the same finished seasons as the
+  // model
+  const board = useMemo(() => {
+    if (!judge) return null;
+    const { pastYears, model, season } = judge.judged(year);
+    const history = pastYears.map((past) => ({
+      year: past,
+      season: judge.judged(past).season,
     }));
     const weekComebacks = getWeekComebacks(history, model.seasonWeeks);
     return {
@@ -201,9 +243,9 @@ export default function SteakOddsView() {
       weekComebacks,
       line: getTombstoneLine(weekComebacks),
       lockLine: getLockLine(getWeekCollapses(history, model.seasonWeeks)),
-      season: buildSteakSeason(year, scores(year)),
+      season,
     };
-  }, [data, year, currentYear]);
+  }, [judge, year]);
 
   const weeksPlayed = board?.season.weeks.length ?? 0;
   const requestedWeek = Number(searchParams.get('week'));
@@ -214,19 +256,11 @@ export default function SteakOddsView() {
   const setPlayed = (week: number) =>
     updateParams({ week: week === weeksPlayed ? null : String(week) });
 
-  // Each week's odds, simulated the first time they're asked for, so stepping
-  // through weeks or opening a team's trend doesn't rerun them
-  const oddsAfter = useMemo(() => {
-    const cache = new Map<number, Map<string, SteakOdds>>();
-    return (week: number) => {
-      let weekOdds = cache.get(week);
-      if (!weekOdds) {
-        weekOdds = simulateSteakOdds(board!.season, week, board!.model);
-        cache.set(week, weekOdds);
-      }
-      return weekOdds;
-    };
-  }, [board]);
+  // This season's odds after the given week
+  const oddsAfter = useMemo(
+    () => (week: number) => judge!.oddsFor(year, week),
+    [judge, year],
+  );
   const odds = useMemo(
     () => (board && played > 0 ? oddsAfter(played) : null),
     [board, played, oddsAfter],
@@ -272,6 +306,7 @@ export default function SteakOddsView() {
       line={board.line}
       lockLine={board.lockLine}
       oddsAfter={oddsAfter}
+      oddsFor={judge!.oddsFor}
     />
   );
 
