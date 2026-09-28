@@ -14,6 +14,11 @@ const STALE_SECONDS = 60 * 60 * 24;
 // apply per server, so each host cools down separately.
 const COOL_DOWN_MS = 60 * 1000;
 
+// MFL sometimes stalls rather than failing. Without a limit the request waits
+// until Cloudflare gives up and shows the visitor an error page, when a stale
+// copy would have served them.
+const ORIGIN_TIMEOUT_MS = 10 * 1000;
+
 const parsed = new Map();
 const pending = new Map();
 const coolingUntil = new Map();
@@ -66,7 +71,9 @@ async function refresh(url, cacheSeconds) {
   try {
     text = await fetchFromOrigin(url);
   } catch (error) {
-    if (error.status === 429) {
+    // A stalled server gets the same break as a throttling one, so the next
+    // visitors get the stale copy at once rather than each waiting it out
+    if (error.status === 429 || error.name === 'TimeoutError') {
       coolingUntil.set(host, Date.now() + COOL_DOWN_MS);
     }
     const data = stale();
@@ -111,6 +118,8 @@ async function fetchFromOrigin(url) {
     // Workers send no User-Agent, and ESPN answers 403 both to that and to
     // unrecognized ones. This is the header the Node API sent via axios.
     headers: { Accept: 'application/json', 'User-Agent': 'axios/1.7.9' },
+    // Also covers reading the body below
+    signal: AbortSignal.timeout(ORIGIN_TIMEOUT_MS),
   });
   if (!response.ok) {
     const error = new Error(
