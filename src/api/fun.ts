@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { WaiverSeason, WeeklyScores, WeekPlayers } from '@/types/Fun';
+import type { TradeSeason } from '@/types/Trades';
 import type { DraftResults } from '@/types/Draft';
 
 const api = axios.create({
@@ -30,4 +31,19 @@ export async function getDraft(year: number): Promise<DraftResults> {
 export async function getWaivers(year: number): Promise<WaiverSeason> {
   const { data } = await api.get<WaiverSeason>(`/waivers/${year}`);
   return data;
+}
+
+export async function getTrades(year: number): Promise<TradeSeason> {
+  const { data } = await api.get<TradeSeason>(
+    `/trades/${year}?valuation=kickoff-v3`,
+  );
+  return {
+    ...data,
+    trades: data.trades.map((trade) => ({
+      ...trade,
+      season: year,
+      evaluated:
+        trade.evaluated ?? (trade.week !== null && trade.week <= data.lastWeek),
+    })),
+  };
 }

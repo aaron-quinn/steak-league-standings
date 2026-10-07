@@ -1,14 +1,12 @@
 import getData from './get-data.js';
 import { seasonDataSeconds } from '../utils/season-cache.js';
+import { parseRosterMoves } from '../utils/roster-moves.js';
 
 // Settings and the NFL schedule change rarely mid-season
 const SETTINGS_CACHE_SECONDS = 60 * 60 * 12;
 
 // MFL returns a single object rather than a one-item array
 const asList = (value) => (Array.isArray(value) ? value : value ? [value] : []);
-
-// MFL lists player IDs as "12345,67890,"
-const idList = (value = '') => value.split(',').filter(Boolean);
 
 // A league's roster moves for the season, oldest first: every pickup (a won
 // blind bid or a free agent signing) and every player who left a team by being
@@ -24,49 +22,7 @@ export async function getRosterMoves({ season, leagueID, prefix }) {
     );
   }
 
-  const pickups = [];
-  const departures = [];
-  asList(response.transactions?.transaction).forEach((move) => {
-    const time = Number(move.timestamp) * 1000;
-    const franchiseID = `${prefix}${move.franchise}`;
-
-    if (move.type === 'BBID_WAIVER' || move.type === 'FREE_AGENT') {
-      // Won bids are "added|bid|dropped", free agent moves "added|dropped"
-      const parts = (move.transaction || '').split('|');
-      const bid = move.type === 'BBID_WAIVER';
-      const cost = bid ? Number(parts[1]) || 0 : 0;
-      const dropped = idList(bid ? parts[2] : parts[1]);
-      idList(parts[0]).forEach((playerID, index) =>
-        pickups.push({
-          franchiseID,
-          playerID,
-          time,
-          bid,
-          // One bid, however many players it brings in
-          cost: index === 0 ? cost : 0,
-          dropped,
-        }),
-      );
-      dropped.forEach((playerID) =>
-        departures.push({ franchiseID, playerID, time, drop: true }),
-      );
-    } else if (move.type === 'TRADE') {
-      idList(move.franchise1_gave_up).forEach((playerID) =>
-        departures.push({ franchiseID, playerID, time, drop: false }),
-      );
-      idList(move.franchise2_gave_up).forEach((playerID) =>
-        departures.push({
-          franchiseID: `${prefix}${move.franchise2}`,
-          playerID,
-          time,
-          drop: false,
-        }),
-      );
-    }
-  });
-
-  const byTime = (a, b) => a.time - b.time;
-  return { pickups: pickups.sort(byTime), departures: departures.sort(byTime) };
+  return parseRosterMoves(response.transactions?.transaction, prefix);
 }
 
 // The season's blind bidding budget for each team, if the league has one

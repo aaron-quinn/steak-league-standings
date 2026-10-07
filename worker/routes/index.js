@@ -8,6 +8,7 @@ import weeklyScoresYear from './weekly-scores.js';
 import weekPlayersYear from './week-players.js';
 import waiversYear from './waivers.js';
 import draftYear from './draft.js';
+import tradesYear from './trades.js';
 import {
   FINAL_RESPONSE_SECONDS,
   isFinishedSeason,
@@ -18,7 +19,7 @@ const CACHE_CONTROL_COPY = 'X-Steak-Cache-Control';
 // Cache each finished response at the edge. A hit returns the stored JSON
 // without parsing or rebuilding anything, which keeps most requests far inside
 // the free plan's CPU limit. Only 200s are cached, so errors are retried.
-const cacheFor = (seconds) => [
+const cacheFor = (seconds, version = null) => [
   // A response read back from the edge cache arrives with the zone's Browser
   // Cache TTL (4 hours) in place of our Cache-Control, so browsers would keep
   // replaying old live scores to every refetch. Restore our own lifetime,
@@ -34,7 +35,11 @@ const cacheFor = (seconds) => [
     cacheName: 'steak-api',
     // The API takes no query parameters, so ignore them rather than let them
     // bypass the cache
-    keyGenerator: (c) => new URL(c.req.path, c.req.url).href,
+    keyGenerator: (c) => {
+      const url = new URL(c.req.path, c.req.url);
+      if (version) url.searchParams.set('valuation', version);
+      return url.href;
+    },
   }),
   // Runs inside the cache middleware, which keeps this header and stores the
   // response for that long. A finished season's responses no longer change.
@@ -67,5 +72,7 @@ apiRoutes.get('/weekly-scores/:year', ...recent, weeklyScoresYear);
 apiRoutes.get('/week-players/:year/:week', ...slow, weekPlayersYear);
 apiRoutes.get('/waivers/:year', ...recent, waiversYear);
 apiRoutes.get('/draft/:year', ...slow, draftYear);
+// A valuation change must not replay finished-season verdicts from the old model.
+apiRoutes.get('/trades/:year', ...cacheFor(300, 'kickoff-v3'), tradesYear);
 
 export default apiRoutes;

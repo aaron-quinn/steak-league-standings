@@ -14,6 +14,7 @@ const loadSteakRaceView = () => import('./views/SteakRaceView');
 const loadSteakOddsView = () => import('./views/SteakOddsView');
 const loadTopPlayersView = () => import('./views/TopPlayersView');
 const loadDraftView = () => import('./views/DraftView');
+const loadTradesView = () => import('./views/TradesView');
 const loadWaiversView = () => import('./views/WaiversView');
 
 const FunView = lazy(loadFunView);
@@ -22,6 +23,7 @@ const SteakOddsView = lazy(loadSteakOddsView);
 const TopPlayersView = lazy(loadTopPlayersView);
 const DraftView = lazy(loadDraftView);
 const WaiversView = lazy(loadWaiversView);
+const TradesView = lazy(loadTradesView);
 
 // Fetch them once the first page is up, so opening the tab doesn't show a
 // loading screen
@@ -34,6 +36,7 @@ function usePrefetchFunViews() {
       loadTopPlayersView();
       loadDraftView();
       loadWaiversView();
+      loadTradesView();
     };
     // Older Safari has no requestIdleCallback
     if (typeof window.requestIdleCallback === 'function') {
@@ -145,7 +148,7 @@ export default function App() {
           }
         />
         <Route path="/fun/waivers" element={<WaiversView />} />
-      </Routes>
+        <Route path="/fun/trades" element={<TradesView />} />      </Routes>
     </Suspense>
   );
 }

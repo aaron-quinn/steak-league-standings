@@ -30,6 +30,11 @@ export const FUN_SCREENS = [
     description: 'Every auction price, and which picks paid off.',
   },
   {
+    to: '/fun/trades',
+    label: 'Trades',
+    description: 'Who won each deal, and who traded their way to more value.',
+  },
+  {
     to: '/fun/waivers',
     label: 'Waivers',
     description: 'The season’s best (and worst) waiver pickups.',

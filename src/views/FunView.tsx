@@ -121,6 +121,12 @@ const art: Record<string, React.ReactNode> = {
       <circle cx="66" cy="30" r="3.5" className="fill-red-400/80 stroke-none" />
     </>
   ),
+  '/fun/trades': (
+    <>
+      <path d="M8 13 H68 L59 5 M68 13 L59 21" className="stroke-emerald-400" />
+      <path d="M72 29 H12 L21 21 M12 29 L21 37" className="stroke-amber-300" />
+    </>
+  ),
   '/fun/waivers': (
     <>
       {/* A price tag that climbs */}
