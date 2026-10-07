@@ -29,8 +29,12 @@ export function requestedPlayers(url) {
   return ids ? new Set(ids.split(',')) : null;
 }
 
+// The NFL added a week 18 in 2021. MFL answers a later week with the last one.
+const lastWeekOf = (season) => (Number(season) >= 2021 ? 18 : 17);
+
 // Every export the site reads for a finished season
 export function seasonExports(season, leagueIDs) {
+  const weeks = Array.from({ length: lastWeekOf(season) }, (_, i) => i + 1);
   return [
     `/${season}/export?TYPE=players&JSON=1`,
     `/${season}/export?TYPE=nflSchedule&W=ALL&JSON=1`,
@@ -40,6 +44,11 @@ export function seasonExports(season, leagueIDs) {
       `/${season}/export?TYPE=transactions&L=${id}&JSON=1`,
       `/${season}/export?TYPE=liveScoring&L=${id}&JSON=1`,
       `/${season}/export?TYPE=liveScoring&L=${id}&DETAILS=1&JSON=1`,
+      // Trades score a sent player who left the league's rosters from these
+      ...weeks.map(
+        (week) =>
+          `/${season}/export?TYPE=playerScores&L=${id}&W=${week}&JSON=1`,
+      ),
     ]),
   ];
 }

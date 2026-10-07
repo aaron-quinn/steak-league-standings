@@ -10,6 +10,9 @@ import {
 } from '../utils/trade-value.js';
 import { loadWeeks } from './weekly-scores.js';
 
+// How long to cache a response with lineup lift left unrated by MFL
+const INCOMPLETE_SECONDS = 60;
+
 const asList = (value) => (Array.isArray(value) ? value : value ? [value] : []);
 
 export default async function tradesYear(c) {
@@ -83,6 +86,8 @@ export default async function tradesYear(c) {
       .sort((a, b) => a.week - b.week);
     if (!starts.length) throw new Error('NFL schedule unavailable');
     const { weeks } = loaded;
+    // Set when MFL refused a week's scores and some lineup lift went unrated
+    let incomplete = false;
     const trades = await Promise.all(
       leagueData.map(async ({ league, moves, rules, trades }) => {
         const scores = weeklyRosterScores(weeks, league.name);
@@ -111,12 +116,14 @@ export default async function tradesYear(c) {
         const missingWeeks = weeks.filter(({ week }) => needed.has(week));
         await Promise.all(
           missingWeeks.map(async ({ week }) => {
+            const url = `/${season}/export?TYPE=playerScores&L=${league.id}&W=${week}&JSON=1`;
             try {
-              const data = await getData(
-                `/${season}/export?TYPE=playerScores&L=${league.id}&W=${week}&JSON=1`,
-                options,
-              );
-              if (data.error || !data.playerScores) return;
+              const data = await getData(url, options);
+              if (data.error || !data.playerScores) {
+                incomplete = true;
+                console.warn(`No player scores from ${url}`, data.error);
+                return;
+              }
               const full = new Map(
                 asList(data.playerScores.playerScore).map((p) => [
                   p.id,
@@ -132,8 +139,10 @@ export default async function tradesYear(c) {
                   }),
                 ),
               );
-            } catch {
+            } catch (error) {
               // Keep the trade and its production, but leave lineup lift unrated.
+              incomplete = true;
+              console.warn(`No player scores from ${url}: ${error.message}`);
             }
           }),
         );
@@ -148,6 +157,8 @@ export default async function tradesYear(c) {
         });
       }),
     );
+    // Don't hold a gap left by a refused request for a finished season's day
+    if (incomplete) c.header('Cache-Control', `max-age=${INCOMPLETE_SECONDS}`);
     return c.json({
       lastWeek: weeks.at(-1)?.week ?? 0,
       trades: trades.flat().sort((a, b) => b.time - a.time),

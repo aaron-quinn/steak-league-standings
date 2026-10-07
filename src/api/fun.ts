@@ -35,7 +35,7 @@ export async function getWaivers(year: number): Promise<WaiverSeason> {
 
 export async function getTrades(year: number): Promise<TradeSeason> {
   const { data } = await api.get<TradeSeason>(
-    `/trades/${year}?valuation=kickoff-v3`,
+    `/trades/${year}?valuation=kickoff-v4`,
   );
   return {
     ...data,

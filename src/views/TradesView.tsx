@@ -105,7 +105,7 @@ export default function TradesView() {
   );
   const results = useQueries({
     queries: selectedYears.map((season) => ({
-      queryKey: ['trades', season, 'kickoff-v3'],
+      queryKey: ['trades', season, 'kickoff-v4'],
       queryFn: () => getTrades(season),
       staleTime: season < currentYear ? Infinity : 5 * 60 * 1000,
     })),

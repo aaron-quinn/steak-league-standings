@@ -73,6 +73,6 @@ apiRoutes.get('/week-players/:year/:week', ...slow, weekPlayersYear);
 apiRoutes.get('/waivers/:year', ...recent, waiversYear);
 apiRoutes.get('/draft/:year', ...slow, draftYear);
 // A valuation change must not replay finished-season verdicts from the old model.
-apiRoutes.get('/trades/:year', ...cacheFor(300, 'kickoff-v3'), tradesYear);
+apiRoutes.get('/trades/:year', ...cacheFor(300, 'kickoff-v4'), tradesYear);
 
 export default apiRoutes;
