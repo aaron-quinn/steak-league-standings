@@ -1,6 +1,5 @@
 import clsx from 'clsx';
 import { useMemo, useState } from 'react';
-import { useQueries, type UseQueryResult } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import PageShell from '@/components/PageShell';
 import SectionLabel from '@/components/SectionLabel';
@@ -14,47 +13,25 @@ import TombstonePit, {
 } from '@/components/fun/TombstonePit';
 import TeamNuggets from '@/components/fun/TeamNuggets';
 import { zoneText } from '@/components/fun/zone-colors';
-import { getWeeklyScores } from '@/api/fun';
+import { FIRST_SEASON, useSteakJudge } from '@/hooks/useSteakJudge';
 import { formatChance, ordinal } from '@/utils/format-score';
 import { useStandingsStore } from '@/stores/standings';
-import type { WeeklyScores } from '@/types/Fun';
-import {
-  buildSteakSeason,
-  type RaceTeam,
-  type SteakSeason,
-} from '@/utils/steak-season';
+import type { RaceTeam, SteakSeason } from '@/utils/steak-season';
 import { getSteakLine, getSteakZone } from '@/utils/steak-teams';
 import {
-  fitScoringModel,
   getDeficits,
   getLockLine,
   getTombstoneLine,
   getWeekCollapses,
   getWeekComebacks,
   isTombstoned,
-  simulateSteakOdds,
-  weeksInSeason,
   type ChaseTarget,
   type Comeback,
-  type ScoringModel,
   type SteakOdds,
 } from '@/utils/steak-odds';
 
-// Seasons with both leagues in the managers data
-const FIRST_SEASON = 2016;
-
 // The full breakdown, or every team on one card to screenshot and send
 type View = 'detail' | 'snapshot';
-
-// Kept outside the component so the combined data only changes when a
-// season's scores do
-function combineSeasons(results: UseQueryResult<WeeklyScores[]>[]) {
-  return {
-    data: results.map((result) => result.data),
-    isError: results.some((result) => result.isError),
-    isPending: results.some((result) => result.isPending),
-  };
-}
 
 // "2021–2025", or "2021–2023 and 2025" around a gap
 function formatYears(years: number[]) {
@@ -167,64 +144,7 @@ export default function SteakOddsView() {
   };
 
   // Every season's scores: the one on screen, and the rest to learn from
-  const { data, isError, isPending } = useQueries({
-    queries: seasons.map((season) => ({
-      queryKey: ['weekly-scores', season],
-      queryFn: () => getWeeklyScores(season),
-    })),
-    combine: combineSeasons,
-  });
-
-  // Any season's standings and model. The model comes from every finished
-  // season except the one asked for, so a past season is judged as if it
-  // hadn't happened yet. Each is built once, along with its odds after each
-  // week, simulated the first time they're asked for, so stepping through
-  // weeks, switching seasons or opening a team's story doesn't rerun them.
-  const judge = useMemo(() => {
-    if (data.some((weeks) => !weeks)) return null;
-    const scores = (season: number) =>
-      data[currentYear - season] as WeeklyScores[];
-    const seasons = new Map<
-      number,
-      {
-        pastYears: number[];
-        model: ScoringModel;
-        season: SteakSeason;
-        odds: Map<number, Map<string, SteakOdds>>;
-      }
-    >();
-    const judged = (year: number) => {
-      let judgedSeason = seasons.get(year);
-      if (!judgedSeason) {
-        const pastYears = Array.from(
-          { length: currentYear - FIRST_SEASON },
-          (_, i) => FIRST_SEASON + i,
-        ).filter((season) => season !== year);
-        judgedSeason = {
-          pastYears,
-          model: {
-            ...fitScoringModel(pastYears.map(scores)),
-            // Played out to this season's length, not the longest past one
-            seasonWeeks: weeksInSeason(year),
-          },
-          season: buildSteakSeason(year, scores(year)),
-          odds: new Map(),
-        };
-        seasons.set(year, judgedSeason);
-      }
-      return judgedSeason;
-    };
-    const oddsFor = (year: number, week: number) => {
-      const { season, model, odds } = judged(year);
-      let weekOdds = odds.get(week);
-      if (!weekOdds) {
-        weekOdds = simulateSteakOdds(season, week, model);
-        odds.set(week, weekOdds);
-      }
-      return weekOdds;
-    };
-    return { judged, oddsFor };
-  }, [data, currentYear]);
+  const { judge, isError, isPending } = useSteakJudge(currentYear);
 
   // The graveyard and lock line come from the same finished seasons as the
   // model

@@ -9,17 +9,18 @@ import MatchupsPlaceholder from '@/components/MatchupsPlaceholder';
 import FunNav from '@/components/fun/FunNav';
 import BumpChart from '@/components/fun/BumpChart';
 import RankRace from '@/components/fun/RankRace';
+import OddsChart from '@/components/fun/OddsChart';
 import FollowSelect from '@/components/fun/FollowSelect';
 import { zoneText } from '@/components/fun/zone-colors';
 import { getWeeklyScores } from '@/api/fun';
+import { FIRST_SEASON, useSteakJudge } from '@/hooks/useSteakJudge';
 import { useStandingsStore } from '@/stores/standings';
 import { buildSteakSeason, getSeasonFacts } from '@/utils/steak-season';
-import { getSteakZone } from '@/utils/steak-teams';
+import { getSteakLine, getSteakZone } from '@/utils/steak-teams';
 
-// Seasons with both leagues in the managers data
-const FIRST_SEASON = 2016;
+type Mode = 'chart' | 'race' | 'odds';
 
-type Mode = 'chart' | 'race';
+const MODES: Mode[] = ['chart', 'race', 'odds'];
 
 export default function SteakRaceView() {
   const currentYear = useStandingsStore((state) => state.year);
@@ -33,7 +34,8 @@ export default function SteakRaceView() {
   const year = seasons.includes(requestedSeason)
     ? requestedSeason
     : currentYear;
-  const mode: Mode = searchParams.get('view') === 'race' ? 'race' : 'chart';
+  const requestedMode = searchParams.get('view') as Mode;
+  const mode: Mode = MODES.includes(requestedMode) ? requestedMode : 'chart';
 
   const updateParams = (changes: Record<string, string | null>) => {
     const next = new URLSearchParams(searchParams);
@@ -53,6 +55,33 @@ export default function SteakRaceView() {
     [data, year],
   );
   const facts = useMemo(() => (season ? getSeasonFacts(season) : []), [season]);
+
+  // The odds chart learns from every other season, so it only loads them
+  // once it's opened. Its odds match the Steak Odds screen's week for week.
+  const {
+    judge,
+    isError: oddsError,
+    isPending: oddsPending,
+  } = useSteakJudge(currentYear, mode === 'odds');
+  const oddsBoard = useMemo(() => {
+    if (mode !== 'odds' || !judge) return null;
+    const { season: judgedSeason, model } = judge.judged(year);
+    const played = judgedSeason.weeks.length;
+    const weekOdds = Array.from({ length: played + 1 }, (_, week) =>
+      judge.oddsFor(year, week),
+    );
+    return {
+      season: judgedSeason,
+      settled: played >= model.seasonWeeks,
+      chances: new Map(
+        judgedSeason.teams.map((team) => [
+          team.id,
+          weekOdds.map((odds) => odds.get(team.id)?.eater ?? 0),
+        ]),
+      ),
+    };
+  }, [mode, judge, year]);
+  const oddsLoading = mode === 'odds' && (oddsPending || !oddsBoard);
 
   // The followed team lives in the URL by manager name, so it survives
   // switching views and seasons (franchise IDs change between seasons) and
@@ -75,16 +104,17 @@ export default function SteakRaceView() {
       <FunNav />
 
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div className="w-40 sm:w-48">
+        <div className="w-56 sm:w-64">
           <SegmentedTabs
             label="Chart type"
             tabs={[
               { value: 'chart', label: 'Chart' },
               { value: 'race', label: 'Race' },
+              { value: 'odds', label: 'Odds' },
             ]}
             value={mode}
             onChange={(value) =>
-              updateParams({ view: value === 'race' ? 'race' : null })
+              updateParams({ view: value === 'chart' ? null : value })
             }
           />
         </div>
@@ -118,12 +148,12 @@ export default function SteakRaceView() {
         />
       </div>
 
-      {isError ? (
+      {isError || (mode === 'odds' && oddsError) ? (
         <MatchupsPlaceholder
           title="Steak Race Unavailable"
           message="We were unable to load the weekly results. Please try again later."
         />
-      ) : isPending || !season ? (
+      ) : isPending || !season || (season.weeks.length > 0 && oddsLoading) ? (
         <div
           role="status"
           aria-label="Loading"
@@ -151,16 +181,27 @@ export default function SteakRaceView() {
                 selected={selected}
                 onSelect={setSelected}
               />
-            ) : (
+            ) : mode === 'race' || !oddsBoard ? (
               <RankRace
                 key={year}
                 season={season}
                 selected={selected}
                 onSelect={setSelected}
               />
+            ) : (
+              <OddsChart
+                key={year}
+                season={oddsBoard.season}
+                chances={oddsBoard.chances}
+                settled={oddsBoard.settled}
+                selected={selected}
+                onSelect={setSelected}
+              />
             )}
             <p className="mt-2 text-[11px] sm:text-xs text-gray-600">
-              Official steak rank after each week. Tap a team to follow it.
+              {mode === 'odds'
+                ? `Chance of finishing top ${getSteakLine(season.teams.length).eaters} after each week, from 10,000 simulated seasons. Tap a team to follow it.`
+                : 'Official steak rank after each week. Tap a team to follow it.'}
             </p>
           </div>
 
