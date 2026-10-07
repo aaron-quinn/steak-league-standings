@@ -156,6 +156,9 @@ export default async function getLiveMatchups({
       });
 
       liveScores[`${prefix}${id}`] = {
+        // MFL keeps serving the last week until the next one kicks off, so
+        // pages can tell those leftover scores from the current week's
+        week: parseInt(week, 10),
         score,
         yetToPlay,
         inProgress,

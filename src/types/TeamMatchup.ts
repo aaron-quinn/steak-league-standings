@@ -27,6 +27,8 @@ interface PlayerInfo {
 
 type TeamMatchup = {
   franchiseID: string;
+  // The week MFL is reporting live scores for
+  week?: number;
   score: string;
   yetToPlay: number;
   inProgress: number;

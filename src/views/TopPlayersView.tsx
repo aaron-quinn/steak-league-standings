@@ -60,9 +60,18 @@ export default function TopPlayersView({ bench }: Props) {
 
   const playedWeeks = weeklyScores?.map((w) => w.week) ?? [];
   const lastPlayed = playedWeeks[playedWeeks.length - 1] ?? 0;
+  // Until the new week kicks off MFL still reports the last one, which is
+  // already a played week, so only count matchups for the current week
+  const currentMatchups = useMemo(
+    () =>
+      matchups?.filter((matchup) =>
+        matchup.every((team) => team.week === weekData?.week),
+      ),
+    [matchups, weekData],
+  );
   const livePlayers = useMemo(
-    () => (matchups ? playersFromMatchups(matchups) : []),
-    [matchups],
+    () => (currentMatchups ? playersFromMatchups(currentMatchups) : []),
+    [currentMatchups],
   );
   const liveWeek =
     weekData && weekData.week > lastPlayed && livePlayers.length > 0
