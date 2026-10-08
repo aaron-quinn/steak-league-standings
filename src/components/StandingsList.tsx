@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useStandingsStore } from '../stores/standings';
+import { useTombstoned } from '../hooks/useTombstoned';
 import getManagers from '../data/managers';
 import type { TeamWithGap } from '../types/TeamWithGap';
 import type { PlayerInfo } from '../types/TeamStanding';
@@ -364,6 +365,7 @@ const StandingsList = forwardRef<StandingsListHandle, StandingsListProps>(
     const standings = useStandingsStore((state) => state.standings);
     const year = useStandingsStore((state) => state.year);
     const live = useStandingsStore((state) => state.live);
+    const tombstoned = useTombstoned(year);
     const listRef = useRef<HTMLDivElement>(null);
     const previousPositions = useRef<Map<string, DOMRect> | null>(null);
     const rowAnimations = useRef<Animation[]>([]);
@@ -586,6 +588,7 @@ const StandingsList = forwardRef<StandingsListHandle, StandingsListProps>(
                     </span>
                     <span className="text-xs sm:text-sm lg:text-base text-gray-300 font-medium truncate">
                       {team.name}
+                      {tombstoned.has(team.id) && ' 🪦'}
                     </span>
                     {!live && (
                       <span className="hidden sm:inline text-gray-600 text-xs tabular-nums shrink-0">
@@ -644,6 +647,7 @@ const StandingsList = forwardRef<StandingsListHandle, StandingsListProps>(
                   </span>
                   <span className="text-xs sm:text-sm lg:text-base text-gray-300 font-medium truncate">
                     {teamsWithGap[steakLineTeam].name}
+                    {tombstoned.has(teamsWithGap[steakLineTeam].id) && ' 🪦'}
                   </span>
                   {!live && (
                     <span className="hidden sm:inline text-gray-600 text-xs tabular-nums shrink-0">
@@ -720,6 +724,7 @@ const StandingsList = forwardRef<StandingsListHandle, StandingsListProps>(
                       </span>
                       <span className="text-xs sm:text-sm lg:text-base text-gray-400 truncate">
                         {team.name}
+                        {tombstoned.has(team.id) && ' 🪦'}
                       </span>
                       {!live && (
                         <span className="hidden sm:inline text-gray-600 text-xs tabular-nums shrink-0">
