@@ -72,6 +72,48 @@
   }
 }
 
+/* The league menu under each site's logo (SportSwitch). It stays mounted so
+   it can fade and scale out from the logo; each site adds its own look. */
+.league-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 40;
+  transform-origin: top left;
+  transition:
+    opacity 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0s;
+}
+
+.league-menu[data-open='false'] {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.96);
+  pointer-events: none;
+  transition:
+    opacity 120ms ease-in,
+    transform 120ms ease-in,
+    visibility 0s linear 120ms;
+}
+
+.league-chevron {
+  flex: none;
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+[aria-expanded='true'] > .league-chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .league-menu,
+  .league-menu[data-open='false'],
+  .league-chevron {
+    transition: none;
+  }
+}
+
 /* Pizza animation styles (Easter egg) */
 .pizza-animation-container {
   position: fixed;

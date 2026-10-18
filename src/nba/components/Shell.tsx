@@ -1,5 +1,6 @@
-import { Link, NavLink, useSearchParams } from 'react-router-dom';
+import { NavLink, useSearchParams } from 'react-router-dom';
 import { DEFAULT_SEASON, SEASONS, seasonLabel } from '../lib/season';
+import SportSwitch from '../../components/SportSwitch';
 import Basketball from './Basketball';
 
 export const NBA_SCREENS = [
@@ -104,18 +105,20 @@ export default function Shell({ title, status, tools, children }: ShellProps) {
       <div className="nba-page">
         <header className="nba-top">
           <div className="nba-masthead">
-            <Link to={`/nba${query}`} aria-label="NBA Steak League standings">
-              <h1 className="nba-wordmark">
+            {/* The wordmark opens the league menu; NBA in it leads back to
+                the standings, keeping the season */}
+            <SportSwitch
+              current="nba"
+              currentTo={`/nba${query}`}
+              className="nba-league"
+              triggerClassName="nba-league-trigger"
+              menuClassName="nba-league-menu"
+            >
+              <span className="nba-wordmark">
                 <Basketball />
                 Steak <span>NBA</span>
-              </h1>
-            </Link>
-            <Link to="/" className="nba-sport-link">
-              NFL
-              <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
-                <path d="M3 1h6v6M9 1 1 9" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              </svg>
-            </Link>
+              </span>
+            </SportSwitch>
           </div>
           <nav className="nba-nav" aria-label="NBA screens">
             {NBA_SCREENS.map((screen) => (

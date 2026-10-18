@@ -71,11 +71,20 @@
   border-bottom: 1px solid var(--line);
 }
 @media (min-width: 640px) { .nba-top { margin: 0 -20px; padding: 14px 20px 0; } }
-.nba-masthead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nba-masthead { display: flex; align-items: center; gap: 4px; }
 .nba-wordmark { display: flex; align-items: center; gap: 8px; margin: 0; font-style: italic; font-weight: 800; font-stretch: 62%; font-size: 30px; line-height: 1; letter-spacing: 0.01em; text-transform: uppercase; }
 .nba-wordmark span { font-style: normal; font-weight: 700; font-size: 18px; line-height: 1; letter-spacing: 0.08em; padding: 4px 7px 3px; border-radius: 5px; color: var(--void); background: var(--rail); box-shadow: 0 0 18px rgb(62 230 255 / 0.35); }
-.nba-sport-link { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border: 1px solid var(--line-strong); border-radius: 8px; font-weight: 600; font-stretch: 85%; font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); transition: color 120ms, border-color 120ms; }
-.nba-sport-link:hover { color: var(--text); border-color: rgb(62 230 255 / 0.5); }
+/* The wordmark opens the league menu (SportSwitch; motion in index.css) */
+.nba-league { z-index: 30; }
+.nba-league-trigger { display: flex; align-items: center; gap: 8px; margin: -5px -8px; padding: 5px 8px; border: 0; border-radius: 12px; background: none; color: var(--faint); cursor: pointer; transition: background 150ms, color 150ms; }
+.nba-league-trigger .nba-wordmark { color: var(--text); }
+.nba-league-trigger:hover, .nba-league-trigger[aria-expanded='true'] { background: rgb(140 160 255 / 0.08); color: var(--text); }
+.nba-league-menu { display: flex; flex-direction: column; gap: 2px; width: 220px; padding: 6px; border: 1px solid var(--line-strong); border-radius: 14px; background: linear-gradient(180deg, #18224e, #0e1534); box-shadow: 0 18px 50px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(0 0 0 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.05); backdrop-filter: blur(14px); }
+.nba .nba-league-menu a { display: flex; align-items: center; gap: 12px; height: 46px; padding: 0 12px; border-radius: 9px; font-weight: 700; font-stretch: 85%; font-size: 16px; letter-spacing: 0.06em; color: var(--dim); transition: color 120ms, background 120ms; }
+.nba .nba-league-menu a > span { flex: 1; }
+.nba .nba-league-menu a:hover, .nba .nba-league-menu a:focus-visible { color: var(--text); background: var(--band); outline: none; }
+.nba .nba-league-menu a[aria-current='true'] { color: var(--text); background: var(--cyan-wash); }
+.nba .nba-league-menu a[aria-current='true'] svg:last-child { color: var(--cyan); }
 
 /* Scrolls sideways on phones; the fade says there's more */
 .nba-nav { display: flex; gap: 2px; margin: 10px -12px 0; padding: 0 12px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; mask-image: linear-gradient(90deg, #000 85%, transparent); }
