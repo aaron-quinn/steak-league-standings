@@ -1,5 +1,5 @@
 import PlayerName from '../components/PlayerName';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { Link, useParams } from 'react-router-dom';
 import RowValue from '../components/RowValue';
@@ -7,7 +7,8 @@ import Shell, { Loading } from '../components/Shell';
 import { useAllLeagues } from '../lib/data';
 import { formatPoints, ordinal } from '../lib/format';
 import BuildCard from '../components/BuildCard';
-import { buildPeople, categoryProfile } from '../lib/people';
+import FinishHistogram from '../components/FinishHistogram';
+import { buildPeople, categoryProfile, type PersonSeason } from '../lib/people';
 import { CATEGORIES } from '../lib/roto';
 import { seasonLabel } from '../lib/season';
 
@@ -50,7 +51,6 @@ export default function ManagerPage() {
   const valued = picks.filter((p) => p.surplus !== undefined);
   const bargains = [...valued].sort((a, b) => b.surplus! - a.surplus!).slice(0, 4);
   const busts = [...valued].sort((a, b) => a.surplus! - b.surplus!).slice(0, 4);
-  const ranked = profile.map((v, i) => ({ v, i })).sort((a, b) => b.v - a.v);
   const built = person.seasons.filter((s) => s.started);
 
   return (
@@ -169,30 +169,28 @@ export default function ManagerPage() {
         </div>
 
         <div>
-          {profile.length > 0 && (
-            <section className="nba-panel" aria-label="Category strengths">
+          {done.length > 0 && (
+            <section className="nba-panel" aria-label="Finishes" style={{ marginBottom: 16 }}>
               <div className="nba-panel-head">
-                <h3 className="nba-panel-title">Categories</h3>
-                <span className="nba-dim" style={{ fontSize: 12.5 }}>
-                  Best {CATEGORIES[ranked[0].i].label} · worst {CATEGORIES[ranked[ranked.length - 1].i].label}
-                </span>
+                <h3 className="nba-panel-title">Finishes</h3>
               </div>
-              <ul className="nba-cat-bars">
-                {CATEGORIES.map((c, i) => (
-                  <li key={c.key}>
-                    <span className="label">{c.label}</span>
-                    <span className="nba-bar" aria-hidden="true">
-                      <span style={{ width: `${Math.round(profile[i] * 100)}%` }} />
-                    </span>
-                    <span className="value">{Math.round(profile[i] * 100)}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="nba-foot" style={{ margin: '0 12px 12px' }}>
-                Where they usually finish in each category: 100 is first every
-                season, 0 is last.
-              </p>
+              <FinishHistogram
+                finishes={done.map((s) => ({
+                  season: s.season,
+                  position: s.row.position,
+                  teamCount: s.teamCount,
+                  zone: s.row.zone,
+                }))}
+              />
             </section>
+          )}
+
+          {profile.length > 0 && (
+            <CategoryPanel
+              key={person.slug}
+              profile={profile}
+              seasons={[...built].sort((a, b) => a.season - b.season)}
+            />
           )}
 
           {bargains.length > 0 && (
@@ -238,5 +236,64 @@ export default function ManagerPage() {
         </section>
       )}
     </Shell>
+  );
+}
+
+// All-time by default; step back through each season they played. All-time
+// sits after the newest season, like a final frame.
+function CategoryPanel({ profile, seasons }: { profile: number[]; seasons: PersonSeason[] }) {
+  const [index, setIndex] = useState(seasons.length);
+  const season = seasons[index] as PersonSeason | undefined;
+  const shape = season
+    ? season.row.categories.map((c) => (c.points - 1) / (season.teamCount - 1))
+    : profile;
+  const ranked = shape.map((v, i) => ({ v, i })).sort((a, b) => b.v - a.v);
+  const rank = (i: number) => season!.teamCount + 1 - season!.row.categories[i].points;
+
+  return (
+    <section className="nba-panel" aria-label="Category strengths">
+      <div className="nba-panel-head">
+        <h3 className="nba-panel-title">Categories</h3>
+        <div className="nba-cat-step" role="group" aria-label="Season">
+          <button aria-label="Previous season" disabled={index === 0} onClick={() => setIndex(index - 1)}>
+            ‹
+          </button>
+          <span aria-live="polite">{season ? seasonLabel(season.season) : 'All-time'}</span>
+          <button
+            aria-label={index === seasons.length - 1 ? 'All-time' : 'Next season'}
+            disabled={index === seasons.length}
+            onClick={() => setIndex(index + 1)}
+          >
+            ›
+          </button>
+        </div>
+      </div>
+      <ul className="nba-cat-bars">
+        {CATEGORIES.map((c, i) => (
+          <li
+            key={c.key}
+            title={
+              season
+                ? `${c.label}: ${c.format(season.row.categories[i].value)}, ${ordinal(Math.floor(rank(i)))} of ${season.teamCount}${Number.isInteger(rank(i)) ? '' : ' (tied)'}`
+                : undefined
+            }
+          >
+            <span className="label">{c.label}</span>
+            <span className="nba-bar" aria-hidden="true">
+              <span style={{ width: `${Math.round(shape[i] * 100)}%` }} />
+            </span>
+            <span className="value">
+              {season ? ordinal(Math.floor(rank(i))) : Math.round(shape[i] * 100)}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="nba-foot" style={{ margin: '0 12px 12px' }}>
+        Best {CATEGORIES[ranked[0].i].label} · worst {CATEGORIES[ranked[ranked.length - 1].i].label}.{' '}
+        {season
+          ? `${ordinal(season.row.position)} of ${season.teamCount} overall${season.finished ? '' : ' so far'}. Each category's rank that season.`
+          : 'Where they usually finish in each category: 100 is first every season, 0 is last.'}
+      </p>
+    </section>
   );
 }

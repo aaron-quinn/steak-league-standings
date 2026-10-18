@@ -268,6 +268,28 @@ a.who:hover { color: var(--cyan); }
 .nba-cat-bars .label { font-weight: 650; font-stretch: 80%; font-size: 12.5px; letter-spacing: 0.05em; color: var(--dim); }
 .nba-cat-bars .value { text-align: right; font-weight: 700; font-size: 13.5px; }
 .nba-cat-bars .nba-bar { height: 8px; }
+.nba-cat-bars li { grid-template-columns: 38px 1fr 34px; }
+.nba-cat-step { display: flex; align-items: center; gap: 4px; }
+.nba-cat-step span { min-width: 64px; text-align: center; font-weight: 700; font-stretch: 80%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.nba-cat-step button { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 1px solid var(--line-strong); border-radius: 7px; background: rgb(5 9 26 / 0.5); font-size: 17px; line-height: 1; color: var(--dim); cursor: pointer; }
+.nba-cat-step button:hover:not(:disabled) { color: var(--text); }
+.nba-cat-step button:disabled { opacity: 0.35; cursor: default; }
+
+/* Manager finishes: one stacked block per season */
+.nba-finishes { margin: 0; padding: 14px 12px 12px; }
+.nba-finishes .plot, .nba-finishes .axis { display: grid; gap: 3px; }
+.nba-finishes .col { display: flex; flex-direction: column-reverse; gap: 3px; }
+.nba-finishes .block { display: grid; place-items: center; height: 24px; border-radius: 3px; font-size: 10.5px; font-weight: 700; font-stretch: 80%; color: var(--void); cursor: default; }
+.nba-finishes .block.eater { background: var(--cyan); }
+.nba-finishes .block.self-buyer { background: var(--violet); }
+.nba-finishes .block.buyer { background: #9aa4cf; }
+.nba-finishes .axis { margin-top: 6px; padding-top: 5px; border-top: 1px solid var(--line-strong); }
+.nba-finishes .axis span { text-align: center; font-size: 11.5px; font-weight: 650; font-stretch: 80%; color: var(--dim); }
+.nba-finishes .nba-foot { margin: 10px 0 0; }
+.nba-finishes .key { font-weight: 650; }
+.nba-finishes .key.eater { color: var(--cyan); }
+.nba-finishes .key.self-buyer { color: var(--violet); }
+.nba-finishes .key.buyer { color: #9aa4cf; }
 
 /* Builds: one octagon per team */
 .nba-builds { list-style: none; margin: 0; padding: 12px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); }

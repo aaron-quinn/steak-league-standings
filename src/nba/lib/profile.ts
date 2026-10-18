@@ -5,10 +5,10 @@ import { CATEGORIES } from './roto.ts';
 
 // Around the octagon, clockwise from the top: scoring, then the guard stats
 // down the right side and the big-man stats up the left, so a build shows as a
-// lean to one side
+// lean to one side. The two percentages meet at the bottom, side by side.
 const indexes = (keys: string[]) => keys.map((k) => CATEGORIES.findIndex((c) => c.key === k));
 
-export const AXES = indexes(['pts', 'tpm', 'ftp', 'ast', 'stl', 'blk', 'reb', 'fgp']);
+export const AXES = indexes(['pts', 'tpm', 'ast', 'stl', 'ftp', 'fgp', 'blk', 'reb']);
 
 const GUARD = indexes(['tpm', 'ftp', 'ast', 'stl']);
 const BIG = indexes(['blk', 'reb', 'fgp']);
