@@ -16,6 +16,7 @@ const loadTopPlayersView = () => import('./views/TopPlayersView');
 const loadDraftView = () => import('./views/DraftView');
 const loadTradesView = () => import('./views/TradesView');
 const loadWaiversView = () => import('./views/WaiversView');
+const loadManagersView = () => import('./views/ManagersView');
 
 // The NBA league lives under /nba/ with its own code and styles
 const NbaApp = lazy(() => import('./nba/NbaApp'));
@@ -27,6 +28,7 @@ const TopPlayersView = lazy(loadTopPlayersView);
 const DraftView = lazy(loadDraftView);
 const WaiversView = lazy(loadWaiversView);
 const TradesView = lazy(loadTradesView);
+const ManagersView = lazy(loadManagersView);
 
 // Fetch them once the first page is up, so opening the tab doesn't show a
 // loading screen
@@ -40,6 +42,7 @@ function usePrefetchFunViews() {
       loadDraftView();
       loadWaiversView();
       loadTradesView();
+      loadManagersView();
     };
     // Older Safari has no requestIdleCallback
     if (typeof window.requestIdleCallback === 'function') {
@@ -152,6 +155,8 @@ export default function App() {
         />
         <Route path="/fun/waivers" element={<WaiversView />} />
         <Route path="/fun/trades" element={<TradesView />} />
+        <Route path="/fun/managers" element={<ManagersView />} />
+        <Route path="/fun/managers/:slug" element={<ManagersView />} />
         <Route
           path="/nba/*"
           element={

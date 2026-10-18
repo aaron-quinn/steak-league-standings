@@ -39,6 +39,11 @@ export const FUN_SCREENS = [
     label: 'Waivers',
     description: 'The season’s best (and worst) waiver pickups.',
   },
+  {
+    to: '/fun/managers',
+    label: 'Managers',
+    description: 'Every manager’s steaks, titles and finishes since 2016.',
+  },
 ];
 
 // Moves between the Fun screens. Each screen renders its own copy, so the
@@ -69,7 +74,8 @@ export default function FunNav() {
       >
         <span ref={indicatorRef} aria-hidden="true" className={pillClassName} />
         {FUN_SCREENS.map((screen) => {
-          const active = pathname === screen.to;
+          const active =
+            pathname === screen.to || pathname.startsWith(`${screen.to}/`);
           return (
             <Link
               key={screen.to}

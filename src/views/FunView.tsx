@@ -140,6 +140,32 @@ const art: Record<string, React.ReactNode> = {
       <path d="M64 8 H72 V16" className="stroke-emerald-400" />
     </>
   ),
+  // A histogram of finishes, eaters on the left
+  '/fun/managers': (
+    <g className="stroke-none">
+      {[
+        [8, 2, 'fill-emerald-400'],
+        [20, 3, 'fill-emerald-400'],
+        [32, 1, 'fill-emerald-400'],
+        [44, 1, 'fill-gray-500'],
+        [56, 2, 'fill-red-400/80'],
+        [68, 1, 'fill-red-400/80'],
+      ].flatMap(([x, height, fill]) =>
+        Array.from({ length: height as number }, (_, i) => (
+          <rect
+            key={`${x}-${i}`}
+            x={x as number}
+            y={30 - i * 9}
+            width={8}
+            height={7}
+            rx={1.5}
+            className={fill as string}
+          />
+        )),
+      )}
+      <rect x={4} y={38} width={74} height={1.5} className="fill-gray-700" />
+    </g>
+  ),
 };
 
 export default function FunView() {
