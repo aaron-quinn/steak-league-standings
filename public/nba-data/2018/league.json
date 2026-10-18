@@ -76,8 +76,8 @@
   {
    "id": 4,
    "name": "The KAT's Meow",
-   "abbrev": "MEOW",
-   "owner": "",
+   "abbrev": "NEUM",
+   "owner": "Eric Neuman",
    "totals": [
     12526,
     5013,
@@ -142,8 +142,8 @@
   {
    "id": 7,
    "name": "Shanksanity",
-   "abbrev": "SHAN",
-   "owner": "",
+   "abbrev": "SCHO",
+   "owner": "Peter Schoenke",
    "totals": [
     12809,
     4202,
@@ -252,8 +252,8 @@
   {
    "id": 12,
    "name": "sweet deal's Team",
-   "abbrev": "TEAM",
-   "owner": "",
+   "abbrev": "CATU",
+   "owner": "Eric Caturia",
    "totals": [
     10202,
     4217,

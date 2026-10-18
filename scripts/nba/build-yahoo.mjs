@@ -27,22 +27,23 @@ const PAGE = 'https://basketball.fantasysports.yahoo.com/2017/nba/135086/standin
 const CACHE = '.cache/nba-yahoo/standings.html';
 const OUT = `public/nba-data/${SEASON}`;
 
-// Who ran each team, read off the 2019 (2018-19) managers, the first ESPN
-// season. Three Yahoo team names match no manager, so they keep their team name
-// as their label ("The person, or the team name while a spot has no owner").
+// Who ran each team: nine read off the 2019 (2018-19) managers, the first ESPN
+// season, plus the three 2017-18 names that match no 2018-19 manager
+// (confirmed by the league, not inferable from Yahoo: it hides manager names in
+// the archived season).
 const OWNERS = {
   'Fighting Ballmers': 'D.J. Trainor', // the 2017-18 winner
   Quinners: 'Aaron Quinn',
   "shannon m's Team": 'Shannon McKeown',
-  "The KAT's Meow": '',
+  "The KAT's Meow": 'Eric Neuman',
   'Team Whalen': 'Nick Whalen',
   "kevin's Team": "Kevin O'Brien",
-  Shanksanity: '',
+  Shanksanity: 'Peter Schoenke',
   "James's Tip-Top Team": 'James Anderson',
   'Big Barutha Brand': 'Alex Barutha',
   "Adam's Team": 'Adam Wolf',
   "Ben's Bold Team": 'Ben Miller',
-  "sweet deal's Team": '',
+  "sweet deal's Team": 'Eric Caturia',
 };
 
 const unescape = (s) =>
