@@ -8,6 +8,8 @@ import { useAllLeagues } from '../lib/data';
 import { formatPoints, ordinal } from '../lib/format';
 import BuildCard from '../components/BuildCard';
 import FinishHistogram from '../components/FinishHistogram';
+import { ManagerStylePanel } from '../components/DraftStyles';
+import { draftStyles, type DraftStyle } from '../lib/draftStyle';
 import { buildPeople, categoryProfile, type PersonSeason } from '../lib/people';
 import { CATEGORIES } from '../lib/roto';
 import { seasonLabel } from '../lib/season';
@@ -20,6 +22,8 @@ export default function ManagerPage() {
   const people = useMemo(() => (isPending ? [] : buildPeople(leagues)), [leagues, isPending]);
   const person = people.find((p) => p.slug === slug);
   const profile = useMemo(() => (person ? categoryProfile(person) : []), [person]);
+  const styles = useMemo(() => (isPending ? new Map<string, DraftStyle>() : draftStyles(leagues)), [leagues, isPending]);
+  const style = person ? styles.get(person.name) : undefined;
 
   if (isPending) {
     return (
@@ -191,6 +195,12 @@ export default function ManagerPage() {
               profile={profile}
               seasons={[...built].sort((a, b) => a.season - b.season)}
             />
+          )}
+
+          {style && (
+            <div style={{ marginTop: 16 }}>
+              <ManagerStylePanel style={style} />
+            </div>
           )}
 
           {bargains.length > 0 && (

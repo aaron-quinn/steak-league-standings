@@ -79,7 +79,7 @@ export function compactDay(json, day) {
 // {
 //   season, finalDay, latestDay, budget,
 //   teams: [{ id, name, abbrev, owner, totals, espn: { points, rank } }],
-//   draft: [{ pick, team, playerID, price, keeper }]
+//   draft: [{ pick, team, playerID, price, keeper, nominator }]
 // }
 // `totals` are ESPN's live season totals (stat line order); `espn` is ESPN's
 // own roto points and rank, which ignore any early cutoff.
@@ -106,6 +106,8 @@ export function compactLeague(json) {
         playerID: pick.playerId,
         price: pick.bidAmount ?? 0,
         keeper: Boolean(pick.keeper),
+        // The team that put the player up for auction
+        nominator: pick.nominatingTeamId ?? 0,
       })),
   };
 }

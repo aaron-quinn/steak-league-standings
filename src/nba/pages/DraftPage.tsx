@@ -11,7 +11,10 @@ import Shell, {
   useAllTime,
   useSeason,
 } from '../components/Shell';
+import { DraftStylesPanel, LoyaltyPanel, PriceTiersPanel } from '../components/DraftStyles';
 import { useAllTimeMoves, type Dated } from '../lib/alltime';
+import { useAllLeagues } from '../lib/data';
+import { draftStyles, priceBands } from '../lib/draftStyle';
 import { buildDraft } from '../lib/moves';
 import type { DraftRow } from '../lib/moves';
 import { isFinished, seasonLabel } from '../lib/season';
@@ -65,6 +68,30 @@ export default function DraftPage() {
     return [...byTeam.values()].sort((a, b) => b.surplus - a.surplus);
   }, [picks]);
 
+  // Habits and re-buys come from every season with an auction, whatever the view
+  const { leagues: everyLeague } = useAllLeagues();
+  const styles = useMemo(() => draftStyles(everyLeague), [everyLeague]);
+  // This season's managers; all-time shows everyone
+  const inView = allTime
+    ? [...styles.values()]
+    : (league?.teams.flatMap((t) => (t.owner ? [styles.get(personName(t))].filter((s) => s !== undefined) : [])) ?? []);
+
+  const bands = useMemo(() => priceBands(picks), [picks]);
+  // Seasons each tier beat its price on average (all-time only)
+  const beat = useMemo(() => {
+    if (!allTime) return undefined;
+    const out = new Map<string, { won: number; of: number }>();
+    for (const s of new Set(picks.map((p) => p.season))) {
+      for (const b of priceBands(picks.filter((p) => p.season === s))) {
+        const w = out.get(b.label) ?? { won: 0, of: 0 };
+        w.of++;
+        if (b.surplus > 0) w.won++;
+        out.set(b.label, w);
+      }
+    }
+    return out;
+  }, [allTime, picks]);
+
   const shown = picks
     .filter((p) => followed === null || p.owner === followed)
     .sort((a, b) =>
@@ -98,9 +125,16 @@ export default function DraftPage() {
       ) : !allTime && isFinished(season) && (days?.length ?? 0) === 0 ? (
         <StandingsOnly season={season} what="auction" />
       ) : picks.length === 0 ? (
-        <div className="nba-panel">
-          <div className="nba-empty">
-            <b>No auction yet</b>Prices show up here once the draft is done.
+        <div className="nba-grid">
+          <div className="nba-panel">
+            <div className="nba-empty">
+              <b>No auction yet</b>Prices show up here once the draft is done.
+              {inView.some((s) => s.habits.length) && ' Until then, here’s how this year’s managers usually draft.'}
+            </div>
+          </div>
+          <div className="nba-side-stack">
+            <DraftStylesPanel styles={inView} title="How they draft" />
+            <LoyaltyPanel styles={inView} limit={8} />
           </div>
         </div>
       ) : (
@@ -158,6 +192,7 @@ export default function DraftPage() {
               ))}
             </ul>
           </section>
+          <div className="nba-side-stack">
           {played && (
             <div>
               <section className="nba-panel" aria-label="Best auctions">
@@ -197,6 +232,10 @@ export default function DraftPage() {
               </p>
             </div>
           )}
+          {played && <PriceTiersPanel bands={bands} beat={beat} />}
+          <DraftStylesPanel styles={inView} />
+          {allTime && <LoyaltyPanel styles={inView} />}
+          </div>
         </div>
       )}
     </Shell>

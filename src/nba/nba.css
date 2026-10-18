@@ -361,3 +361,13 @@ a.who:hover { color: var(--cyan); }
 
 .nba-foot { margin: 22px 2px 0; font-size: 12.5px; color: var(--faint); }
 .nba-foot a { color: var(--dim); text-decoration: underline; text-underline-offset: 2px; }
+.nba-foot.nba-panel-foot { margin: 0; padding: 10px 12px 12px; border-top: 1px solid var(--line); }
+
+/* ---------------------------------------------------------------- draft styles */
+.nba-side-stack { display: grid; gap: 16px; align-content: start; }
+.nba-style-row { grid-template-columns: minmax(0, 1fr); }
+.nba-style-row .nba-row-title { display: inline-block; }
+.nba-habits { margin: 4px 0 0; padding-left: 16px; display: grid; gap: 3px; font-size: 13px; color: var(--text); }
+.nba-habits .hint { color: var(--faint); }
+.nba-tiers th[scope='row'] { padding-left: 12px; text-align: left; font-weight: 650; }
+.nba-tiers td:last-child, .nba-tiers th:last-child { padding-right: 12px; }

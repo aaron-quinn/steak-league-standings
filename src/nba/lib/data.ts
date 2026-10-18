@@ -24,6 +24,8 @@ export interface DraftPick {
   playerID: number;
   price: number;
   keeper: boolean;
+  // The team that nominated the player (missing in files built before it was kept)
+  nominator?: number;
   // How the pick paid off (finished seasons; see buildDraft in moves.ts)
   points?: number;
   games?: number;
