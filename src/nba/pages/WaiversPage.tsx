@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { FollowPeople } from '../components/FollowSelect';
 import RowValue from '../components/RowValue';
 import SeasonStatus from '../components/SeasonStatus';
+import StandingsOnly from '../components/StandingsOnly';
 import Shell, {
   AllTimeToggle,
   Loading,
@@ -13,7 +14,7 @@ import Shell, {
 import { useAllTimeMoves, type Dated } from '../lib/alltime';
 import { buildPickups } from '../lib/moves';
 import type { Pickup } from '../lib/moves';
-import { dateOfDay, seasonLabel, shortDate } from '../lib/season';
+import { dateOfDay, isFinished, seasonLabel, shortDate } from '../lib/season';
 import { personName } from '../lib/standings';
 import { useMoves } from '../lib/useMoves';
 
@@ -94,6 +95,8 @@ export default function WaiversPage() {
     >
       {loading ? (
         <Loading label="Loading pickups" />
+      ) : !allTime && isFinished(season) && (days?.length ?? 0) === 0 ? (
+        <StandingsOnly season={season} what="pickups" />
       ) : pickups.length === 0 ? (
         <div className="nba-panel">
           <div className="nba-empty">

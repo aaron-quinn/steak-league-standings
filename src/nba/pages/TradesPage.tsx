@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { FollowPeople } from '../components/FollowSelect';
 import RowValue, { signed } from '../components/RowValue';
 import SeasonStatus from '../components/SeasonStatus';
+import StandingsOnly from '../components/StandingsOnly';
 import Shell, {
   AllTimeToggle,
   Loading,
@@ -14,7 +15,7 @@ import Shell, {
 import { useAllTimeMoves, type Dated } from '../lib/alltime';
 import { buildTrades } from '../lib/moves';
 import type { Trade } from '../lib/moves';
-import { dateOfDay, seasonLabel, shortDate } from '../lib/season';
+import { dateOfDay, isFinished, seasonLabel, shortDate } from '../lib/season';
 import { personName } from '../lib/standings';
 import { useMoves } from '../lib/useMoves';
 
@@ -95,6 +96,8 @@ export default function TradesPage() {
     >
       {loading ? (
         <Loading label="Loading trades" />
+      ) : !allTime && isFinished(season) && (days?.length ?? 0) === 0 ? (
+        <StandingsOnly season={season} what="trades" />
       ) : trades.length === 0 ? (
         <div className="nba-panel">
           <div className="nba-empty">

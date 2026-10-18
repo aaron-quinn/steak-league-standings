@@ -139,14 +139,20 @@ Run the valuation and ranking checks with `npm test`.
 
 ## NBA Steak League
 
-`/nba/` covers the NBA Steak League, an ESPN roto league (ESPN league
-50106954, 8 categories, weekly lineups), from 2018–19 on. Its code lives apart
-from the NFL site: pages in `src/nba/`, its API in `worker/nba/` (mounted at
-`/api/nba`), and the NFL pages never load either. ESPN names a season by the
-year it ends, so 2027 is 2026–27.
+`/nba/` covers the NBA Steak League, a roto league (8 categories, weekly
+lineups) from 2017–18 on. Its code lives apart from the NFL site: pages in
+`src/nba/`, its API in `worker/nba/` (mounted at `/api/nba`), and the NFL pages
+never load either. Seasons are named by the year they end, so 2027 is 2026–27.
 
-- **Finished seasons** are built once into `public/nba-data/<season>/` and
-  served as static files, so they never call ESPN. The build rebuilds each
+- **2017–18 (2018)** was played on Yahoo, before the ESPN league (ESPN league
+  50106954), and only its final standings survive there: no daily rosters, no
+  auction and no per-player stats. It is therefore standings-only: the
+  standings, history and all-time tables use it, and the race, odds and moves
+  screens say so instead of guessing. `scripts/nba/build-yahoo.mjs` reads
+  Yahoo's published standings and checks the site's own scorer reproduces
+  Yahoo's roto points before writing `public/nba-data/2018/`.
+- **The other finished seasons** are built once into `public/nba-data/<season>/`
+  and served as static files, so they never call ESPN. The build rebuilds each
   season's standings day by day from ESPN's daily lineups and stops if they
   don't match ESPN's own final standings.
 - **The live season** comes from the Worker: the league (standings, owners,
@@ -166,5 +172,12 @@ node scripts/nba/build-seasons.mjs 2027
 ```
 
 ESPN responses are saved gzipped in `.cache/nba-espn/` (gitignored), so later
-rebuilds make no requests. Steak Odds learn from every finished season; check
-them with `node scripts/nba/backtest-odds.mjs`.
+rebuilds make no requests. The Yahoo season is rebuilt on its own, from a saved
+copy of the standings page or a fresh fetch:
+
+```bash
+node scripts/nba/build-yahoo.mjs [saved-standings.html]
+```
+
+Steak Odds learn from every finished season; check them with
+`node scripts/nba/backtest-odds.mjs`.

@@ -5,6 +5,7 @@ import OddsChart from '../components/OddsChart';
 import OddsReplay from '../components/OddsReplay';
 import SeasonStatus from '../components/SeasonStatus';
 import Shell, { Loading, useSeason } from '../components/Shell';
+import StandingsOnly from '../components/StandingsOnly';
 import TombstonePit from '../components/TombstonePit';
 import { formatPoints, ordinal } from '../lib/format';
 import { oddsStories } from '../lib/season-odds';
@@ -40,6 +41,8 @@ export default function OddsPage() {
     <Shell title="Steak Odds" status={league && <SeasonStatus league={league} />}>
       {loading ? (
         <Loading label="Running the odds" />
+      ) : finished && history && history.race.checkpoints.length === 0 ? (
+        <StandingsOnly season={season} what="odds" />
       ) : !hasStarted(league) ? (
         <div className="nba-panel">
           <div className="nba-empty">

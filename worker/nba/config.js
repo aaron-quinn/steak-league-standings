@@ -1,7 +1,9 @@
 // The NBA Steak League: an ESPN roto league (8 categories, weekly lineups).
 // ESPN names a season by the year it ends: 2027 is the 2026–27 season.
 export const LEAGUE_ID = 50106954;
-export const FIRST_SEASON = 2019;
+// 2018 (2017-18) was played on Yahoo, before the ESPN league, and only its
+// final standings survive: standings-only, built by scripts/nba/build-yahoo.mjs.
+export const FIRST_SEASON = 2018;
 // The season in progress. Earlier seasons are served from public/nba-data/, built
 // once by scripts/nba/build-seasons.mjs.
 export const CURRENT_SEASON = 2027;
@@ -12,6 +14,7 @@ export const ESPN_LEAGUE = (season) =>
 // ESPN scores each day as one scoring period, numbered from the NBA's opening
 // night: day N is the opener plus N - 1 days
 export const OPENERS = {
+  2018: '2017-10-17',
   2019: '2018-10-16',
   2020: '2019-10-22',
   2021: '2020-12-22',

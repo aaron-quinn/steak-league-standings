@@ -1,0 +1,276 @@
+{
+ "season": 2018,
+ "opener": "2017-10-17",
+ "finalDay": 177,
+ "latestDay": 177,
+ "lastDay": 177,
+ "cutoff": null,
+ "budget": 100,
+ "teams": [
+  {
+   "id": 1,
+   "name": "Fighting Ballmers",
+   "abbrev": "TRAI",
+   "owner": "D.J. Trainor",
+   "totals": [
+    14264,
+    5219,
+    3009,
+    1210,
+    909,
+    609,
+    4680000,
+    10000000,
+    7706138,
+    10000000
+   ],
+   "espn": {
+    "points": 72,
+    "rank": 1
+   }
+  },
+  {
+   "id": 2,
+   "name": "Quinners",
+   "abbrev": "QUIN",
+   "owner": "Aaron Quinn",
+   "totals": [
+    14192,
+    5041,
+    2688,
+    1071,
+    1018,
+    634,
+    4720000,
+    10000000,
+    7820000,
+    10000000
+   ],
+   "espn": {
+    "points": 66,
+    "rank": 2
+   }
+  },
+  {
+   "id": 3,
+   "name": "shannon m's Team",
+   "abbrev": "MCKE",
+   "owner": "Shannon McKeown",
+   "totals": [
+    13050,
+    5418,
+    2922,
+    1395,
+    796,
+    543,
+    4550000,
+    10000000,
+    7850000,
+    10000000
+   ],
+   "espn": {
+    "points": 61,
+    "rank": 3
+   }
+  },
+  {
+   "id": 4,
+   "name": "The KAT's Meow",
+   "abbrev": "MEOW",
+   "owner": "",
+   "totals": [
+    12526,
+    5013,
+    2424,
+    1134,
+    922,
+    668,
+    4740568,
+    10000000,
+    8080000,
+    10000000
+   ],
+   "espn": {
+    "points": 60,
+    "rank": 4
+   }
+  },
+  {
+   "id": 5,
+   "name": "Team Whalen",
+   "abbrev": "WHAL",
+   "owner": "Nick Whalen",
+   "totals": [
+    13563,
+    4793,
+    2866,
+    1267,
+    867,
+    538,
+    4740796,
+    10000000,
+    7530000,
+    10000000
+   ],
+   "espn": {
+    "points": 55,
+    "rank": 5
+   }
+  },
+  {
+   "id": 6,
+   "name": "kevin's Team",
+   "abbrev": "O'BR",
+   "owner": "Kevin O'Brien",
+   "totals": [
+    13924,
+    4822,
+    2912,
+    1028,
+    903,
+    520,
+    4780000,
+    10000000,
+    7620000,
+    10000000
+   ],
+   "espn": {
+    "points": 53,
+    "rank": 6
+   }
+  },
+  {
+   "id": 7,
+   "name": "Shanksanity",
+   "abbrev": "SHAN",
+   "owner": "",
+   "totals": [
+    12809,
+    4202,
+    3293,
+    1358,
+    840,
+    453,
+    4480000,
+    10000000,
+    8330000,
+    10000000
+   ],
+   "espn": {
+    "points": 51,
+    "rank": 7
+   }
+  },
+  {
+   "id": 8,
+   "name": "James's Tip-Top Team",
+   "abbrev": "ANDE",
+   "owner": "James Anderson",
+   "totals": [
+    12778,
+    4284,
+    2561,
+    1428,
+    798,
+    350,
+    4570000,
+    10000000,
+    8190000,
+    10000000
+   ],
+   "espn": {
+    "points": 45,
+    "rank": 8
+   }
+  },
+  {
+   "id": 9,
+   "name": "Big Barutha Brand",
+   "abbrev": "BARU",
+   "owner": "Alex Barutha",
+   "totals": [
+    12618,
+    4914,
+    2515,
+    1199,
+    910,
+    479,
+    4635985,
+    10000000,
+    7700000,
+    10000000
+   ],
+   "espn": {
+    "points": 43,
+    "rank": 9
+   }
+  },
+  {
+   "id": 10,
+   "name": "Adam's Team",
+   "abbrev": "WOLF",
+   "owner": "Adam Wolf",
+   "totals": [
+    12201,
+    5480,
+    3067,
+    1024,
+    721,
+    530,
+    4637208,
+    10000000,
+    7540000,
+    10000000
+   ],
+   "espn": {
+    "points": 42,
+    "rank": 10
+   }
+  },
+  {
+   "id": 11,
+   "name": "Ben's Bold Team",
+   "abbrev": "MILL",
+   "owner": "Ben Miller",
+   "totals": [
+    12536,
+    4711,
+    2954,
+    1086,
+    626,
+    503,
+    4650000,
+    10000000,
+    8000000,
+    10000000
+   ],
+   "espn": {
+    "points": 41,
+    "rank": 11
+   }
+  },
+  {
+   "id": 12,
+   "name": "sweet deal's Team",
+   "abbrev": "TEAM",
+   "owner": "",
+   "totals": [
+    10202,
+    4217,
+    2322,
+    1146,
+    704,
+    537,
+    4741390,
+    10000000,
+    7705088,
+    10000000
+   ],
+   "espn": {
+    "points": 35,
+    "rank": 12
+   }
+  }
+ ],
+ "draft": []
+}

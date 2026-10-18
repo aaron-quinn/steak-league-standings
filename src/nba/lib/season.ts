@@ -1,5 +1,6 @@
-// Season facts the pages need. Keep in step with worker/nba/config.js.
-export const FIRST_SEASON = 2019;
+// Season facts the pages need. Keep in step with worker/nba/config.js. 2018
+// (2017-18) was played on Yahoo and is standings-only: see build-yahoo.mjs.
+export const FIRST_SEASON = 2018;
 export const CURRENT_SEASON = 2027;
 
 export const SEASONS = Array.from(

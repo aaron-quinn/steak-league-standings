@@ -16,7 +16,6 @@ import {
   CURRENT_SEASON,
   CUTOFFS,
   ESPN_LEAGUE,
-  FIRST_SEASON,
   OPENERS,
   dayOfDate,
 } from '../../worker/nba/config.js';
@@ -170,6 +169,9 @@ async function build(season) {
 }
 
 const seasons = process.argv.slice(2).map(Number);
-for (const season of seasons.length ? seasons : Array.from({ length: CURRENT_SEASON - FIRST_SEASON }, (_, i) => FIRST_SEASON + i)) {
+// 2018 predates the ESPN league (it was played on Yahoo): build-yahoo.mjs makes
+// that one, so the default run starts with the first ESPN season.
+const ESPN_FIRST_SEASON = 2019;
+for (const season of seasons.length ? seasons : Array.from({ length: CURRENT_SEASON - ESPN_FIRST_SEASON }, (_, i) => ESPN_FIRST_SEASON + i)) {
   await build(season);
 }

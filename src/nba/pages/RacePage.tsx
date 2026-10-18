@@ -3,8 +3,10 @@ import FollowSelect from '../components/FollowSelect';
 import RaceChart from '../components/RaceChart';
 import SeasonStatus from '../components/SeasonStatus';
 import Shell, { Loading, useSeason } from '../components/Shell';
+import StandingsOnly from '../components/StandingsOnly';
 import { useLeague, useSeasonTotals } from '../lib/data';
 import { buildRace, raceFacts } from '../lib/race';
+import { isFinished } from '../lib/season';
 
 export default function RacePage() {
   const [season] = useSeason();
@@ -23,12 +25,16 @@ export default function RacePage() {
       {!race ? (
         <Loading label="Loading the race" />
       ) : race.checkpoints.length === 0 ? (
-        <div className="nba-panel">
-          <div className="nba-empty">
-            <b>No race yet</b>The first week ends the Sunday after opening
-            night.
+        isFinished(season) ? (
+          <StandingsOnly season={season} what="week-by-week record" />
+        ) : (
+          <div className="nba-panel">
+            <div className="nba-empty">
+              <b>No race yet</b>The first week ends the Sunday after opening
+              night.
+            </div>
           </div>
-        </div>
+        )
       ) : (
         <>
           <section className="nba-panel" aria-label="Steak positions by week">
