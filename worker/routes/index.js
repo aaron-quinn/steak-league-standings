@@ -19,7 +19,7 @@ const CACHE_CONTROL_COPY = 'X-Steak-Cache-Control';
 // Cache each finished response at the edge. A hit returns the stored JSON
 // without parsing or rebuilding anything, which keeps most requests far inside
 // the free plan's CPU limit. Only 200s are cached, so errors are retried.
-const cacheFor = (seconds, version = null) => [
+export const cacheFor = (seconds, version = null) => [
   // A response read back from the edge cache arrives with the zone's Browser
   // Cache TTL (4 hours) in place of our Cache-Control, so browsers would keep
   // replaying old live scores to every refetch. Restore our own lifetime,

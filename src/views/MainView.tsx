@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import StandingsList from '../components/StandingsList';
 import type { StandingsListHandle } from '../components/StandingsList';
 import PlayoffLists from '../components/PlayoffLists';
@@ -184,6 +184,14 @@ export default function MainView({ live }: MainViewProps) {
             {!displayedLive && <HistoryTabs />}
           </div>
         </div>
+        <p className="mt-8 text-center text-xs">
+          <Link
+            to="/nba"
+            className="text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            NBA Steak League →
+          </Link>
+        </p>
       </div>
     </div>
   );

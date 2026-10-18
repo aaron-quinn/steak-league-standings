@@ -1,0 +1,341 @@
+/*
+  NBA Steak League, styled after the steak-nba draft board: arena tracking
+  graphics, the broadcast overlays and LED boards around an NBA court.
+  - Deep indigo base with glassy, edge-lit panels. Always dark.
+  - Cyan-to-violet rails mark what matters: the steak line, the leader.
+  - Saira (a sports-broadcast face) in three widths, with tabular figures.
+  Everything is scoped under .nba so the NFL pages are untouched; this file
+  only loads with the NBA pages.
+*/
+
+@font-face {
+  font-family: 'Saira';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 50% 125%;
+  font-display: swap;
+  src: url('/fonts/saira-v5-latin.woff2') format('woff2');
+}
+
+.nba {
+  --void: #0a0f24;
+  --surface: #10183a;
+  --surface-2: #141e46;
+  --band: rgb(120 140 255 / 0.04);
+  --line: rgb(140 160 255 / 0.12);
+  --line-strong: rgb(140 160 255 / 0.26);
+  --text: #e6ecff;
+  --dim: #8792bd;
+  --faint: #5b6592;
+  --cyan: #3ee6ff;
+  --violet: #9b7bff;
+  --cyan-wash: rgb(62 230 255 / 0.1);
+  --violet-wash: rgb(155 123 255 / 0.12);
+  --good: rgb(46 224 168 / 0.16);
+  --good-text: #5ff0c0;
+  --bad: rgb(255 82 134 / 0.16);
+  --bad-text: #ff7aa2;
+  --gold: #ffd479;
+  --rail: linear-gradient(90deg, var(--cyan), var(--violet));
+  --font: 'Saira', system-ui, sans-serif;
+
+  color-scheme: dark;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font: 15px/1.4 var(--font);
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--text);
+  background:
+    radial-gradient(900px 420px at 15% -10%, rgb(110 90 255 / 0.2), transparent 60%),
+    radial-gradient(700px 360px at 100% 0%, rgb(62 230 255 / 0.09), transparent 55%),
+    var(--void);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+.nba *, .nba *::before, .nba *::after { box-sizing: border-box; }
+.nba a { color: inherit; text-decoration: none; }
+.nba button, .nba select { font: inherit; color: inherit; }
+.nba :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 6px; }
+.nba .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .nba * { transition: none !important; animation: none !important; } }
+
+.nba-page { max-width: 1120px; margin: 0 auto; padding: 0 12px calc(32px + env(safe-area-inset-bottom)); }
+@media (min-width: 640px) { .nba-page { padding: 0 20px 48px; } }
+
+/* ---------------------------------------------------------------- masthead */
+.nba-top {
+  position: sticky; top: 0; z-index: 20;
+  margin: 0 -12px; padding: calc(10px + env(safe-area-inset-top)) 12px 0;
+  background: linear-gradient(var(--void) 70%, rgb(10 15 36 / 0.85));
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+@media (min-width: 640px) { .nba-top { margin: 0 -20px; padding: 14px 20px 0; } }
+.nba-masthead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nba-wordmark { display: flex; align-items: center; gap: 8px; margin: 0; font-style: italic; font-weight: 800; font-stretch: 62%; font-size: 30px; line-height: 1; letter-spacing: 0.01em; text-transform: uppercase; }
+.nba-wordmark span { font-style: normal; font-weight: 700; font-size: 18px; line-height: 1; letter-spacing: 0.08em; padding: 4px 7px 3px; border-radius: 5px; color: var(--void); background: var(--rail); box-shadow: 0 0 18px rgb(62 230 255 / 0.35); }
+.nba-sport-link { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border: 1px solid var(--line-strong); border-radius: 8px; font-weight: 600; font-stretch: 85%; font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); transition: color 120ms, border-color 120ms; }
+.nba-sport-link:hover { color: var(--text); border-color: rgb(62 230 255 / 0.5); }
+
+/* Scrolls sideways on phones; the fade says there's more */
+.nba-nav { display: flex; gap: 2px; margin: 10px -12px 0; padding: 0 12px; overflow-x: auto; scrollbar-width: none; mask-image: linear-gradient(90deg, #000 85%, transparent); }
+@media (min-width: 640px) { .nba-nav { mask-image: none; } }
+.nba-nav::-webkit-scrollbar { display: none; }
+@media (min-width: 640px) { .nba-nav { margin: 12px 0 0; padding: 0; } }
+.nba-nav a { position: relative; flex: none; padding: 8px 11px 10px; font-weight: 600; font-stretch: 85%; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--dim); transition: color 120ms; }
+.nba-nav a:hover { color: var(--text); }
+.nba-nav a[aria-current='page'] { color: var(--text); }
+.nba-nav a[aria-current='page']::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 2px; border-radius: 2px; background: var(--rail); box-shadow: 0 0 10px rgb(62 230 255 / 0.6); }
+
+/* ---------------------------------------------------------------- page head */
+.nba-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin: 16px 0 12px; }
+.nba-title { margin: 0; font-style: italic; font-weight: 800; font-stretch: 62%; font-size: 34px; line-height: 1; text-transform: uppercase; }
+.nba-status { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--dim); }
+.nba-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); animation: nba-pulse 1.6s ease-in-out infinite; }
+@keyframes nba-pulse { 50% { opacity: 0.35; } }
+
+.nba-season { position: relative; display: inline-flex; align-items: center; }
+.nba-season select { appearance: none; padding: 6px 30px 6px 11px; border: 1px solid var(--line-strong); border-radius: 9px; background: rgb(5 9 26 / 0.55); font-weight: 650; font-stretch: 90%; font-size: 14px; cursor: pointer; }
+.nba-season select:focus-visible { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px var(--cyan-wash); }
+.nba-season::after { content: ''; position: absolute; right: 11px; top: 50%; border: 4.5px solid transparent; border-top-color: var(--cyan); transform: translateY(-1px); pointer-events: none; }
+
+.nba-note { display: flex; gap: 9px; margin: 0 0 12px; padding: 9px 12px; border: 1px solid rgb(255 212 121 / 0.3); border-radius: 10px; background: rgb(255 212 121 / 0.06); font-size: 13px; color: #f3dfae; }
+.nba-note b { color: var(--gold); font-weight: 650; }
+
+/* ---------------------------------------------------------------- layout */
+.nba-grid { display: grid; gap: 16px; }
+@media (min-width: 960px) { .nba-grid { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; gap: 24px; } }
+
+.nba-panel { position: relative; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg, rgb(20 30 70 / 0.65), rgb(12 18 44 / 0.55)); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03); overflow: hidden; }
+.nba-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px 10px; border-bottom: 1px solid var(--line); }
+.nba-panel-title { margin: 0; font-weight: 700; font-stretch: 75%; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+.nba-panel-body { padding: 12px; }
+.nba-section-label { margin: 0 0 8px 2px; font-weight: 700; font-stretch: 75%; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+
+.nba-seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 10px; background: rgb(5 9 26 / 0.5); }
+.nba-seg button { border: 0; border-radius: 7px; padding: 4px 11px; background: transparent; font-weight: 600; font-stretch: 85%; font-size: 13px; color: var(--dim); cursor: pointer; transition: color 120ms, background 120ms; }
+.nba-seg button:hover { color: var(--text); }
+.nba-seg button[aria-pressed='true'], .nba-seg button[aria-selected='true'] { background: var(--cyan-wash); color: var(--cyan); box-shadow: inset 0 0 0 1px rgb(62 230 255 / 0.45); }
+/* The season picker and the Season / All-Time switch sit together top-right */
+.nba-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+.nba-empty { padding: 28px 16px; text-align: center; color: var(--dim); }
+.nba-empty b { display: block; margin-bottom: 4px; font-style: italic; font-weight: 800; font-stretch: 62%; font-size: 26px; text-transform: uppercase; color: var(--text); }
+
+.nba-loading { display: grid; place-items: center; min-height: 40vh; color: var(--dim); }
+.nba-loading::before { content: ''; width: 34px; height: 34px; margin-bottom: 10px; border-radius: 50%; border: 3px solid var(--line-strong); border-top-color: var(--cyan); animation: nba-spin 0.8s linear infinite; }
+@keyframes nba-spin { to { transform: rotate(360deg); } }
+
+/* ---------------------------------------------------------------- tables */
+.nba-scroll { overflow-x: auto; scrollbar-width: none; }
+.nba-scroll::-webkit-scrollbar { display: none; }
+.nba-table { width: 100%; border-collapse: separate; border-spacing: 0; font-stretch: 90%; font-size: 14.5px; }
+.nba-table th, .nba-table td { padding: 0 6px; height: 40px; white-space: nowrap; border-bottom: 1px solid var(--line); }
+.nba-table thead th { height: 30px; font-weight: 650; font-stretch: 80%; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); background: #0e1534; border-bottom-color: var(--line-strong); }
+.nba-table tbody tr { --row: transparent; }
+.nba-table tbody tr:nth-child(even) { --row: var(--band); }
+.nba-table tbody td { background: var(--row); }
+.nba-table .num { text-align: right; }
+.nba-table .rank { width: 34px; padding-left: 12px; color: var(--faint); font-weight: 600; }
+.nba-table .team-cell { max-width: 0; width: 100%; }
+.nba-table .who { display: block; overflow: hidden; text-overflow: ellipsis; font-weight: 650; font-size: 15px; line-height: 1.15; }
+.nba-table .team-name { display: block; overflow: hidden; text-overflow: ellipsis; font-size: 12px; color: var(--faint); line-height: 1.2; }
+.nba-table .pts { padding-right: 12px; font-weight: 800; font-stretch: 70%; font-size: 20px; }
+.nba-table tr.leader .pts { color: var(--cyan); text-shadow: 0 0 14px rgb(62 230 255 / 0.5); }
+.nba-table .espn { font-size: 12px; color: var(--faint); }
+.nba-table .move { width: 30px; font-size: 11.5px; font-weight: 650; }
+.nba-table .move.up { color: var(--good-text); }
+.nba-table .move.down { color: var(--bad-text); }
+
+/* Steak zones: eaters' ranks light up, buyers fade back */
+.nba-table tr.eater .rank { color: var(--cyan); }
+.nba-table tr.self-buyer .rank { color: var(--violet); }
+.nba-table tr.buyer .who { color: #c4cbe8; }
+.nba-table tr.buyer .pts { color: #b7bfdf; }
+.nba-table tr.steak-line td { border-bottom: 0; box-shadow: 0 1px 0 0 rgb(62 230 255 / 0.65), 0 6px 14px -6px rgb(62 230 255 / 0.45); }
+.nba-zone-tag { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-weight: 650; font-stretch: 80%; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 1px; color: var(--violet); background: var(--violet-wash); }
+
+/* Category grid: team column stays put while the categories scroll */
+.nba-cats .sticky { position: sticky; left: 0; z-index: 1; background: linear-gradient(var(--row, transparent), var(--row, transparent)), #0f1637; }
+.nba-cats thead .sticky { z-index: 2; background: #0e1534; }
+.nba-cats .team-cell { width: auto; max-width: 132px; min-width: 112px; padding-left: 12px; box-shadow: 8px 0 10px -8px rgb(0 0 0 / 0.7); }
+.nba-cats th.cat { min-width: 62px; cursor: pointer; user-select: none; }
+.nba-cats th.cat:hover, .nba-cats th.cat[aria-sort] { color: var(--text); }
+.nba-cats th.cat[aria-sort]::after { content: ''; display: inline-block; margin-left: 3px; border: 3.5px solid transparent; border-top-color: var(--cyan); transform: translateY(2px); }
+.nba-cats td.cat { text-align: right; line-height: 1.1; }
+.nba-cats td.cat b { display: block; font-weight: 600; font-size: 14px; }
+.nba-cats td.cat span { display: block; font-size: 11px; color: var(--faint); }
+.nba-cats td.cat.top { background: var(--good); }
+.nba-cats td.cat.top span { color: var(--good-text); }
+.nba-cats td.cat.bottom { background: var(--bad); }
+.nba-cats td.cat.bottom span { color: var(--bad-text); }
+.nba-cats td.total { padding-right: 12px; font-weight: 800; font-stretch: 70%; font-size: 18px; }
+
+/* ---------------------------------------------------------------- history */
+.nba-history-list { list-style: none; margin: 0; padding: 4px 0; }
+.nba-history-list li { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 6px 12px; font-size: 14px; }
+.nba-history-list li:nth-child(even) { background: var(--band); }
+.nba-history-sub { margin: 0; padding: 12px 12px 4px; border-top: 1px solid var(--line); font-weight: 650; font-stretch: 80%; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+.nba-steaks { display: flex; flex-wrap: wrap; gap: 1px; font-size: 13px; line-height: 1; }
+.nba-steaks .bought { opacity: 0.45; }
+.nba-steak-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nba-steak-pct { margin-left: 6px; font-size: 12px; color: var(--faint); }
+.nba-champ-year { color: var(--faint); font-size: 13px; margin-right: 10px; }
+.nba-champ-name { font-weight: 600; }
+
+/* ---------------------------------------------------------------- charts */
+.nba-chart { display: block; width: 100%; height: auto; overflow: visible; font-family: var(--font); }
+.nba-chart .grid { stroke: var(--line); }
+.nba-chart .axis { fill: var(--faint); font-size: 11px; font-stretch: 85%; }
+.nba-chart .line { fill: none; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; opacity: 0.4; transition: opacity 150ms, stroke-width 150ms; }
+.nba-chart .line.on { opacity: 1; stroke-width: 3; }
+.nba-chart .line.dim { opacity: 0.12; }
+.nba-chart .end { font-size: 11.5px; font-weight: 650; font-stretch: 85%; }
+.nba-chart .steak-band { fill: rgb(62 230 255 / 0.05); }
+.nba-chart .steak-rule { stroke: rgb(62 230 255 / 0.6); stroke-dasharray: 4 4; }
+
+.nba-tooltip { position: absolute; transform: translate(-50%, -100%); margin-top: -6px; display: grid; gap: 1px; min-width: 150px; padding: 7px 10px; border: 1px solid var(--line-strong); border-radius: 9px; background: rgb(16 24 58 / 0.96); box-shadow: 0 10px 28px rgb(0 0 0 / 0.5); font-size: 12.5px; pointer-events: none; z-index: 5; }
+.nba-tooltip b { font-weight: 650; font-stretch: 85%; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); }
+.nba-tooltip span { display: flex; justify-content: space-between; gap: 12px; }
+.nba-tooltip em { font-style: normal; color: var(--dim); }
+.nba-follow { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--dim); }
+.nba-follow select { appearance: none; max-width: 180px; padding: 5px 26px 5px 10px; border: 1px solid var(--line-strong); border-radius: 8px; background: rgb(5 9 26 / 0.55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0h9L4.5 5z' fill='%233ee6ff'/%3E%3C/svg%3E") no-repeat right 9px center; font-weight: 600; font-size: 13.5px; }
+.nba-follow select.on { border-color: rgb(62 230 255 / 0.6); color: var(--cyan); }
+
+.nba-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.nba-chip { border: 1px solid var(--line-strong); border-radius: 999px; padding: 3px 10px; background: transparent; font-size: 12.5px; font-weight: 600; font-stretch: 88%; color: var(--dim); cursor: pointer; }
+.nba-chip[aria-pressed='true'] { color: var(--void); border-color: transparent; background: var(--chip, var(--cyan)); }
+
+.nba-facts { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.nba-fact { padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgb(5 9 26 / 0.35); }
+.nba-fact dt { font-weight: 650; font-stretch: 80%; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+.nba-fact dd { margin: 3px 0 0; }
+.nba-fact .big { display: block; font-style: italic; font-weight: 800; font-stretch: 65%; font-size: 24px; line-height: 1.05; }
+.nba-fact .small { display: block; font-size: 12.5px; color: var(--dim); }
+
+/* ---------------------------------------------------------------- lists */
+.nba-rows { list-style: none; margin: 0; padding: 0; }
+.nba-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.nba-row:last-child { border-bottom: 0; }
+.nba-row-main { min-width: 0; }
+.nba-player-name { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; vertical-align: middle; }
+.nba-player-name > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.nba-team-logo { flex: 0 0 18px; width: 18px; height: 18px; object-fit: contain; }
+/* The Clippers' monochrome navy mark needs a light variant on our dark surface. */
+.nba-team-logo[src$='/LAC.png'] { filter: brightness(0) invert(1); }
+.nba-team-logo-empty { border: 1px solid var(--line-strong); border-radius: 50%; background: var(--band); }
+.nba-row-title { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 650; }
+.nba-row-sub { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; color: var(--dim); }
+.nba-row-value { text-align: right; font-weight: 800; font-stretch: 70%; font-size: 19px; line-height: 1.05; }
+.nba-row-value small { display: block; font-weight: 500; font-stretch: 90%; font-size: 11.5px; color: var(--faint); }
+.nba-good { color: var(--good-text); }
+.nba-bad { color: var(--bad-text); }
+.nba-dim { color: var(--dim); }
+.nba-faint { color: var(--faint); }
+
+.nba-trade { padding: 16px; border-bottom: 1px solid var(--line); }
+.nba-trade:last-child { border-bottom: 0; }
+.nba-trade-head { margin-bottom: 12px; font-weight: 500; font-stretch: 90%; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--dim); }
+.nba-trade-result { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; margin-bottom: 16px; }
+.nba-trade-result-label { display: block; margin-bottom: 4px; font-weight: 550; font-stretch: 90%; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+.nba-trade-verdict strong { display: block; font-weight: 650; font-stretch: 85%; font-size: 23px; line-height: 1.15; overflow-wrap: anywhere; }
+.nba-trade-margin { padding-left: 16px; border-left: 1px solid var(--line); text-align: right; }
+.nba-trade-margin strong { display: block; font-weight: 700; font-stretch: 75%; font-size: 32px; line-height: 1; white-space: nowrap; color: var(--dim); }
+.nba-trade-result.won .nba-trade-margin strong { color: var(--gold); }
+.nba-trade-margin small { display: block; margin-top: 5px; font-weight: 500; font-stretch: 90%; font-size: 11px; color: var(--dim); }
+.nba-metric-note { margin: 0; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 12px; line-height: 1.5; color: var(--dim); }
+.nba-metric-heading { margin-bottom: 6px; font-size: 10px; font-weight: 550; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+.nba-metric-heading-panel { margin: 0; padding: 9px 12px 3px; text-align: right; }
+.nba-trade-exchange { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: rgb(5 9 26 / 0.2); }
+.nba-trade-side { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 12px; }
+.nba-trade-side + .nba-trade-side { border-top: 1px solid var(--line); }
+.nba-trade-side.won { box-shadow: inset 2px 0 rgb(62 230 255 / 0.55); background: rgb(62 230 255 / 0.035); }
+.nba-trade-side .nba-row-title { margin-bottom: 3px; font-size: 13px; font-weight: 600; }
+.nba-trade-side .nba-row-value { font-size: 17px; font-weight: 650; color: var(--dim); }
+.nba-trade-side .nba-row-sub { white-space: normal; }
+
+.nba-row-link { transition: background 120ms; }
+.nba-row-link:hover { background: rgb(120 140 255 / 0.06); }
+.nba-rows > li:last-child > .nba-row { border-bottom: 0; }
+.nba-row-link.zone-eater .nba-row-value { color: var(--cyan); }
+.nba-row-link.zone-self-buyer .nba-row-value { color: var(--violet); }
+.nba-titles { font-size: 12px; letter-spacing: -0.1em; }
+.nba-link { color: var(--cyan); text-decoration: underline; text-decoration-color: rgb(62 230 255 / 0.4); text-underline-offset: 2px; }
+a.who:hover { color: var(--cyan); }
+
+.nba-cat-bars { list-style: none; margin: 0; padding: 10px 12px 8px; display: grid; gap: 9px; }
+.nba-cat-bars li { display: grid; grid-template-columns: 38px 1fr 28px; align-items: center; gap: 10px; }
+.nba-cat-bars .label { font-weight: 650; font-stretch: 80%; font-size: 12.5px; letter-spacing: 0.05em; color: var(--dim); }
+.nba-cat-bars .value { text-align: right; font-weight: 700; font-size: 13.5px; }
+.nba-cat-bars .nba-bar { height: 8px; }
+
+/* Builds: one octagon per team */
+.nba-builds { list-style: none; margin: 0; padding: 12px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); }
+.nba-build { display: flex; flex-direction: column; padding: 10px 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgb(5 9 26 / 0.35); }
+.nba-build-head { display: grid; gap: 1px; font-size: 12px; line-height: 1.25; }
+.nba-build-head .who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 650; font-size: 14.5px; }
+.nba-build-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.nba-build-tag { padding: 1px 6px; border-radius: 4px; font-weight: 650; font-stretch: 82%; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--dim); background: rgb(140 160 255 / 0.1); }
+.nba-build-tag.guards, .nba-build-tag.bigs { color: var(--text); background: rgb(140 160 255 / 0.18); }
+.nba-build-tag.punt { color: var(--bad-text); background: var(--bad); }
+.nba-build-best { margin: 5px 0 0; font-size: 12px; color: var(--dim); }
+.nba-shape { position: relative; margin: 2px -4px 0; }
+.nba-shape svg { display: block; width: 100%; height: auto; overflow: visible; font-family: var(--font); }
+.nba-shape .ring { fill: none; stroke: var(--line); }
+.nba-shape .mid { fill: none; stroke: var(--line-strong); stroke-dasharray: 3 3; }
+.nba-shape .spoke { stroke: var(--line); }
+.nba-shape .cat { fill: var(--dim); font-size: 12.5px; font-weight: 650; font-stretch: 80%; letter-spacing: 0.03em; }
+.nba-shape .fill { stroke-width: 2; stroke-linejoin: round; }
+.nba-shape .fill.eater { fill: rgb(62 230 255 / 0.2); stroke: var(--cyan); }
+.nba-shape .fill.self-buyer { fill: rgb(155 123 255 / 0.22); stroke: var(--violet); }
+.nba-shape .fill.buyer { fill: rgb(135 146 189 / 0.18); stroke: #9aa4cf; }
+.nba-shape .dot { stroke: var(--void); stroke-width: 2; transition: r 120ms; }
+.nba-shape .dot.eater { fill: var(--cyan); }
+.nba-shape .dot.self-buyer { fill: var(--violet); }
+.nba-shape .dot.buyer { fill: #9aa4cf; }
+.nba-shape .fill.career { fill: rgb(155 123 255 / 0.18); stroke: var(--violet); }
+.nba-shape .dot.career { fill: var(--violet); }
+.nba-shape .hit { fill: transparent; cursor: pointer; }
+
+/* Tombstone pit: depth below the steak line, with the comeback line */
+.nba-pit { --name: 84px; --value: 44px; position: relative; list-style: none; margin: 0; padding: 12px 12px 10px; display: grid; gap: 7px; }
+.nba-pit-row { display: grid; grid-template-columns: var(--name) 1fr var(--value); align-items: center; gap: 8px; font-size: 13.5px; }
+.nba-pit-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.nba-pit-row .depth { position: relative; height: 10px; border-radius: 0 5px 5px 0; background: rgb(255 255 255 / 0.03); }
+.nba-pit-row .depth span { position: absolute; inset: 0 auto 0 0; border-radius: 0 5px 5px 0; background: linear-gradient(90deg, rgb(155 123 255 / 0.35), var(--violet)); }
+.nba-pit-row .value { text-align: right; font-weight: 700; color: var(--dim); }
+.nba-pit-row.buried .name, .nba-pit-row.buried .value { color: var(--faint); }
+.nba-pit-row.buried .depth span { background: linear-gradient(90deg, rgb(91 101 146 / 0.4), #39406a); }
+/* The comeback line runs down through every bar at the same depth */
+.nba-pit-line { position: absolute; top: 6px; bottom: 4px; left: calc(12px + var(--name) + 8px + (100% - 24px - var(--name) - var(--value) - 16px) * var(--at-ratio, 0)); width: 0; border-left: 2px dashed rgb(255 122 162 / 0.75); pointer-events: none; }
+
+/* Odds replay */
+.nba-replay { padding: 12px 12px 14px; border-bottom: 1px solid var(--line); }
+.nba-replay-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.nba-replay-kicker { display: block; font-weight: 650; font-stretch: 80%; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+.nba-replay-date { display: block; font-style: italic; font-weight: 800; font-stretch: 65%; font-size: 26px; line-height: 1.05; text-transform: uppercase; }
+.nba-replay-buttons { display: flex; gap: 6px; }
+.nba-replay-buttons button { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid var(--line-strong); border-radius: 10px; background: rgb(5 9 26 / 0.5); font-size: 20px; line-height: 1; color: var(--dim); cursor: pointer; }
+.nba-replay-buttons button:disabled { opacity: 0.35; cursor: default; }
+.nba-replay-buttons button.play { width: 46px; font-size: 14px; color: var(--void); border-color: transparent; background: var(--rail); box-shadow: 0 0 16px rgb(62 230 255 / 0.4); }
+.nba-range { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; margin: 0; background: transparent; cursor: pointer; }
+.nba-range::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--cyan), var(--violet)) 0 / var(--fill) 100% no-repeat, var(--line-strong); }
+.nba-range::-moz-range-track { height: 6px; border-radius: 3px; background: var(--line-strong); }
+.nba-range::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--rail); }
+.nba-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -8px; border-radius: 50%; background: #e6ecff; border: 3px solid var(--cyan); box-shadow: 0 0 12px rgb(62 230 255 / 0.7); }
+.nba-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #e6ecff; border: 3px solid var(--cyan); box-shadow: 0 0 12px rgb(62 230 255 / 0.7); }
+.nba-odds-cell { display: inline-grid; gap: 3px; width: 64px; }
+.nba-odds-cell .nba-bar { height: 4px; }
+.nba-odds-num { font-weight: 800; font-stretch: 70%; font-size: 17px; }
+.nba-ended { display: inline-flex; flex-direction: column; align-items: flex-end; font-size: 12.5px; color: var(--faint); }
+.nba-ended.ate { color: var(--text); }
+.nba-upset { margin-bottom: 2px; padding: 0 5px; border-radius: 4px; font-weight: 700; font-stretch: 80%; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); background: rgb(255 212 121 / 0.12); }
+.nba-table tr.followed td { background: rgb(62 230 255 / 0.1); }
+.nba-fact.clickable { cursor: pointer; transition: border-color 120ms; }
+.nba-fact.clickable:hover { border-color: rgb(62 230 255 / 0.45); }
+
+.nba-bar { position: relative; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.nba-bar span { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--rail); box-shadow: 0 0 8px rgb(62 230 255 / 0.5); }
+
+.nba-foot { margin: 22px 2px 0; font-size: 12.5px; color: var(--faint); }
+.nba-foot a { color: var(--dim); text-decoration: underline; text-underline-offset: 2px; }

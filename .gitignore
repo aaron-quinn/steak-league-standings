@@ -29,6 +29,9 @@ coverage
 *.sln
 *.sw?
 
+# ESPN responses saved by scripts/nba/build-seasons.mjs
+.cache
+
 # Cloudflare
 .wrangler
 .dev.vars*

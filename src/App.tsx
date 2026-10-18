@@ -17,6 +17,9 @@ const loadDraftView = () => import('./views/DraftView');
 const loadTradesView = () => import('./views/TradesView');
 const loadWaiversView = () => import('./views/WaiversView');
 
+// The NBA league lives under /nba/ with its own code and styles
+const NbaApp = lazy(() => import('./nba/NbaApp'));
+
 const FunView = lazy(loadFunView);
 const SteakRaceView = lazy(loadSteakRaceView);
 const SteakOddsView = lazy(loadSteakOddsView);
@@ -148,7 +151,22 @@ export default function App() {
           }
         />
         <Route path="/fun/waivers" element={<WaiversView />} />
-        <Route path="/fun/trades" element={<TradesView />} />      </Routes>
+        <Route path="/fun/trades" element={<TradesView />} />
+        <Route
+          path="/nba/*"
+          element={
+            // A blank page in the NBA background rather than the NFL's
+            // loading screen
+            <Suspense
+              fallback={
+                <div style={{ minHeight: '100vh', background: '#0a0f24' }} />
+              }
+            >
+              <NbaApp />
+            </Suspense>
+          }
+        />
+      </Routes>
     </Suspense>
   );
 }

@@ -1,3 +1,8 @@
 # Font files carry their version in the name, so a new version is a new URL
 /fonts/*.woff2
   Cache-Control: public, max-age=31536000, immutable
+
+# Finished NBA seasons (scripts/nba/build-seasons.mjs). They only change when
+# rebuilt, so browsers reuse them for an hour and revalidate in the background
+/nba-data/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=604800

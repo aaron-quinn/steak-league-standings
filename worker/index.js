@@ -1,10 +1,12 @@
 import { Hono } from 'hono';
 import apiRoutes from './routes/index.js';
+import nbaRoutes from './nba/routes.js';
 
 // Only /api/* reaches this Worker. Everything else is served straight from the
 // built site in dist/ (see "assets" in wrangler.jsonc).
 const app = new Hono();
 
+app.route('/api/nba', nbaRoutes);
 app.route('/api', apiRoutes);
 
 app.onError((error, c) => {

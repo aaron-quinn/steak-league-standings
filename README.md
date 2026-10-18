@@ -136,3 +136,35 @@ whether a particular team's roster improved as the lineup comparison. The two
 production views provide simpler, observable alternatives.
 
 Run the valuation and ranking checks with `npm test`.
+
+## NBA Steak League
+
+`/nba/` covers the NBA Steak League, an ESPN roto league (ESPN league
+50106954, 8 categories, weekly lineups), from 2018–19 on. Its code lives apart
+from the NFL site: pages in `src/nba/`, its API in `worker/nba/` (mounted at
+`/api/nba`), and the NFL pages never load either. ESPN names a season by the
+year it ends, so 2027 is 2026–27.
+
+- **Finished seasons** are built once into `public/nba-data/<season>/` and
+  served as static files, so they never call ESPN. The build rebuilds each
+  season's standings day by day from ESPN's daily lineups and stops if they
+  don't match ESPN's own final standings.
+- **The live season** comes from the Worker: the league (standings, owners,
+  auction) cached for a minute, and seven-day chunks of daily lineups and
+  moves. A finished day is fetched from ESPN once and kept at the edge.
+- **2023–24 and 2024–25 ended early** because of NBA tanking: only games
+  through March 31 count (`CUTOFFS` in `worker/nba/config.js`). ESPN's final
+  standings for those seasons kept going and differ.
+
+When an NBA season ends, move `CURRENT_SEASON` on in both
+`worker/nba/config.js` and `src/nba/lib/season.ts`, add the new opening night
+to `OPENERS` and `CURRENT_OPENER` (pages show the last finished season until
+opening night), and build the finished season:
+
+```bash
+node scripts/nba/build-seasons.mjs 2027
+```
+
+ESPN responses are saved gzipped in `.cache/nba-espn/` (gitignored), so later
+rebuilds make no requests. Steak Odds learn from every finished season; check
+them with `node scripts/nba/backtest-odds.mjs`.

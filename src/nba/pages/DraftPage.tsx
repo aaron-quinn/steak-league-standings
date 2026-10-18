@@ -1,0 +1,201 @@
+import PlayerName from '../components/PlayerName';
+import { useMemo, useState } from 'react';
+import { FollowPeople } from '../components/FollowSelect';
+import RowValue, { signed } from '../components/RowValue';
+import SeasonStatus from '../components/SeasonStatus';
+import Shell, {
+  AllTimeToggle,
+  Loading,
+  SeasonPicker,
+  useAllTime,
+  useSeason,
+} from '../components/Shell';
+import { useAllTimeMoves, type Dated } from '../lib/alltime';
+import { buildDraft } from '../lib/moves';
+import type { DraftRow } from '../lib/moves';
+import { seasonLabel } from '../lib/season';
+import { personName } from '../lib/standings';
+import { useMoves } from '../lib/useMoves';
+
+type Sort = 'steals' | 'busts' | 'price';
+const SORTS: { value: Sort; label: string }[] = [
+  { value: 'steals', label: 'Steals' },
+  { value: 'busts', label: 'Busts' },
+  { value: 'price', label: 'Price' },
+];
+
+export default function DraftPage() {
+  const [season] = useSeason();
+  const [allTime] = useAllTime();
+  const { league, days, names, proTeams, rates, ready } = useMoves(season);
+  const all = useAllTimeMoves(allTime);
+  const [sort, setSort] = useState<Sort>('steals');
+  const [followed, setFollowed] = useState<string | null>(null);
+
+  const picks = useMemo<Dated<DraftRow>[]>(() => {
+    if (allTime) return all.draft;
+    if (!ready) return [];
+    return buildDraft(league!, days!, names, rates!).map((r) => ({
+      ...r,
+      season,
+    }));
+  }, [allTime, all.draft, ready, league, days, names, rates, season]);
+
+  const loading = allTime ? all.isPending : !ready;
+  const teamOf = allTime ? all.proTeams : proTeams;
+  const played = picks.some((p) => p.games > 0);
+  const owners = useMemo(() => picks.map((p) => p.owner), [picks]);
+
+  // Each manager's whole auction: points beyond what its prices usually buy
+  const teams = useMemo(() => {
+    const byTeam = new Map<
+      string,
+      { owner: string; spent: number; points: number; surplus: number }
+    >();
+    for (const p of picks) {
+      const t =
+        byTeam.get(p.owner) ??
+        { owner: p.owner, spent: 0, points: 0, surplus: 0 };
+      t.spent += p.price;
+      t.points += p.points;
+      t.surplus += p.surplus;
+      byTeam.set(p.owner, t);
+    }
+    return [...byTeam.values()].sort((a, b) => b.surplus - a.surplus);
+  }, [picks]);
+
+  const shown = picks
+    .filter((p) => followed === null || p.owner === followed)
+    .sort((a, b) =>
+      sort === 'price' || !played
+        ? b.price - a.price || b.season - a.season || a.pick - b.pick
+        : sort === 'steals'
+          ? b.surplus - a.surplus || b.season - a.season
+          : a.surplus - b.surplus || b.season - a.season,
+    )
+    .slice(0, followed === null ? 40 : undefined);
+
+  return (
+    <Shell
+      title="Draft"
+      status={
+        allTime ? (
+          <span>Every finished season</span>
+        ) : (
+          league && <SeasonStatus league={league} />
+        )
+      }
+      tools={
+        <div className="nba-tools">
+          {!allTime && <SeasonPicker />}
+          <AllTimeToggle />
+        </div>
+      }
+    >
+      {loading ? (
+        <Loading label="Loading the auction" />
+      ) : picks.length === 0 ? (
+        <div className="nba-panel">
+          <div className="nba-empty">
+            <b>No auction yet</b>Prices show up here once the draft is done.
+          </div>
+        </div>
+      ) : (
+        <div className="nba-grid">
+          <section className="nba-panel" aria-label="Auction picks">
+            <div className="nba-panel-head" style={{ flexWrap: 'wrap' }}>
+              {played ? (
+                <div className="nba-seg" role="group" aria-label="Sort picks">
+                  {SORTS.map((s) => (
+                    <button
+                      key={s.value}
+                      aria-pressed={sort === s.value}
+                      onClick={() => setSort(s.value)}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <h3 className="nba-panel-title">By price</h3>
+              )}
+              <FollowPeople
+                names={
+                  allTime
+                    ? owners
+                    : (league?.teams.map(personName) ?? [])
+                }
+                value={followed}
+                onChange={setFollowed}
+              />
+            </div>
+            <ul className="nba-rows">
+              {shown.map((p) => (
+                <li key={`${p.season}-${p.pick}`} className="nba-row">
+                  <span className="nba-row-main">
+                    <span className="nba-row-title">
+                      <PlayerName
+                        name={p.player}
+                        proTeam={teamOf[p.playerID]}
+                      />
+                    </span>
+                    <span className="nba-row-sub">
+                      {allTime && `${seasonLabel(p.season)} · `}${p.price} ·{' '}
+                      {p.owner}
+                      {played &&
+                        ` · ${p.games} games, ${p.points.toFixed(1)} roto points`}
+                    </span>
+                  </span>
+                  {played ? (
+                    <RowValue value={p.surplus} label="vs price" sign />
+                  ) : (
+                    <span className="nba-row-value">${p.price}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+          {played && (
+            <div>
+              <section className="nba-panel" aria-label="Best auctions">
+                <div className="nba-panel-head">
+                  <h3 className="nba-panel-title">Best auctions</h3>
+                </div>
+                <ul className="nba-rows">
+                  {teams.map((t) => (
+                    <li
+                      key={t.owner}
+                      className="nba-row"
+                      onClick={() =>
+                        setFollowed(followed === t.owner ? null : t.owner)
+                      }
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <span className="nba-row-main">
+                        <span className="nba-row-title">{t.owner}</span>
+                        <span className="nba-row-sub">
+                          {t.points.toFixed(1)} roto points from ${t.spent}
+                        </span>
+                      </span>
+                      <RowValue value={t.surplus} label="vs prices" sign />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+              <p className="nba-foot">
+                Roto points measure each pick’s contribution to his team’s
+                category standings while in its lineup.
+                {allTime
+                  ? ' Pooled over every finished season.'
+                  : ''}{' '}
+                &ldquo;Vs price&rdquo; compares that with what picks at the same
+                price produced on average: {signed(5)} means five roto points
+                more than his price promised.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </Shell>
+  );
+}
