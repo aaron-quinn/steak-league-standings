@@ -78,14 +78,14 @@
 .nba-sport-link:hover { color: var(--text); border-color: rgb(62 230 255 / 0.5); }
 
 /* Scrolls sideways on phones; the fade says there's more */
-.nba-nav { display: flex; gap: 2px; margin: 10px -12px 0; padding: 0 12px; overflow-x: auto; scrollbar-width: none; mask-image: linear-gradient(90deg, #000 85%, transparent); }
+.nba-nav { display: flex; gap: 2px; margin: 10px -12px 0; padding: 0 12px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; mask-image: linear-gradient(90deg, #000 85%, transparent); }
 @media (min-width: 640px) { .nba-nav { mask-image: none; } }
 .nba-nav::-webkit-scrollbar { display: none; }
 @media (min-width: 640px) { .nba-nav { margin: 12px 0 0; padding: 0; } }
 .nba-nav a { position: relative; flex: none; padding: 8px 11px 10px; font-weight: 600; font-stretch: 85%; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--dim); transition: color 120ms; }
 .nba-nav a:hover { color: var(--text); }
 .nba-nav a[aria-current='page'] { color: var(--text); }
-.nba-nav a[aria-current='page']::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 2px; border-radius: 2px; background: var(--rail); box-shadow: 0 0 10px rgb(62 230 255 / 0.6); }
+.nba-nav a[aria-current='page']::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 0; height: 2px; border-radius: 2px; background: var(--rail); box-shadow: 0 0 10px rgb(62 230 255 / 0.6); }
 
 /* ---------------------------------------------------------------- page head */
 .nba-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin: 16px 0 12px; }

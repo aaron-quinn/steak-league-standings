@@ -14,7 +14,7 @@ export default function PositionFilters({ value, onChange, className }: Props) {
       role="group"
       aria-label="Position"
       className={clsx(
-        '-mx-2 flex gap-1.5 overflow-x-auto px-2 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+        '-mx-2 flex gap-1.5 overflow-x-auto overflow-y-hidden overscroll-x-contain px-2 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
         className,
       )}
     >

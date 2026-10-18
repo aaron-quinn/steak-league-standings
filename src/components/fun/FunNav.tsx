@@ -66,7 +66,7 @@ export default function FunNav() {
     // Scrolls sideways if the screens outgrow a phone's width
     <nav
       aria-label="Fun screens"
-      className="-mx-2 mb-4 overflow-x-auto px-2 [scrollbar-width:none] lg:mb-6 [&::-webkit-scrollbar]:hidden"
+      className="-mx-2 mb-4 overflow-x-auto overflow-y-hidden overscroll-x-contain px-2 [scrollbar-width:none] lg:mb-6 [&::-webkit-scrollbar]:hidden"
     >
       <div
         ref={groupRef}
