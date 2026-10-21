@@ -12,7 +12,8 @@ export interface NbaTeam {
   abbrev: string;
   // The person behind the team; '' while a spot has no owner
   owner: string;
-  // Season totals through the last day that counts
+  // Season totals through the last day that counts (live season: including
+  // games played today)
   totals: StatLine;
   // ESPN's own final roto points and rank, which ignore early cutoffs
   espn: { points: number; rank: number };
@@ -40,6 +41,9 @@ export interface NbaLeague {
   // The last day whose games count (the cutoff, in a season that ended early)
   lastDay: number;
   cutoff: string | null;
+  // Live season: days in `totals` from the live box scores, which ESPN's
+  // season totals haven't taken in yet
+  liveDays?: number[];
   budget: number;
   teams: NbaTeam[];
   draft: DraftPick[];
@@ -69,7 +73,27 @@ export interface NbaDay {
   // Every team's full roster, on days it changed (finished seasons) or every
   // day (live season)
   rosters?: Record<string, number[]>;
+  // Every rostered player's lineup slot (live season only)
+  slots?: Record<string, number>;
+  // Each team's active-lineup minutes, on days with games
+  minutes?: Record<string, number>;
   tx: Transaction[];
+}
+
+// An NBA game on the latest scoring day (worker/nba/espn.js compactGames)
+export interface NbaGame {
+  home: number;
+  away: number;
+  state: 'pre' | 'in' | 'post';
+  // "Final", "3:15 - 1st", "10/21 - 7:30 PM EDT"
+  detail: string;
+  start: string;
+}
+
+export interface Tonight {
+  day: number;
+  date: string;
+  games: NbaGame[];
 }
 
 export interface NbaTotals {
@@ -79,6 +103,12 @@ export interface NbaTotals {
 }
 
 const CHUNK_DAYS = 7;
+
+// Browsers keep /nba-data/ for an hour (public/_headers), so bump this when
+// build-seasons.mjs changes days.json's shape to fetch the new files at once.
+// 2: each day's team minutes.
+const DAYS_VERSION = 2;
+const daysFile = (season: number) => `/nba-data/${season}/days.json?v=${DAYS_VERSION}`;
 const LIVE_REFRESH_MS = 60 * 1000;
 
 async function getJSON<T>(url: string): Promise<T> {
@@ -120,7 +150,7 @@ export function useAllTimeDays(enabled = true) {
   return useQueries({
     queries: finished.map((season) => ({
       queryKey: ['nba', 'days', season],
-      queryFn: () => getJSON<NbaDay[]>(`/nba-data/${season}/days.json`),
+      queryFn: () => getJSON<NbaDay[]>(daysFile(season)),
       enabled,
       staleTime: Infinity,
     })),
@@ -139,21 +169,22 @@ interface Chunk {
   proTeams?: Record<string, number>;
 }
 
+const chunkQuery = (season: number, chunk: number, newest: boolean) => ({
+  queryKey: ['nba', 'days', season, chunk],
+  queryFn: () => getJSON<Chunk>(`/api/nba/days/${season}/${chunk}`),
+  staleTime: newest ? LIVE_REFRESH_MS : Infinity,
+  refetchInterval: newest ? LIVE_REFRESH_MS : (false as const),
+});
+
 // The live season, seven days per request. Only the newest chunk changes.
 function useLiveChunks(season: number, enabled: boolean) {
   const { data: league } = useLeague(season);
   const lastDay = enabled ? (league?.lastDay ?? 0) : 0;
   const count = Math.ceil(lastDay / CHUNK_DAYS);
   return useQueries({
-    queries: Array.from({ length: count }, (_, chunk) => {
-      const newest = chunk === count - 1;
-      return {
-        queryKey: ['nba', 'days', season, chunk],
-        queryFn: () => getJSON<Chunk>(`/api/nba/days/${season}/${chunk}`),
-        staleTime: newest ? LIVE_REFRESH_MS : Infinity,
-        refetchInterval: newest ? LIVE_REFRESH_MS : (false as const),
-      };
-    }),
+    queries: Array.from({ length: count }, (_, chunk) =>
+      chunkQuery(season, chunk, chunk === count - 1),
+    ),
     combine: (results) => ({
       chunks: results.flatMap((r) => (r.data ? [r.data] : [])),
       isPending: !league || results.some((r) => r.isPending),
@@ -161,17 +192,41 @@ function useLiveChunks(season: number, enabled: boolean) {
   });
 }
 
+// The live season's latest day alone, from the newest chunk (the same query
+// useLiveChunks makes, so pages share it)
+export function useToday(season: number) {
+  const { data: league } = useLeague(season);
+  const latestDay = !isFinished(season) ? (league?.latestDay ?? 0) : 0;
+  const chunk = Math.floor((latestDay - 1) / CHUNK_DAYS);
+  const { data } = useQuery({ ...chunkQuery(season, chunk, true), enabled: latestDay > 0 });
+  return {
+    day: data?.days.find((d) => d.day === latestDay),
+    names: data?.names ?? {},
+    proTeams: data?.proTeams ?? {},
+  };
+}
+
+// The NBA games on the live season's latest day
+export const useTonight = (season: number) =>
+  useQuery({
+    queryKey: ['nba', 'tonight', season],
+    queryFn: () => getJSON<Tonight>(`/api/nba/tonight/${season}`),
+    enabled: !isFinished(season),
+    staleTime: LIVE_REFRESH_MS,
+    refetchInterval: LIVE_REFRESH_MS,
+  });
+
 // Every day's player lines and moves, with player names
-export function useSeasonDays(season: number) {
+export function useSeasonDays(season: number, enabled = true) {
   const finished = isFinished(season);
   const { data: league } = useLeague(season);
   const stored = useQuery({
     queryKey: ['nba', 'days', season],
-    queryFn: () => getJSON<NbaDay[]>(`/nba-data/${season}/days.json`),
-    enabled: finished,
+    queryFn: () => getJSON<NbaDay[]>(daysFile(season)),
+    enabled: enabled && finished,
     staleTime: Infinity,
   });
-  const live = useLiveChunks(season, !finished);
+  const live = useLiveChunks(season, enabled && !finished);
 
   if (finished) {
     return {

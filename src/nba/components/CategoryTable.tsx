@@ -1,22 +1,43 @@
 import { useState } from 'react';
 import clsx from 'clsx';
 import { CATEGORIES } from '../lib/roto';
-import type { StandingRow } from '../lib/standings';
+import type { PlayingTime, StandingRow } from '../lib/standings';
 import { formatPoints } from '../lib/format';
+
+interface Props {
+  rows: StandingRow[];
+  // Games and minutes each team's active lineup played: null while loading,
+  // left out for a season without player lines
+  games?: Map<number, PlayingTime> | null;
+}
+
+type Time = keyof PlayingTime;
+type Sort = number | Time | null;
+
+const TIME: { key: Time; label: string; title: string }[] = [
+  { key: 'games', label: 'GP', title: "Games played by the active lineup (bench and IR don't count)" },
+  { key: 'minutes', label: 'MIN', title: "Minutes played by the active lineup (bench and IR don't count)" },
+];
 
 // Every team's total and roto points in each category. Tap a category to
 // sort by it; the team column stays put while the categories scroll.
-export default function CategoryTable({ rows }: { rows: StandingRow[] }) {
-  const [sortBy, setSortBy] = useState<number | null>(null);
+export default function CategoryTable({ rows, games }: Props) {
+  const [sortBy, setSortBy] = useState<Sort>(null);
+  const time = (row: StandingRow, key: Time) => games?.get(row.team.id)?.[key] ?? 0;
   const sorted =
     sortBy === null
       ? rows
       : [...rows].sort(
           (a, b) =>
-            b.categories[sortBy].points - a.categories[sortBy].points ||
+            (typeof sortBy === 'string'
+              ? time(b, sortBy) - time(a, sortBy)
+              : b.categories[sortBy].points - a.categories[sortBy].points) ||
             a.position - b.position,
         );
   const teamCount = rows.length;
+  const average = (key: Time) =>
+    rows.reduce((sum, row) => sum + time(row, key), 0) / (rows.length || 1);
+  const toggle = (key: Sort) => setSortBy(sortBy === key ? null : key);
 
   return (
     <div className="nba-scroll">
@@ -31,19 +52,32 @@ export default function CategoryTable({ rows }: { rows: StandingRow[] }) {
             >
               Team
             </th>
+            {games !== undefined &&
+              TIME.map(({ key, label, title }) => (
+                <th
+                  key={key}
+                  className={clsx('cat num time', key)}
+                  scope="col"
+                  title={title}
+                  aria-sort={sortBy === key ? 'descending' : undefined}
+                  onClick={() => toggle(key)}
+                >
+                  {label}
+                </th>
+              ))}
             {CATEGORIES.map((category, i) => (
               <th
                 key={category.key}
                 className="cat num"
                 scope="col"
                 aria-sort={sortBy === i ? 'descending' : undefined}
-                onClick={() => setSortBy(sortBy === i ? null : i)}
+                onClick={() => toggle(i)}
               >
                 {category.label}
               </th>
             ))}
-            <th className="num" scope="col" style={{ paddingRight: 12 }}>
-              Roto points
+            <th className="num" scope="col" style={{ paddingRight: 12 }} title="Roto points">
+              Roto
             </th>
           </tr>
         </thead>
@@ -53,6 +87,19 @@ export default function CategoryTable({ rows }: { rows: StandingRow[] }) {
               <td className="sticky team-cell">
                 <span className="who">{row.name}</span>
               </td>
+              {games !== undefined &&
+                TIME.map(({ key }) => (
+                  <td key={key} className={clsx('cat time', key)}>
+                    {games ? (
+                      <>
+                        <b>{time(row, key).toLocaleString('en-US')}</b>
+                        <span>{versus(time(row, key) - average(key))}</span>
+                      </>
+                    ) : (
+                      <b className="nba-faint">–</b>
+                    )}
+                  </td>
+                ))}
               {CATEGORIES.map((category, i) => {
                 const { value, points } = row.categories[i];
                 return (
@@ -75,4 +122,12 @@ export default function CategoryTable({ rows }: { rows: StandingRow[] }) {
       </table>
     </div>
   );
+}
+
+// Above or below the league average: "+12", "−8", "avg"
+function versus(diff: number) {
+  const n = Math.round(diff);
+  if (n === 0) return 'avg';
+  const abs = Math.abs(n).toLocaleString('en-US');
+  return n > 0 ? `+${abs}` : `−${abs}`;
 }

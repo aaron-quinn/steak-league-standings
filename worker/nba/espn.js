@@ -1,7 +1,7 @@
 // Turns ESPN's league responses into the small shapes the NBA pages use. The
 // build script for past seasons and the Worker for the live one share these,
 // so both produce the same data.
-import { BENCH, GP, IR, STAT_IDS, ownerName } from './config.js';
+import { BENCH, GP, IR, MIN, STAT_IDS, ownerName } from './config.js';
 
 // One day's scoreboard and transactions:
 //   ESPN_LEAGUE(season)?view=mScoreboard&view=mTransactions2&scoringPeriodId=N
@@ -20,6 +20,8 @@ const counts = (slot) => slot !== BENCH && slot !== IR;
 //   players: [[teamID, playerID, slot, games, ...stat line]] for every
 //            rostered player who played,
 //   rosters: { [teamID]: every player on the team that day },
+//   slots: { [playerID]: lineup slot } for every rostered player,
+//   minutes: { [teamID]: minutes played by the active lineup },
 //   tx: executed adds, drops and trades,
 //   names: { [playerID]: name } for every rostered player
 // }
@@ -30,10 +32,13 @@ export function compactDay(json, day) {
   const teams = {};
   const players = [];
   const rosters = {};
+  const slots = {};
+  const minutes = {};
   const names = {};
   const proTeams = {};
   for (const team of json.schedule?.[0]?.teams ?? []) {
     const total = STAT_IDS.map(() => 0);
+    let played = 0;
     rosters[team.teamId] = [];
     for (const entry of team.rosterForCurrentScoringPeriod?.entries ?? []) {
       const player = entry.playerPoolEntry?.player;
@@ -41,6 +46,7 @@ export function compactDay(json, day) {
       names[player.id] = player.fullName;
       if (Number.isInteger(player.proTeamId)) proTeams[player.id] = player.proTeamId;
       rosters[team.teamId].push(player.id);
+      slots[player.id] = entry.lineupSlotId;
       const stats = player.stats?.find(
         (s) =>
           s.statSplitTypeId === 5 &&
@@ -51,9 +57,13 @@ export function compactDay(json, day) {
       if (!games) continue;
       const line = statLine(stats);
       players.push([team.teamId, player.id, entry.lineupSlotId, games, ...line]);
-      if (counts(entry.lineupSlotId)) line.forEach((v, i) => (total[i] += v));
+      if (counts(entry.lineupSlotId)) {
+        line.forEach((v, i) => (total[i] += v));
+        played += stats[MIN] ?? 0;
+      }
     }
     teams[team.teamId] = total;
+    minutes[team.teamId] = Math.round(played);
   }
 
   const tx = (json.transactions ?? [])
@@ -73,7 +83,28 @@ export function compactDay(json, day) {
     }))
     .sort((a, b) => a.at - b.at);
 
-  return { day, teams, players, rosters, tx, names, proTeams };
+  return { day, teams, players, rosters, slots, minutes, tx, names, proTeams };
+}
+
+// The NBA's games on one date, from ESPN's public scoreboard
+//   https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=YYYYMMDD
+// as [{ home, away, state: 'pre' | 'in' | 'post', detail, start }]. Team IDs
+// are the same as the fantasy API's proTeamId.
+export const SCOREBOARD = (isoDate) =>
+  `https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=${isoDate.replaceAll('-', '')}`;
+
+export function compactGames(json) {
+  return (json.events ?? []).map((event) => {
+    const teams = event.competitions?.[0]?.competitors ?? [];
+    const side = (where) => Number(teams.find((t) => t.homeAway === where)?.team?.id ?? 0);
+    return {
+      home: side('home'),
+      away: side('away'),
+      state: event.status?.type?.state ?? 'pre',
+      detail: event.status?.type?.shortDetail ?? '',
+      start: event.date,
+    };
+  });
 }
 
 // {

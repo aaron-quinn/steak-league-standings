@@ -50,12 +50,16 @@ async function espn(url, file) {
 function withRosterChanges(days) {
   let previous = '';
   const out = [];
-  for (const { day, players, rosters, tx } of days) {
+  for (const { day, players, rosters, minutes, tx } of days) {
     const key = JSON.stringify(rosters);
     const changed = key !== previous && Object.values(rosters).some((r) => r.length);
     previous = key;
     if (!players.length && !tx.length && !changed) continue;
-    out.push(changed ? { day, players, rosters, tx } : { day, players, tx });
+    // Each team's active-lineup minutes, on days with games
+    const timed = players.length ? { minutes } : {};
+    out.push(
+      changed ? { day, players, rosters, ...timed, tx } : { day, players, ...timed, tx },
+    );
   }
   return out;
 }

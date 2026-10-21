@@ -1,4 +1,4 @@
-import type { NbaLeague, NbaTeam } from './data';
+import type { NbaDay, NbaLeague, NbaTeam } from './data';
 import { scoreRoto, type CategoryResult, type StatLine } from './roto.ts';
 
 export type SteakZone = 'eater' | 'self-buyer' | 'buyer';
@@ -53,6 +53,34 @@ export function buildStandings(
     position: i + 1,
     zone: steakZone(i + 1, scored.length),
   }));
+}
+
+export interface PlayingTime {
+  games: number;
+  minutes: number;
+}
+
+// Games and minutes each team got from its active lineup (bench and IR don't
+// count), through the last day that counts. Empty for a season without player
+// lines (2017-18, from Yahoo).
+export function playingTime(days: NbaDay[], lastDay: number) {
+  const time = new Map<number, PlayingTime>();
+  const of = (team: number) => {
+    let t = time.get(team);
+    if (!t) time.set(team, (t = { games: 0, minutes: 0 }));
+    return t;
+  };
+  for (const day of days) {
+    if (day.day > lastDay) continue;
+    for (const [team, , slot, played] of day.players) {
+      if (slot === 12 || slot === 13) continue;
+      of(team).games += played;
+    }
+    for (const [team, minutes] of Object.entries(day.minutes ?? {})) {
+      of(Number(team)).minutes += minutes;
+    }
+  }
+  return time;
 }
 
 // A season with no games yet has nothing to rank

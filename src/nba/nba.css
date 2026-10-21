@@ -162,13 +162,16 @@
 .nba-table tr.buyer .who { color: #c4cbe8; }
 .nba-table tr.buyer .pts { color: #b7bfdf; }
 .nba-table tr.steak-line td { border-bottom: 0; box-shadow: 0 1px 0 0 rgb(62 230 255 / 0.65), 0 6px 14px -6px rgb(62 230 255 / 0.45); }
+/* The team buying its own steak sits between two lines: the eaters above,
+   the buyers below */
+.nba-table tr.self-buyer td { border-top: 1px solid rgb(62 230 255 / 0.65); }
 .nba-zone-tag { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-weight: 650; font-stretch: 80%; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 1px; color: var(--violet); background: var(--violet-wash); }
 
 /* Category grid: team column stays put while the categories scroll */
 .nba-cats .sticky { position: sticky; left: 0; z-index: 1; background: linear-gradient(var(--row, transparent), var(--row, transparent)), #0f1637; }
 .nba-cats thead .sticky { z-index: 2; background: #0e1534; }
-.nba-cats .team-cell { width: auto; max-width: 132px; min-width: 112px; padding-left: 12px; box-shadow: 8px 0 10px -8px rgb(0 0 0 / 0.7); }
-.nba-cats th.cat { min-width: 62px; cursor: pointer; user-select: none; }
+.nba-cats .team-cell { width: auto; max-width: 124px; min-width: 112px; padding-left: 12px; box-shadow: 8px 0 10px -8px rgb(0 0 0 / 0.7); }
+.nba-cats th.cat { min-width: 57px; cursor: pointer; user-select: none; }
 .nba-cats th.cat:hover, .nba-cats th.cat[aria-sort] { color: var(--text); }
 .nba-cats th.cat[aria-sort]::after { content: ''; display: inline-block; margin-left: 3px; border: 3.5px solid transparent; border-top-color: var(--cyan); transform: translateY(2px); }
 .nba-cats td.cat { text-align: right; line-height: 1.1; }
@@ -178,6 +181,9 @@
 .nba-cats td.cat.top span { color: var(--good-text); }
 .nba-cats td.cat.bottom { background: var(--bad); }
 .nba-cats td.cat.bottom span { color: var(--bad-text); }
+.nba-cats th.time, .nba-cats td.time { min-width: 48px; }
+.nba-cats th.minutes, .nba-cats td.minutes { border-right: 1px solid var(--line-strong); }
+.nba-cats td.time b { color: var(--dim); }
 .nba-cats td.total { padding-right: 12px; font-weight: 800; font-stretch: 70%; font-size: 18px; }
 
 /* ---------------------------------------------------------------- history */
@@ -241,6 +247,56 @@
 .nba-bad { color: var(--bad-text); }
 .nba-dim { color: var(--dim); }
 .nba-faint { color: var(--faint); }
+
+/* Standings rows that open to show the team's players today. Each team is
+   its own tbody, so the banding follows the team rather than the row. */
+.nba-table tbody.team > tr:first-child { --row: transparent; }
+.nba-table tbody.team:nth-of-type(even) > tr:first-child { --row: var(--band); }
+.nba-table tr.openable { cursor: pointer; }
+.nba-table tr.openable:hover > td { background: linear-gradient(var(--band), var(--band)), var(--row); }
+/* Games done / playing / to play today, after the NFL standings' bar: one
+   segment per active lineup slot, the same colour for every team */
+.nba-table .games { width: 1%; padding-right: 2px; }
+.nba-games { --zone: var(--cyan); display: inline-flex; align-items: center; justify-content: flex-end; gap: 7px; padding: 6px 6px; border: 0; border-radius: 7px; background: none; font: inherit; color: var(--zone); cursor: pointer; transition: background 120ms; }
+.nba-games:hover, tr.open .nba-games { background: color-mix(in srgb, var(--zone) 10%, transparent); }
+/* Room for the nine active lineup slots; a team's segments start at the left,
+   so a longer bar is more games */
+.nba-games .bar { --seg: 8px; display: flex; gap: 2px; height: 8px; }
+.nba-games .bar > span { flex: 0 0 var(--seg); border-radius: 2px; transition: background 300ms, box-shadow 300ms; }
+/* Lineup slots with no game today: neutral, so the zone colour marks games */
+.nba-games .bar .empty { background: rgb(140 160 255 / 0.07); }
+.nba-games .bar .to-play { background: color-mix(in srgb, var(--zone) 12%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--zone) 55%, transparent); }
+.nba-games .bar .done { background: color-mix(in srgb, var(--zone) 50%, transparent); }
+.nba-games .bar .playing { background: var(--zone); box-shadow: 0 0 6px color-mix(in srgb, var(--zone) 70%, transparent); animation: nba-pulse 1.6s ease-in-out infinite; }
+.nba-games .bar.over .done { background: color-mix(in srgb, var(--zone) 35%, transparent); }
+.nba-games .chev { width: 0; height: 0; border: 4px solid transparent; border-top-color: currentColor; opacity: 0.7; transform: translateY(2px); transition: transform 140ms ease-out; }
+tr.open .nba-games .chev { transform: translateY(-2px) rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .nba-games .bar .playing { animation: none; } }
+@media (max-width: 520px) { .nba-games { gap: 5px; } .nba-games .bar { --seg: 6px; height: 8px; } }
+.nba-table tr.nba-box-row > td { height: auto; padding: 0 0 10px; background: rgb(5 9 26 / 0.4); white-space: normal; }
+
+/* A team's box score for the day */
+/* width 0 + min-width 100% keeps the box from widening the standings table;
+   on a narrow screen it scrolls sideways inside its row instead */
+.nba-box { width: 0; min-width: 100%; overflow-x: auto; }
+.nba-box table { width: 100%; border-collapse: collapse; font-stretch: 90%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.nba-box table th, .nba-box table td { height: auto; padding: 6px 7px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.nba-table .nba-box th, .nba-table .nba-box td { background: none; }
+.nba-box table thead th { padding-top: 8px; padding-bottom: 6px; font-weight: 650; font-stretch: 80%; font-size: 11px; letter-spacing: 0.08em; color: var(--faint); }
+.nba-box th.player { width: 100%; max-width: 0; padding-left: 12px; text-align: left; font-weight: 600; }
+.nba-box tbody th.player .nba-player-name { display: flex; }
+.nba-box .when { display: block; padding-left: 25px; font-weight: 500; font-size: 11.5px; color: var(--faint); overflow: hidden; text-overflow: ellipsis; }
+.nba-box tr.live .when { color: var(--cyan); }
+.nba-box td:last-child, .nba-box th:last-child { padding-right: 12px; }
+.nba-box td.none { text-align: center; color: var(--faint); }
+.nba-box tr.benched { opacity: 0.5; }
+.nba-box tbody tr:last-child > * { border-bottom: 0; }
+.nba-box tfoot th, .nba-box tfoot td { border-top: 1px solid var(--line-strong); border-bottom: 0; font-weight: 750; color: var(--text); }@media (max-width: 520px) {
+  .nba-box th.player { min-width: 112px; }
+  .nba-box table th, .nba-box table td { padding-left: 4px; padding-right: 4px; }
+  .nba-box table th.player { padding-left: 10px; }
+  .nba-box table td:last-child, .nba-box table th:last-child { padding-right: 10px; }
+}
 
 .nba-trade { padding: 16px; border-bottom: 1px solid var(--line); }
 .nba-trade:last-child { border-bottom: 0; }

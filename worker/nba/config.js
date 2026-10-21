@@ -48,6 +48,8 @@ export const CUTOFFS = { 2024: '2024-03-31', 2025: '2025-03-31' };
 export const STAT_IDS = ['0', '6', '3', '17', '2', '1', '13', '14', '15', '16'];
 // Games played, kept alongside the stats for each player line
 export const GP = '42';
+// Minutes, summed per team for the active lineup
+export const MIN = '40';
 
 // Lineup slots that don't count
 export const BENCH = 12;

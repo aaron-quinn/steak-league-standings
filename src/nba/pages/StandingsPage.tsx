@@ -12,11 +12,12 @@ import Shell, {
   useSeason,
 } from '../components/Shell';
 import { careerTable, type CareerRow } from '../lib/alltime';
-import { useAllLeagues, useLeague } from '../lib/data';
+import { useAllLeagues, useLeague, useSeasonDays, useToday, useTonight } from '../lib/data';
+import { rankMoves, tonightByTeam } from '../lib/tonight';
 import { formatPoints, ordinal } from '../lib/format';
-import { dateOfDay, isFinished, shortDate } from '../lib/season';
+import { FIRST_SEASON, dateOfDay, isFinished, shortDate } from '../lib/season';
 import { useSteakOdds } from '../lib/useSteakOdds';
-import { buildStandings, hasStarted } from '../lib/standings';
+import { buildStandings, hasStarted, playingTime } from '../lib/standings';
 
 type View = 'points' | 'categories';
 
@@ -37,6 +38,27 @@ export default function StandingsPage() {
   // Tombstones only mean something while a season is still going
   const live = Boolean(league && !isFinished(season) && hasStarted(league));
   const { pitNow } = useSteakOdds(season, { withHistory: false, enabled: live });
+  // Games and minutes played need every day's player lines, so only fetch
+  // them for the categories view. 2017-18 (Yahoo) has none.
+  const withGames = view === 'categories' && !allTime && season > FIRST_SEASON;
+  const { days } = useSeasonDays(season, withGames);
+  const played = useMemo(
+    () => (withGames && days && league ? playingTime(days, league.lastDay) : undefined),
+    [withGames, days, league],
+  );
+  const today = useToday(season);
+  const { data: games } = useTonight(season);
+  const moves = useMemo(
+    () => (live && league ? rankMoves(league.teams, today.day) : undefined),
+    [live, league, today.day],
+  );
+  const tonight = useMemo(
+    () =>
+      live && games
+        ? tonightByTeam(today.day, games.games, today.names, today.proTeams)
+        : undefined,
+    [live, games, today.day, today.names, today.proTeams],
+  );
 
   return (
     <Shell
@@ -123,9 +145,11 @@ export default function StandingsPage() {
                   rows={rows}
                   showESPN={Boolean(league.cutoff)}
                   buried={pitNow?.buried}
+                  moves={moves?.size ? moves : undefined}
+                  tonight={tonight}
                 />
               ) : (
-                <CategoryTable rows={rows} />
+                <CategoryTable rows={rows} games={withGames ? (played ?? null) : undefined} />
               )}
             </section>
           )}
