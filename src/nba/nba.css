@@ -112,7 +112,9 @@
 .nba-note b { color: var(--gold); font-weight: 650; }
 
 /* ---------------------------------------------------------------- layout */
-.nba-grid { display: grid; gap: 16px; }
+/* minmax(0, …) so a wide table (the categories) scrolls inside its panel
+   instead of stretching the column and the whole page */
+.nba-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 @media (min-width: 960px) { .nba-grid { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; gap: 24px; } }
 
 .nba-panel { position: relative; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg, rgb(20 30 70 / 0.65), rgb(12 18 44 / 0.55)); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03); overflow: hidden; }
@@ -261,7 +263,9 @@
 .nba-games:hover, tr.open .nba-games { background: color-mix(in srgb, var(--zone) 10%, transparent); }
 /* Room for the nine active lineup slots; a team's segments start at the left,
    so a longer bar is more games */
-.nba-games .bar { --seg: 8px; display: flex; gap: 2px; height: 8px; }
+/* Never shrink the bar or the chevron: Safari squeezes flex items in a tight
+   table cell, which let the segments spill under the chevron */
+.nba-games .bar { --seg: 8px; flex: none; display: flex; gap: 2px; min-width: calc(9 * var(--seg) + 8 * 2px); height: 8px; }
 .nba-games .bar > span { flex: 0 0 var(--seg); border-radius: 2px; transition: background 300ms, box-shadow 300ms; }
 /* Lineup slots with no game today: neutral, so the zone colour marks games */
 .nba-games .bar .empty { background: rgb(140 160 255 / 0.07); }
@@ -269,7 +273,7 @@
 .nba-games .bar .done { background: color-mix(in srgb, var(--zone) 50%, transparent); }
 .nba-games .bar .playing { background: var(--zone); box-shadow: 0 0 6px color-mix(in srgb, var(--zone) 70%, transparent); animation: nba-pulse 1.6s ease-in-out infinite; }
 .nba-games .bar.over .done { background: color-mix(in srgb, var(--zone) 35%, transparent); }
-.nba-games .chev { width: 0; height: 0; border: 4px solid transparent; border-top-color: currentColor; opacity: 0.7; transform: translateY(2px); transition: transform 140ms ease-out; }
+.nba-games .chev { flex: none; width: 0; height: 0; border: 4px solid transparent; border-top-color: currentColor; opacity: 0.7; transform: translateY(2px); transition: transform 140ms ease-out; }
 tr.open .nba-games .chev { transform: translateY(-2px) rotate(180deg); }
 @media (prefers-reduced-motion: reduce) { .nba-games .bar .playing { animation: none; } }
 @media (max-width: 520px) { .nba-games { gap: 5px; } .nba-games .bar { --seg: 6px; height: 8px; } }
