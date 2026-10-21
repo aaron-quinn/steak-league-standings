@@ -163,10 +163,12 @@
 .nba-table tr.self-buyer .rank { color: var(--violet); }
 .nba-table tr.buyer .who { color: #c4cbe8; }
 .nba-table tr.buyer .pts { color: #b7bfdf; }
-.nba-table tr.steak-line td { border-bottom: 0; box-shadow: 0 1px 0 0 rgb(62 230 255 / 0.65), 0 6px 14px -6px rgb(62 230 255 / 0.45); }
+/* Child cells only: an open team's row holds a nested box score whose cells
+   mustn't pick these up */
+.nba-table tr.steak-line > td { border-bottom: 0; box-shadow: 0 1px 0 0 rgb(62 230 255 / 0.65), 0 6px 14px -6px rgb(62 230 255 / 0.45); }
 /* The team buying its own steak sits between two lines: the eaters above,
    the buyers below */
-.nba-table tr.self-buyer td { border-top: 1px solid rgb(62 230 255 / 0.65); }
+.nba-table tr.self-buyer > td { border-top: 1px solid rgb(62 230 255 / 0.65); }
 .nba-zone-tag { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-weight: 650; font-stretch: 80%; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 1px; color: var(--violet); background: var(--violet-wash); }
 
 /* Category grid: team column stays put while the categories scroll */
@@ -295,7 +297,8 @@ tr.open .nba-games .chev { transform: translateY(-2px) rotate(180deg); }
 .nba-box td.none { text-align: center; color: var(--faint); }
 .nba-box tr.benched { opacity: 0.5; }
 .nba-box tbody tr:last-child > * { border-bottom: 0; }
-.nba-box tfoot th, .nba-box tfoot td { border-top: 1px solid var(--line-strong); border-bottom: 0; font-weight: 750; color: var(--text); }@media (max-width: 520px) {
+.nba-box tfoot th, .nba-box tfoot td { border-top: 1px solid var(--line-strong); border-bottom: 0; font-weight: 750; color: var(--text); }
+@media (max-width: 520px) {
   .nba-box th.player { min-width: 112px; }
   .nba-box table th, .nba-box table td { padding-left: 4px; padding-right: 4px; }
   .nba-box table th.player { padding-left: 10px; }
@@ -360,7 +363,58 @@ a.who:hover { color: var(--cyan); }
 .nba-finishes .key.self-buyer { color: var(--violet); }
 .nba-finishes .key.buyer { color: #9aa4cf; }
 
-/* Builds: one octagon per team */
+/* Week: each team's starters' games this lineup week */
+.nba-week-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px; border-bottom: 1px solid var(--line); }
+.nba-week-step { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.nba-week-step b { font-weight: 700; }
+.nba-week-step button { width: 28px; height: 28px; border: 1px solid var(--line-strong); border-radius: 8px; background: rgb(5 9 26 / 0.5); color: var(--cyan); font-size: 16px; line-height: 1; cursor: pointer; }
+.nba-week-step button:disabled { color: var(--faint); cursor: default; opacity: 0.5; }
+.nba-week-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; padding: 0; list-style: none; font-size: 12px; color: var(--dim); }
+.nba-week-legend li { display: flex; align-items: center; gap: 5px; }
+/* The four states, in the bar, the grid and the key */
+.nba-week i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: middle; }
+.nba-week .played { background: color-mix(in srgb, var(--cyan) 55%, transparent); }
+.nba-week .live { background: var(--cyan); box-shadow: 0 0 6px rgb(62 230 255 / 0.7); animation: nba-pulse 1.6s ease-in-out infinite; }
+.nba-week .lost { background: var(--bad-text); }
+.nba-week .upcoming { background: var(--cyan-wash); box-shadow: inset 0 0 0 1px rgb(62 230 255 / 0.55); }
+.nba-week i.off { width: 4px; height: 4px; border-radius: 50%; background: var(--line-strong); }
+.nba-week i.out { width: 8px; height: 1px; border-radius: 0; background: var(--line); }
+@media (prefers-reduced-motion: reduce) { .nba-week .live { animation: none; } }
+/* Sortable headers */
+.nba-week-table thead th { white-space: nowrap; }
+.nba-sort { padding: 0; border: 0; background: none; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; }
+.nba-sort:hover, [aria-sort] > .nba-sort { color: var(--text); }
+[aria-sort] > .nba-sort::after { content: ''; display: inline-block; margin-left: 3px; border: 3.5px solid transparent; border-top-color: var(--cyan); transform: translateY(2px); }
+[aria-sort='ascending'] > .nba-sort::after { border-top-color: transparent; border-bottom-color: var(--cyan); transform: translateY(-2px); }
+.nba-week-table .num { width: 48px; font-variant-numeric: tabular-nums; }
+.nba-week-table tbody.team > tr > td.num { font-weight: 650; }
+/* Stacked bar: one segment per state, scaled to the team with most games */
+.nba-week-bar { display: flex; height: 6px; margin-top: 5px; border-radius: 3px; overflow: hidden; }
+.nba-week-bar > span { flex: none; height: 100%; }
+.nba-week-toggle { border: 0; padding: 0; width: 100%; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.nba-week-table .nba-week-toggle { display: flex; align-items: center; }
+.nba-week-name { position: relative; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.nba-week-name-measure { position: absolute; left: 0; width: max-content; visibility: hidden; }
+.nba-week-toggle .chev { margin-left: 5px; color: var(--faint); font-size: 11px; }
+.nba-week-toggle:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 2px; }
+.nba-week-table tfoot td { border-top: 1px solid var(--line-strong); border-bottom: 0; }
+@media (max-width: 520px) {
+  .nba-week-table .num { width: 30px; padding-left: 2px; padding-right: 2px; }
+  .nba-week-table thead th.num { font-size: 10px; letter-spacing: 0.02em; }
+  .nba-week-table td.num:last-child, .nba-week-table th.num:last-child { padding-right: 10px; }
+  .nba-week-table .rank { width: 24px; padding-left: 8px; }
+}
+/* Starters by day */
+.nba-week-grid table { table-layout: fixed; }
+.nba-week-grid table th.player { width: 45%; min-width: 0; }
+.nba-week-grid table td { text-align: center; padding-left: 4px; padding-right: 4px; }
+.nba-week-grid table thead th:not(.player) { text-align: center; padding-left: 4px; padding-right: 4px; line-height: 1.1; }
+.nba-week-grid table thead small { display: block; font-size: 10.5px; letter-spacing: 0; }
+.nba-week-grid table td i { width: 12px; height: 12px; }
+@media (max-width: 520px) {
+  .nba-week-grid table th.player { width: 56%; }
+}
+
 /* Builds: shapes from stats so far, or from each roster's projections */
 .nba-basis { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 12px 12px 0; font-size: 12.5px; }
 .nba-builds { list-style: none; margin: 0; padding: 12px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); }

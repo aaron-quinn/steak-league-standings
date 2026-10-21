@@ -1,5 +1,6 @@
 import { useQueries, useQuery } from '@tanstack/react-query';
 import type { StatLine } from './roto';
+import type { NbaSchedule } from './schedule';
 import { CURRENT_SEASON, SEASONS, isFinished } from './season';
 
 // Shapes from worker/nba/espn.js. Finished seasons come from the static
@@ -75,6 +76,8 @@ export interface NbaDay {
   rosters?: Record<string, number[]>;
   // Every rostered player's lineup slot (live season only)
   slots?: Record<string, number>;
+  // The NBA team each rostered player who played that day played for (live)
+  playedFor?: Record<string, number>;
   // Each team's active-lineup minutes, on days with games
   minutes?: Record<string, number>;
   tx: Transaction[];
@@ -191,6 +194,7 @@ function useLiveChunks(season: number, enabled: boolean) {
     combine: (results) => ({
       chunks: results.flatMap((r) => (r.data ? [r.data] : [])),
       isPending: !league || results.some((r) => r.isPending),
+      isError: results.some((r) => r.isError),
     }),
   });
 }
@@ -251,6 +255,7 @@ export function useSeasonDays(season: number, enabled = true) {
       names: league?.names ?? {},
       proTeams: league?.proTeams ?? {},
       isPending: stored.isPending || !league,
+      isError: stored.isError,
     };
   }
   return {
@@ -258,6 +263,7 @@ export function useSeasonDays(season: number, enabled = true) {
     names: Object.assign({}, ...live.chunks.map((c) => c.names)),
     proTeams: Object.assign({}, ...live.chunks.map((c) => c.proTeams)) as Record<string, number>,
     isPending: live.isPending,
+    isError: live.isError,
   };
 }
 
@@ -267,6 +273,15 @@ const totalsQuery = (season: number) => ({
   queryFn: () => getJSON<NbaTotals>(`/nba-data/${season}/totals.json?v=2`),
   staleTime: Infinity,
 });
+
+// The live season's NBA schedule by day
+export const useSchedule = (season: number, enabled = true) =>
+  useQuery({
+    queryKey: ['nba', 'schedule', season],
+    queryFn: () => getJSON<NbaSchedule>(`/api/nba/schedule/${season}`),
+    enabled: enabled && !isFinished(season),
+    staleTime: 60 * 60 * 1000,
+  });
 
 // Each team's stat line for every counted day
 export function useSeasonTotals(season: number, enabled = true) {

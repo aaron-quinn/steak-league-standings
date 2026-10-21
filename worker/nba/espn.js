@@ -22,6 +22,7 @@ const counts = (slot) => slot !== BENCH && slot !== IR;
 //   rosters: { [teamID]: every player on the team that day },
 //   slots: { [playerID]: lineup slot } for every rostered player,
 //   minutes: { [teamID]: minutes played by the active lineup },
+//   playedFor: { [playerID]: NBA team } for rostered players who played,
 //   tx: executed adds, drops and trades,
 //   names: { [playerID]: name } for every rostered player
 // }
@@ -34,6 +35,7 @@ export function compactDay(json, day) {
   const rosters = {};
   const slots = {};
   const minutes = {};
+  const playedFor = {};
   const names = {};
   const proTeams = {};
   for (const team of json.schedule?.[0]?.teams ?? []) {
@@ -47,12 +49,16 @@ export function compactDay(json, day) {
       if (Number.isInteger(player.proTeamId)) proTeams[player.id] = player.proTeamId;
       rosters[team.teamId].push(player.id);
       slots[player.id] = entry.lineupSlotId;
-      const stats = player.stats?.find(
+      const split = player.stats?.find(
         (s) =>
           s.statSplitTypeId === 5 &&
           s.scoringPeriodId === day &&
           s.statSourceId === 0,
-      )?.stats;
+      );
+      const stats = split?.stats;
+      // The NBA team he played for that day: a past day's snapshot only has
+      // his team as of when it was fetched, wrong if he was traded since
+      if (Number.isInteger(split?.proTeamId)) playedFor[player.id] = split.proTeamId;
       const games = stats?.[GP] ?? 0;
       if (!games) continue;
       const line = statLine(stats);
@@ -83,7 +89,7 @@ export function compactDay(json, day) {
     }))
     .sort((a, b) => a.at - b.at);
 
-  return { day, teams, players, rosters, slots, minutes, tx, names, proTeams };
+  return { day, teams, players, rosters, slots, minutes, playedFor, tx, names, proTeams };
 }
 
 // Each team's rostered players with ESPN's season projections:
@@ -115,6 +121,20 @@ export function compactProjections(json, season) {
       return { id: team.id, totals, players, missing };
     }),
   };
+}
+
+// The NBA's whole season schedule, by fantasy scoring period (day)
+export const SCHEDULE = (season) =>
+  `https://lm-api-reads.fantasy.espn.com/apis/v3/games/fba/seasons/${season}?view=proTeamSchedules_wl`;
+
+// { [NBA team id]: the days it plays }, src/nba/lib/schedule.ts NbaSchedule
+export function compactSchedule(json) {
+  const out = {};
+  for (const team of json.settings?.proTeams ?? []) {
+    const days = Object.keys(team.proGamesByScoringPeriod ?? {}).map(Number);
+    if (days.length) out[team.id] = days.sort((a, b) => a - b);
+  }
+  return out;
 }
 
 // The NBA's games on one date, from ESPN's public scoreboard

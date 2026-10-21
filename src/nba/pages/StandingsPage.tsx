@@ -4,6 +4,7 @@ import CategoryTable from '../components/CategoryTable';
 import HistoryPanel from '../components/HistoryPanel';
 import SeasonStatus from '../components/SeasonStatus';
 import StandingsTable from '../components/StandingsTable';
+import WeekView from '../components/WeekView';
 import Shell, {
   AllTimeToggle,
   Loading,
@@ -19,7 +20,7 @@ import { FIRST_SEASON, dateOfDay, isFinished, shortDate } from '../lib/season';
 import { useSteakOdds } from '../lib/useSteakOdds';
 import { buildStandings, hasStarted, playingTime } from '../lib/standings';
 
-type View = 'points' | 'categories';
+type View = 'points' | 'categories' | 'week';
 
 export default function StandingsPage() {
   const [season] = useSeason();
@@ -124,6 +125,15 @@ export default function StandingsPage() {
                   >
                     Categories
                   </button>
+                  {!isFinished(season) && (
+                    <button
+                      aria-pressed={view === 'week'}
+                      onClick={() => setView('week')}
+                      title="Each team's games this lineup week"
+                    >
+                      Week
+                    </button>
+                  )}
                 </div>
               </div>
               {isError ? (
@@ -140,14 +150,17 @@ export default function StandingsPage() {
                   {shortDate(dateOfDay(league.opener, 1))}.{' '}
                   {league.teams.length} teams are in.
                 </div>
-              ) : view === 'points' ? (
+              ) : view === 'points' || (view === 'week' && isFinished(season)) ? (
                 <StandingsTable
                   rows={rows}
                   showESPN={Boolean(league.cutoff)}
                   buried={pitNow?.buried}
                   moves={moves?.size ? moves : undefined}
                   tonight={tonight}
+                  liveSeason={live}
                 />
+              ) : view === 'week' ? (
+                <WeekView key={season} league={league} rows={rows} />
               ) : (
                 <CategoryTable rows={rows} games={withGames ? (played ?? null) : undefined} />
               )}

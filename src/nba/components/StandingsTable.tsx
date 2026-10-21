@@ -16,6 +16,7 @@ interface Props {
   // Places each team has moved today, and its players' games today (live season)
   moves?: Map<number, number>;
   tonight?: Map<number, TonightTeam>;
+  liveSeason?: boolean;
 }
 
 // Active lineup slots (1 C, 3 G, 3 F, 2 UTIL): one segment each
@@ -67,6 +68,7 @@ export default function StandingsTable({
   buried,
   moves,
   tonight,
+  liveSeason = false,
 }: Props) {
   const [opened, setOpened] = useState<Set<number>>(() => new Set());
   const toggle = (id: number) =>
@@ -133,12 +135,10 @@ export default function StandingsTable({
                 {row.rank}
               </td>
               <td className="team-cell">
-                {row.team.owner ? (
-                  <Link
-                    to={`/nba/managers/${slugify(row.name)}`}
-                    className="who"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                {/* In the live season the whole row opens the day's players,
+                    so the name isn't a link there */}
+                {row.team.owner && !liveSeason ? (
+                  <Link to={`/nba/managers/${slugify(row.name)}`} className="who">
                     {row.name}
                     {buried?.has(row.team.id) && <span title="Tombstoned"> 🪦</span>}
                     {row.zone === 'self-buyer' && (
@@ -146,7 +146,13 @@ export default function StandingsTable({
                     )}
                   </Link>
                 ) : (
-                  <span className="who">{row.name}</span>
+                  <span className="who">
+                    {row.name}
+                    {buried?.has(row.team.id) && <span title="Tombstoned"> 🪦</span>}
+                    {row.zone === 'self-buyer' && (
+                      <span className="nba-zone-tag">Buys own</span>
+                    )}
+                  </span>
                 )}
                 <span className="team-name">
                   {row.team.owner ? row.team.name : 'No owner yet'}

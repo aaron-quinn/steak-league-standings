@@ -162,6 +162,20 @@ never load either. Seasons are named by the year they end, so 2027 is 2026–27.
   through March 31 count (`CUTOFFS` in `worker/nba/config.js`). ESPN's final
   standings for those seasons kept going and differ.
 
+The current season's standings rows open that day's players. The **Week** tab
+compares scheduled, played, lost and remaining starter-games for each weekly
+lineup period, with sortable totals and expandable daily calendars. Bench and
+IR are excluded, and future dates use the latest lineup. Played includes games
+in progress; Lost is a missed completed game, including injury, rest and coach's
+decisions, since the source does not distinguish those reasons. The NBA schedule
+is cached for a day; lineups and live game states refresh every minute.
+
+Check the weekly game accounting with Node 22.6 or later:
+
+```bash
+node --experimental-strip-types --test scripts/nba/week.test.mjs
+```
+
 When an NBA season ends, move `CURRENT_SEASON` on in both
 `worker/nba/config.js` and `src/nba/lib/season.ts`, add the new opening night
 to `OPENERS` and `CURRENT_OPENER` (pages show the last finished season until

@@ -15,11 +15,13 @@ import {
   DAY_VIEWS,
   LEAGUE_VIEWS,
   ROSTER_VIEWS,
+  SCHEDULE,
   SCOREBOARD,
   compactDay,
   compactGames,
   compactLeague,
   compactProjections,
+  compactSchedule,
 } from './espn.js';
 
 export const CHUNK_DAYS = 7;
@@ -75,7 +77,7 @@ async function liveTotals(season, league, json) {
 // it in memory too.
 const memory = new Map();
 async function getDay(season, day, final) {
-  const key = `https://nba.steak.internal/day/v4/${season}/${day}`;
+  const key = `https://nba.steak.internal/day/v5/${season}/${day}`;
   const kept = memory.get(key);
   if (kept && kept.expires > Date.now()) return kept.data;
 
@@ -157,18 +159,29 @@ nba.get('/days/:year/:chunk', ...cacheFor(LIVE_SECONDS), async (c) => {
   const final = first + CHUNK_DAYS - 1 < latestDay;
   if (final) c.header('Cache-Control', `max-age=${FINAL_RESPONSE_SECONDS}`);
   return c.json({
-    days: days.map(({ day, teams, players, rosters, slots, minutes, tx }) => ({
+    days: days.map(({ day, teams, players, rosters, slots, minutes, playedFor, tx }) => ({
       day,
       teams,
       players,
       rosters,
       slots,
       minutes,
+      playedFor,
       tx,
     })),
     names,
     proTeams,
   });
+});
+
+// The NBA schedule by day, for the weekly games view. It changes only when
+// games are rescheduled.
+const SCHEDULE_SECONDS = 60 * 60 * 24;
+nba.get('/schedule/:year', ...cacheFor(SCHEDULE_SECONDS), async (c) => {
+  const season = Number(c.req.param('year'));
+  if (!isCurrent(season)) return c.json({ error: 'Not the current season' }, 404);
+  const json = await fetchJSON(SCHEDULE(season), { cacheSeconds: SCHEDULE_SECONDS });
+  return c.json(compactSchedule(json));
 });
 
 // Each team's summed ESPN season projections over its current roster, for the
