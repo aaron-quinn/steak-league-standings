@@ -5,31 +5,64 @@ import BuildCard from '../components/BuildCard';
 import BuildShape from '../components/BuildShape';
 import SeasonStatus from '../components/SeasonStatus';
 import Shell, { Loading, useSeason } from '../components/Shell';
-import { useAllLeagues, useLeague } from '../lib/data';
+import { useAllLeagues, useLeague, useProjections } from '../lib/data';
 import { formatPoints, ordinal, plural } from '../lib/format';
 import { buildPeople, slugify, tendencies } from '../lib/people';
 import { BUILD_LABEL, PUNT_REST, buildProfile } from '../lib/profile';
-import { CATEGORIES } from '../lib/roto';
+import { CATEGORIES, emptyLine } from '../lib/roto';
 import { CURRENT_SEASON, dateOfDay, isFinished, shortDate } from '../lib/season';
 import { buildStandings, hasStarted, personName } from '../lib/standings';
+
+// The live season shows projected shapes by default until this many days in,
+// when its own stats start to say more than the schedule so far
+const PROJECTED_UNTIL_DAY = 21;
+
+type Basis = 'stats' | 'projected';
 
 export default function BuildsPage() {
   const [season] = useSeason();
   const { data: league } = useLeague(season);
-  const rows = useMemo(() => (league ? buildStandings(league.teams) : []), [league]);
-  // ?view=managers, so the view survives a reload or a shared link
+  // ?view=managers and ?basis=, so the view survives a reload or a shared link
   const [params, setParams] = useSearchParams();
   const view = params.get('view') === 'managers' ? 'managers' : 'seasons';
-  const setView = (next: 'seasons' | 'managers') =>
+  const setParam = (key: string, value: string | null) =>
     setParams(
       (prev) => {
         const p = new URLSearchParams(prev);
-        if (next === 'managers') p.set('view', next);
-        else p.delete('view');
+        if (value) p.set(key, value);
+        else p.delete(key);
         return p;
       },
       { replace: true },
     );
+  const setView = (next: 'seasons' | 'managers') =>
+    setParam('view', next === 'managers' ? next : null);
+
+  // The live season can be drawn from ESPN's projections for each roster
+  const live = !isFinished(season);
+  const defaultBasis: Basis =
+    live && (league?.latestDay ?? 0) < PROJECTED_UNTIL_DAY ? 'projected' : 'stats';
+  const chosen = params.get('basis');
+  const basis: Basis =
+    live && (chosen === 'stats' || chosen === 'projected') ? chosen : defaultBasis;
+  const projected = live && basis === 'projected';
+  const setBasis = (next: Basis) => setParam('basis', next === defaultBasis ? null : next);
+  const { data: projections, isError: projectionsFailed } = useProjections(
+    season,
+    projected && view === 'seasons',
+  );
+
+  const rows = useMemo(() => {
+    if (!league) return [];
+    if (!projected) return buildStandings(league.teams);
+    if (!projections) return [];
+    const byID = new Map(projections.teams.map((t) => [t.id, t.totals]));
+    return buildStandings(
+      league.teams,
+      new Map(league.teams.map((t) => [t.id, byID.get(t.id) ?? emptyLine()])),
+    );
+  }, [league, projected, projections]);
+  const unprojected = projections?.teams.reduce((n, t) => n + t.missing, 0) ?? 0;
 
   return (
     <Shell
@@ -50,10 +83,61 @@ export default function BuildsPage() {
               </button>
             </div>
           </div>
+          {view === 'seasons' && live && (
+            <div className="nba-basis">
+              <div className="nba-seg" role="group" aria-label="Shapes from">
+                <button aria-pressed={basis === 'stats'} onClick={() => setBasis('stats')}>
+                  Stats so far
+                </button>
+                <button aria-pressed={basis === 'projected'} onClick={() => setBasis('projected')}>
+                  Projected
+                </button>
+              </div>
+              <span className="nba-faint">
+                {projected
+                  ? 'Each roster on ESPN’s season projections'
+                  : 'From each team’s stats this season'}
+              </span>
+            </div>
+          )}
           {view === 'managers' ? (
             <ManagerTendencies />
           ) : !league ? (
             <Loading label="Loading builds" />
+          ) : projected ? (
+            projectionsFailed ? (
+              <div className="nba-empty">
+                <b>No projections</b>ESPN didn&rsquo;t answer. Try again in a minute.
+              </div>
+            ) : !projections ? (
+              <Loading label="Loading projections" />
+            ) : (
+              <>
+                <ul className="nba-builds">
+                  {rows.map((row) => (
+                    <BuildCard
+                      key={row.team.id}
+                      row={row}
+                      teamCount={rows.length}
+                      title={row.name}
+                      to={row.team.owner ? `/nba/managers/${slugify(row.name)}` : undefined}
+                      sub={`Projects ${ordinal(row.position)} · ${formatPoints(row.points)} roto points`}
+                    />
+                  ))}
+                </ul>
+                <p className="nba-foot" style={{ margin: 0, padding: '0 12px 12px' }}>
+                  Each team&rsquo;s current roster, IR left out, added up on
+                  ESPN&rsquo;s season projections and ranked category by
+                  category, as if every player played his projected games for
+                  this team. It updates with roster moves.
+                  {unprojected > 0 &&
+                    ` ${plural(unprojected, 'rostered player')} ESPN doesn’t project ${unprojected === 1 ? 'counts' : 'count'} as nothing.`}{' '}
+                  Until {shortDate(dateOfDay(league.opener, PROJECTED_UNTIL_DAY))} this
+                  is the default, while a few nights of games say more about
+                  the schedule than the roster.
+                </p>
+              </>
+            )
           ) : !hasStarted(league) ? (
             <div className="nba-empty">
               <b>No games yet</b>

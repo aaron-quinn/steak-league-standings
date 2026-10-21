@@ -209,6 +209,20 @@ export function useToday(season: number) {
   };
 }
 
+// ESPN's season projections summed over each team's current roster (IR left
+// out), from worker/nba/espn.js compactProjections
+export interface NbaProjections {
+  teams: { id: number; totals: StatLine; players: number; missing: number }[];
+}
+
+export const useProjections = (season: number, enabled = true) =>
+  useQuery({
+    queryKey: ['nba', 'projections', season],
+    queryFn: () => getJSON<NbaProjections>(`/api/nba/projections/${season}`),
+    enabled: enabled && !isFinished(season),
+    staleTime: 60 * 60 * 1000,
+  });
+
 // The NBA games on the live season's latest day
 export const useTonight = (season: number) =>
   useQuery({

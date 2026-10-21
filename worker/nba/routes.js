@@ -3,8 +3,8 @@
 //
 // ESPN is asked for at most three things a minute per edge location: the
 // league (standings, status), today's fantasy scoreboard and today's NBA
-// games. A finished day is fetched once, reduced to its compact form and kept
-// at the edge for a month.
+// games, plus rosters with projections once an hour. A finished day is
+// fetched once, reduced to its compact form and kept at the edge for a month.
 import { Hono } from 'hono';
 import fetchJSON from '../api/fetch-json.js';
 import { cacheFor } from '../routes/index.js';
@@ -14,10 +14,12 @@ import { addLine, scoreRoto } from '../../src/nba/lib/roto.ts';
 import {
   DAY_VIEWS,
   LEAGUE_VIEWS,
+  ROSTER_VIEWS,
   SCOREBOARD,
   compactDay,
   compactGames,
   compactLeague,
+  compactProjections,
 } from './espn.js';
 
 export const CHUNK_DAYS = 7;
@@ -167,6 +169,19 @@ nba.get('/days/:year/:chunk', ...cacheFor(LIVE_SECONDS), async (c) => {
     names,
     proTeams,
   });
+});
+
+// Each team's summed ESPN season projections over its current roster, for the
+// Builds page's projected shapes. Rosters change with moves, projections
+// rarely, so an hour is fresh enough.
+const PROJECTION_SECONDS = 60 * 60;
+nba.get('/projections/:year', ...cacheFor(PROJECTION_SECONDS), async (c) => {
+  const season = Number(c.req.param('year'));
+  if (!isCurrent(season)) return c.json({ error: 'Not the current season' }, 404);
+  const json = await fetchJSON(`${ESPN_LEAGUE(season)}?${ROSTER_VIEWS}`, {
+    cacheSeconds: PROJECTION_SECONDS,
+  });
+  return c.json(compactProjections(json, season));
 });
 
 // The NBA games on the latest scoring day, with whether each is still to

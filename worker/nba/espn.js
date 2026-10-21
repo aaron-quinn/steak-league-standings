@@ -86,6 +86,37 @@ export function compactDay(json, day) {
   return { day, teams, players, rosters, slots, minutes, tx, names, proTeams };
 }
 
+// Each team's rostered players with ESPN's season projections:
+//   ESPN_LEAGUE(season)?view=mRoster
+export const ROSTER_VIEWS = 'view=mRoster';
+
+// { teams: [{ id, totals, players, missing }] }: each team's summed projection
+// (stat line order) over its roster, leaving out IR slots, which don't count;
+// `missing` is how many of those players ESPN has no projection for
+export function compactProjections(json, season) {
+  const id = `10${season}`;
+  return {
+    teams: (json.teams ?? []).map((team) => {
+      const totals = STAT_IDS.map(() => 0);
+      let players = 0;
+      let missing = 0;
+      for (const entry of team.roster?.entries ?? []) {
+        if (entry.lineupSlotId === IR) continue;
+        players++;
+        const projection = entry.playerPoolEntry?.player?.stats?.find(
+          (s) => s.id === id && s.statSourceId === 1,
+        )?.stats;
+        if (!projection) {
+          missing++;
+          continue;
+        }
+        statLine(projection).forEach((v, i) => (totals[i] += v));
+      }
+      return { id: team.id, totals, players, missing };
+    }),
+  };
+}
+
 // The NBA's games on one date, from ESPN's public scoreboard
 //   https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=YYYYMMDD
 // as [{ home, away, state: 'pre' | 'in' | 'post', detail, start }]. Team IDs
