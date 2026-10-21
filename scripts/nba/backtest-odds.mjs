@@ -1,9 +1,16 @@
 // Leave-one-season-out backtest of the NBA steak odds (src/nba/lib/odds.ts)
 // against a baseline that only knows each team's current position.
 // Scores per team-week log loss on eating, and calibration by decile.
-// Usage: node scripts/nba/backtest-odds.mjs [priorDays ...]
+// Each run compares paces per calendar day with paces per game played.
+// Usage: node scripts/nba/backtest-odds.mjs [priorDays ...] [--early]
 import { readFileSync } from 'node:fs';
-import { checkpoints, fitModel, seeded, simulate } from '../../src/nba/lib/odds.ts';
+import {
+  GAMES_PRIOR_DAYS,
+  checkpoints,
+  fitModel,
+  seeded,
+  simulate,
+} from '../../src/nba/lib/odds.ts';
 import { scoreRoto } from '../../src/nba/lib/roto.ts';
 
 const SEASONS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
@@ -51,18 +58,34 @@ function positionBaseline(train) {
   };
 }
 
-const priors = process.argv.slice(2).map(Number);
-for (const priorDays of priors.length ? priors : [14]) {
+// Weekly checkpoints, as the model is fitted; --early instead scores each of a
+// season's first seven days with games (opening night on), where schedule luck
+// is largest
+const early = process.argv.includes('--early');
+const heldCheckpoints = (season) =>
+  early ? checkpoints(season, 1, 0).slice(0, 7) : checkpoints(season);
+
+// --games-prior=7,14,28 scans the days of league-average games blended into a
+// team's own games per day (GAMES_PRIOR_DAYS in odds.ts)
+const gamesPriorArg = process.argv.find((a) => a.startsWith('--games-prior='));
+const gamesPriors = gamesPriorArg
+  ? gamesPriorArg.split('=')[1].split(',').map(Number)
+  : [GAMES_PRIOR_DAYS];
+const modes = [{ perGame: false }, ...gamesPriors.map((g) => ({ perGame: true, gamesPrior: g }))];
+
+const priors = process.argv.slice(2).filter((a) => !a.startsWith('--')).map(Number);
+for (const priorDays of priors.length ? priors : [14])
+for (const { perGame, gamesPrior } of modes) {
   let model = 0, base = 0, count = 0;
   const bins = Array.from({ length: 10 }, () => [0, 0, 0]);
   const buried = [0, 0];
   const bySeason = [];
   for (const held of seasons) {
     const train = seasons.filter((s) => s !== held);
-    const fitted = fitModel(train, priorDays);
+    const fitted = fitModel(train, priorDays, perGame, gamesPrior);
     const baseline = positionBaseline(train);
     let sm = 0, sb = 0, sc = 0;
-    for (const { soFar, final } of checkpoints(held)) {
+    for (const { soFar, final } of heldCheckpoints(held)) {
       const ate = eaters(final, held.order);
       const odds = simulate(soFar, fitted, held.order, 400, seeded(held.season * 1000 + soFar.elapsed));
       const ranked = scoreRoto(soFar.totals).sort((a, b) => b.points - a.points || held.order.get(a.id) - held.order.get(b.id));
@@ -78,11 +101,11 @@ for (const priorDays of priors.length ? priors : [14]) {
     }
     model += sm; base += sb; count += sc;
     bySeason.push(`${held.season} ${(sm / sc).toFixed(3)} vs ${(sb / sc).toFixed(3)}`);
-    if (priors.length <= 1 && held === seasons.at(-1)) {
+    if (priors.length <= 1 && perGame && held === seasons.at(-1)) {
       console.log('fitted on 2019–2025:', JSON.stringify(fitted, (_key, v) => (typeof v === 'number' ? +v.toFixed(4) : v)));
     }
   }
-  console.log(`priorDays ${priorDays}: model ${(model / count).toFixed(4)}, position baseline ${(base / count).toFixed(4)} (${count} team-weeks)`);
+  console.log(`priorDays ${priorDays}, ${perGame ? `per game, games prior ${gamesPrior} days` : 'per day'}${early ? ', first 7 days' : ''}: model ${(model / count).toFixed(4)}, position baseline ${(base / count).toFixed(4)} (${count} team-checkpoints)`);
   console.log('  by season (model vs baseline):', bySeason.join(' · '));
   console.log(`  under 1% (tombstoned): ${buried[0]} team-weeks, ${buried[1]} ate`);
   console.log('  calibration (predicted → ate, n):', bins.filter((b) => b[2]).map((b) => `${(100 * b[0] / b[2]).toFixed(0)}→${(100 * b[1] / b[2]).toFixed(0)} (${b[2]})`).join('  '));

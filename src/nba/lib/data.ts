@@ -100,6 +100,9 @@ export interface NbaTotals {
   // The days with games that count, and each team's stat line on each
   days: number[];
   teams: Record<string, StatLine[]>;
+  // Games each team's active lineup played on each of those days (files built
+  // since Oct 2026, and the live season)
+  games?: Record<string, number[]>;
 }
 
 const CHUNK_DAYS = 7;
@@ -246,7 +249,8 @@ export function useSeasonDays(season: number, enabled = true) {
 
 const totalsQuery = (season: number) => ({
   queryKey: ['nba', 'totals', season],
-  queryFn: () => getJSON<NbaTotals>(`/nba-data/${season}/totals.json`),
+  // v2: each day's games (see DAYS_VERSION)
+  queryFn: () => getJSON<NbaTotals>(`/nba-data/${season}/totals.json?v=2`),
   staleTime: Infinity,
 });
 
@@ -265,12 +269,18 @@ function liveTotals(chunks: Chunk[]): NbaTotals {
     .flatMap((c) => c.days)
     .filter((d) => d.players.length > 0 && d.teams);
   const teams: Record<string, StatLine[]> = {};
+  const games: Record<string, number[]> = {};
   for (const d of days) {
+    const played: Record<string, number> = {};
+    for (const [team, , slot, count] of d.players) {
+      if (slot !== 12 && slot !== 13) played[team] = (played[team] ?? 0) + count;
+    }
     for (const [id, line] of Object.entries(d.teams!)) {
       (teams[id] ??= []).push(line);
+      (games[id] ??= []).push(played[id] ?? 0);
     }
   }
-  return { days: days.map((d) => d.day), teams };
+  return { days: days.map((d) => d.day), teams, games };
 }
 
 // Every finished season's daily totals, for the odds model

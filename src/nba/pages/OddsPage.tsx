@@ -164,8 +164,9 @@ export default function OddsPage() {
                   ? 'Drag the slider or press play to watch the season unfold: each week shows the odds as they stood then, next to how it really ended. Tap a card to jump to its moment. '
                   : ''}
                 Each team&rsquo;s rest of season is simulated thousands of times
-                from its pace in every category, with the swings that past
-                seasons (2018–19 on) actually showed; a past season&rsquo;s
+                from its pace per game in every category (so an early run of
+                extra games isn&rsquo;t assumed to last), with the swings that
+                past seasons (2018–19 on) actually showed; a past season&rsquo;s
                 odds never see that season. Checked season by season against
                 what happened, it beat ranking by current position in 7 of 8
                 seasons.

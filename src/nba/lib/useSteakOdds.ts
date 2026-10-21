@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useAllLeagues, useHistoricalTotals, useLeague, useSeasonTotals } from './data';
 import { buildRace } from './race';
-import { currentOdds, modelFor, oddsHistory } from './season-odds';
+import { currentOdds, gamesSoFar, modelFor, oddsHistory } from './season-odds';
 import { dateOfDay, isFinished } from './season';
 import { buildStandings, hasStarted } from './standings';
 import { isTombstoned, tombstoneLine, tombstoned, type Comeback } from './tombstone';
@@ -32,9 +32,9 @@ export function useSteakOdds(
   const { leagues } = useAllLeagues();
   const { seasons: past, isPending: pastPending } = useHistoricalTotals(enabled);
   const finished = isFinished(season);
-  // The live season's week-by-week totals come in chunks; skip them when only
-  // today's tombstones are wanted
-  const { totals } = useSeasonTotals(season, enabled && withHistory);
+  // A season's day-by-day totals: the history needs them, and today's odds
+  // need the live season's games so far (they project per game played)
+  const { totals } = useSeasonTotals(season, enabled && (withHistory || !finished));
 
   const pastSeasons = useMemo(() => {
     if (pastPending) return null;
@@ -65,8 +65,11 @@ export function useSteakOdds(
 
   const started = league ? hasStarted(league) : false;
   const now = useMemo(
-    () => (league && model && !finished && started ? currentOdds(league, model) : null),
-    [league, model, finished, started],
+    () =>
+      league && model && totals && !finished && started
+        ? currentOdds(league, model, gamesSoFar(totals))
+        : null,
+    [league, model, totals, finished, started],
   );
 
   const history = useMemo(

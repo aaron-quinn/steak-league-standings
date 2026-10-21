@@ -20,6 +20,14 @@ export interface ErrorModel {
 export interface OddsModel {
   // Days of league-average production blended into a team's pace
   priorDays: number;
+  // Active-lineup games a team plays per calendar day, on average. When set,
+  // paces are per game played times the games a team is expected to get, so
+  // early schedule luck (more games so far) isn't projected forward
+  gamesPerDay?: number;
+  // Days of league-average games blended into a team's own games per day.
+  // Over a season some teams really do get more games (streaming, full
+  // lineups), so their own rate takes over as the days pass.
+  gamesPriorDays?: number;
   // One per counting stat (PTS, REB, AST, 3PM, STL, BLK), then FGA, FTA
   volume: ErrorModel[];
   // Absolute error of FG% and FT% over the remaining shots
@@ -31,6 +39,8 @@ export interface OddsModel {
 export interface SeasonSoFar {
   // Each team's total through today
   totals: Map<number, StatLine>;
+  // Each team's active-lineup games through today, when known
+  games?: Map<number, number>;
   // Calendar days played and left (day 1 is opening night)
   elapsed: number;
   remaining: number;
@@ -40,11 +50,34 @@ const sd = (e: ErrorModel, remaining: number) =>
   Math.sqrt(e.drift ** 2 + e.noise / Math.max(remaining, 1));
 
 // Each team's expected production per remaining day, nudged toward the
-// league average while the sample is small
-function paces(season: SeasonSoFar, priorDays: number) {
+// league average while the sample is small. With games known, that's the
+// team's production per game times the games per day it's expected to get.
+function paces(
+  season: SeasonSoFar,
+  priorDays: number,
+  gamesPerDay?: number,
+  gamesPriorDays = 0,
+) {
   const ids = [...season.totals.keys()];
   const league = emptyLine();
   for (const id of ids) addLine(league, season.totals.get(id)!);
+  const games = season.games;
+  const leagueGames = games ? ids.reduce((sum, id) => sum + (games.get(id) ?? 0), 0) : 0;
+  if (gamesPerDay && games && leagueGames > 0) {
+    const perGame = league.map((v) => v / leagueGames);
+    const priorGames = priorDays * gamesPerDay;
+    return new Map(
+      ids.map((id) => {
+        const played = games.get(id) ?? 0;
+        const rate = (played + gamesPriorDays * gamesPerDay) / (season.elapsed + gamesPriorDays);
+        const weight = played + priorGames;
+        return [
+          id,
+          season.totals.get(id)!.map((v, i) => ((v + priorGames * perGame[i]) / weight) * rate),
+        ];
+      }),
+    );
+  }
   const average = league.map((v) => v / ids.length / Math.max(season.elapsed, 1));
   const weight = season.elapsed + priorDays;
   return new Map(
@@ -98,7 +131,7 @@ export function simulate(
   const ids = [...season.totals.keys()];
   const n = ids.length;
   const eaters = Math.floor(n / 2);
-  const pace = paces(season, model.priorDays);
+  const pace = paces(season, model.priorDays, model.gamesPerDay, model.gamesPriorDays);
   const R = season.remaining;
   const result = new Map<number, TeamOdds>(
     ids.map((id) => [id, { id, eat: 0, first: 0, position: 0, points: 0 }]),
@@ -154,38 +187,78 @@ export function simulate(
 export interface PastSeason {
   days: number[];
   teams: Record<string, StatLine[]>;
+  // Active-lineup games each team played each day (files built since Oct 2026)
+  games?: Record<string, number[]>;
   // The last day that counted
   lastDay: number;
 }
 
-// Cumulative totals through each day index
+// Cumulative totals (and games, when known) through each day index
 function cumulative(season: PastSeason) {
   const ids = Object.keys(season.teams).map(Number);
   const running = new Map(ids.map((id) => [id, emptyLine()]));
+  const played = new Map(ids.map((id) => [id, 0]));
   return season.days.map((_, i) => {
-    for (const id of ids) addLine(running.get(id)!, season.teams[id][i]);
-    return new Map([...running].map(([id, line]) => [id, [...line]]));
+    for (const id of ids) {
+      addLine(running.get(id)!, season.teams[id][i]);
+      played.set(id, played.get(id)! + (season.games?.[id]?.[i] ?? 0));
+    }
+    return {
+      totals: new Map([...running].map(([id, line]) => [id, [...line]])),
+      games: season.games ? new Map(played) : undefined,
+    };
   });
 }
 
-// Weekly checkpoints through a past season: totals so far, and final totals
-export function checkpoints(season: PastSeason, every = 7) {
-  const totals = cumulative(season);
-  const final = totals[totals.length - 1];
+// Checkpoints through a past season, every `every` days of games from day
+// index `first`: totals (and games) so far, and final totals
+export function checkpoints(season: PastSeason, every = 7, first = every - 1) {
+  const running = cumulative(season);
   const out: { soFar: SeasonSoFar; final: Map<number, StatLine> }[] = [];
-  for (let i = every - 1; i < season.days.length - 1; i += every) {
+  // 2017-18 (Yahoo) has no daily totals
+  if (!running.length) return out;
+  const final = running[running.length - 1].totals;
+  for (let i = first; i < season.days.length - 1; i += every) {
     const day = season.days[i];
     out.push({
-      soFar: { totals: totals[i], elapsed: day, remaining: season.lastDay - day },
+      soFar: { ...running[i], elapsed: day, remaining: season.lastDay - day },
       final,
     });
   }
   return out;
 }
 
+// Chosen by scripts/nba/backtest-odds.mjs --games-prior=0,3,7,14,28,56,
+// leaving each season out (log loss; per day was 0.3912 weekly, 0.6653 over
+// the first seven days): 28 gave 0.3900 weekly and 0.6367 early. Less trusts
+// early schedule luck (0 scored 1.087 early); more ignores real differences
+// in games later on (56: 0.3917 weekly).
+export const GAMES_PRIOR_DAYS = 28;
+
+// Active-lineup games per team per calendar day over the seasons that record
+// games, or undefined if none do
+function averageGamesPerDay(seasons: PastSeason[]) {
+  let games = 0;
+  let teamDays = 0;
+  for (const season of seasons) {
+    if (!season.games) continue;
+    const ids = Object.keys(season.games);
+    for (const id of ids) games += season.games[id].reduce((a, b) => a + b, 0);
+    teamDays += ids.length * season.lastDay;
+  }
+  return teamDays ? games / teamDays : undefined;
+}
+
 // Fits the error model to past seasons: compare each team's pace at every
-// weekly checkpoint with what it actually produced over the rest of the season
-export function fitModel(seasons: PastSeason[], priorDays = 14): OddsModel {
+// weekly checkpoint with what it actually produced over the rest of the season.
+// perGame (the default) projects per game played when the seasons record games.
+export function fitModel(
+  seasons: PastSeason[],
+  priorDays = 14,
+  perGame = true,
+  gamesPriorDays = GAMES_PRIOR_DAYS,
+): OddsModel {
+  const gamesPerDay = perGame ? averageGamesPerDay(seasons) : undefined;
   const volumeRows = COUNTING.length + VOLUME.length;
   const volume: { R: number; err: number }[][] = Array.from({ length: volumeRows }, () => []);
   const shooting: { R: number; err: number }[][] = [[], []];
@@ -193,7 +266,7 @@ export function fitModel(seasons: PastSeason[], priorDays = 14): OddsModel {
 
   for (const season of seasons) {
     for (const { soFar, final } of checkpoints(season)) {
-      const pace = paces(soFar, priorDays);
+      const pace = paces(soFar, priorDays, gamesPerDay, gamesPriorDays);
       const R = soFar.remaining;
       if (R < 3) continue;
       for (const [id, now] of soFar.totals) {
@@ -223,6 +296,8 @@ export function fitModel(seasons: PastSeason[], priorDays = 14): OddsModel {
 
   return {
     priorDays,
+    gamesPerDay,
+    gamesPriorDays,
     volume: volume.map(fitError),
     shooting: shooting.map(fitError),
     teamShare: sharedShare(teamResiduals),

@@ -47,6 +47,12 @@ async function espn(url, file) {
   }
 }
 
+// Games a team's active lineup played on a day (bench and IR don't count)
+const activeGames = (day, team) =>
+  day.players
+    .filter(([t, , slot]) => t === team && slot !== 12 && slot !== 13)
+    .reduce((sum, p) => sum + p[3], 0);
+
 function withRosterChanges(days) {
   let previous = '';
   const out = [];
@@ -163,6 +169,11 @@ async function build(season) {
       days: counted.map((d) => d.day),
       teams: Object.fromEntries(
         league.teams.map((t) => [t.id, counted.map((d) => d.teams[t.id] ?? emptyLine())]),
+      ),
+      // Games each team's active lineup played each day, so the odds can
+      // project per game rather than per calendar day
+      games: Object.fromEntries(
+        league.teams.map((t) => [t.id, counted.map((d) => activeGames(d, t.id))]),
       ),
     }),
     // Moves happen on days without games too (the All-Star break). Rosters

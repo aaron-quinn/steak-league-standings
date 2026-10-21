@@ -25,11 +25,31 @@ export function tieOrder(league: NbaLeague) {
   );
 }
 
-// Odds today, from the league's live totals
-export function currentOdds(league: NbaLeague, model: OddsModel, runs = 4000) {
+// Each team's active-lineup games over a season's days so far
+export function gamesSoFar(totals: NbaTotals) {
+  return new Map(
+    Object.entries(totals.games ?? {}).map(([id, days]) => [
+      Number(id),
+      days.reduce((a, b) => a + b, 0),
+    ]),
+  );
+}
+
+// Odds today, from the league's live totals and each team's games so far
+export function currentOdds(
+  league: NbaLeague,
+  model: OddsModel,
+  games?: Map<number, number>,
+  runs = 4000,
+) {
   const totals = new Map<number, StatLine>(league.teams.map((t) => [t.id, t.totals]));
   return simulate(
-    { totals, elapsed: league.latestDay, remaining: Math.max(0, league.finalDay - league.latestDay) },
+    {
+      totals,
+      games,
+      elapsed: league.latestDay,
+      remaining: Math.max(0, league.finalDay - league.latestDay),
+    },
     model,
     tieOrder(league),
     runs,
@@ -193,10 +213,15 @@ export function oddsHistory(
   const order = tieOrder(league);
   const eat = new Map<number, number[]>(league.teams.map((t) => [t.id, []]));
   const running = new Map<number, StatLine>(league.teams.map((t) => [t.id, emptyLine()]));
+  // Games so far, when the totals record them (the odds project per game)
+  const played = totals.games ? new Map(league.teams.map((t) => [t.id, 0])) : undefined;
   let i = 0;
   for (const checkpoint of race.checkpoints) {
     while (i < totals.days.length && totals.days[i] <= checkpoint.day) {
-      for (const t of league.teams) addLine(running.get(t.id)!, totals.teams[t.id]?.[i] ?? emptyLine());
+      for (const t of league.teams) {
+        addLine(running.get(t.id)!, totals.teams[t.id]?.[i] ?? emptyLine());
+        played?.set(t.id, played.get(t.id)! + (totals.games?.[t.id]?.[i] ?? 0));
+      }
       i++;
     }
     const remaining = Math.max(0, endDay - checkpoint.day);
@@ -205,7 +230,12 @@ export function oddsHistory(
       odds = simulate({ totals: running, elapsed: checkpoint.day, remaining: 0 }, model, order, 1);
     } else {
       odds = simulate(
-        { totals: new Map([...running].map(([id, l]) => [id, [...l]])), elapsed: checkpoint.day, remaining },
+        {
+          totals: new Map([...running].map(([id, l]) => [id, [...l]])),
+          games: played && new Map(played),
+          elapsed: checkpoint.day,
+          remaining,
+        },
         model,
         order,
         runs,
