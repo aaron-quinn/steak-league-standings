@@ -1,6 +1,6 @@
-import { useState, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import clsx from 'clsx';
-import { CATEGORIES } from '../lib/roto';
+import { CATEGORIES, scoreRoto, type CategoryResult } from '../lib/roto';
 import type { PlayingTime, StandingRow } from '../lib/standings';
 import { formatPoints } from '../lib/format';
 
@@ -13,6 +13,13 @@ interface Props {
 
 type Time = keyof PlayingTime;
 type Sort = number | Time | null;
+type Mode = 'totals' | 'perGame' | 'points';
+
+// Per game played by the active lineup, so a player-game. Percentages are
+// already rates.
+const RATES = new Set(['fgp', 'ftp']);
+const perGameFormat = (index: number, value: number) =>
+  RATES.has(CATEGORIES[index].key) ? CATEGORIES[index].format(value) : value.toFixed(1);
 
 const TIME: { key: Time; label: string; title: string }[] = [
   { key: 'games', label: 'GP', title: "Games played by the active lineup (bench and IR don't count)" },
@@ -23,8 +30,24 @@ const TIME: { key: Time; label: string; title: string }[] = [
 // sort by it; the team column stays put while the categories scroll.
 export default function CategoryTable({ rows, games }: Props) {
   const [sortBy, setSortBy] = useState<Sort>(null);
-  const [showPoints, setShowPoints] = useState(false);
+  const [chosenMode, setMode] = useState<Mode>('totals');
+  // Per game needs games played, which load separately
+  const mode = chosenMode === 'perGame' && !games ? 'totals' : chosenMode;
   const time = (row: StandingRow, key: Time) => games?.get(row.team.id)?.[key] ?? 0;
+  // Each team's line divided by its games played, ranked like the real table
+  // so the tints and sorting follow per-game standing. Percentages don't move.
+  const perGame = useMemo(() => {
+    if (!games) return undefined;
+    const lines = new Map(
+      rows.map((row) => {
+        const gp = games.get(row.team.id)?.games ?? 0;
+        return [row.team.id, row.team.totals.map((v) => (gp ? v / gp : 0))];
+      }),
+    );
+    return new Map(scoreRoto(lines).map((r) => [r.id, r.categories]));
+  }, [rows, games]);
+  const cats = (row: StandingRow): CategoryResult[] =>
+    (mode === 'perGame' && perGame?.get(row.team.id)) || row.categories;
   const sorted =
     sortBy === null
       ? rows
@@ -32,7 +55,7 @@ export default function CategoryTable({ rows, games }: Props) {
           (a, b) =>
             (typeof sortBy === 'string'
               ? time(b, sortBy) - time(a, sortBy)
-              : b.categories[sortBy].points - a.categories[sortBy].points) ||
+              : cats(b)[sortBy].points - cats(a)[sortBy].points) ||
             a.position - b.position,
         );
   const teamCount = rows.length;
@@ -42,13 +65,29 @@ export default function CategoryTable({ rows, games }: Props) {
     <>
       <div className="nba-cats-key">
         <div className="nba-seg" role="group" aria-label="Category values">
-          <button type="button" aria-pressed={!showPoints} onClick={() => setShowPoints(false)}>Totals</button>
-          <button type="button" aria-pressed={showPoints} onClick={() => setShowPoints(true)}>Roto points</button>
+          <button type="button" aria-pressed={mode === 'totals'} onClick={() => setMode('totals')}>Totals</button>
+          <button type="button" aria-pressed={mode === 'points'} onClick={() => setMode('points')}>Roto points</button>
+          {games !== undefined && (
+            <button
+              type="button"
+              aria-pressed={mode === 'perGame'}
+              disabled={!games}
+              title="Each category divided by games played by the active lineup"
+              onClick={() => setMode('perGame')}
+            >
+              Per game
+            </button>
+          )}
         </div>
         <span className="nba-cats-scale"><span>Bottom 3</span><i aria-hidden="true" /><span>Top 3</span></span>
       </div>
       <div className="nba-scroll">
-      <table className="nba-table nba-cats" aria-label={showPoints ? 'Category roto points' : 'Category totals'}>
+      <table
+        className="nba-table nba-cats"
+        aria-label={
+          mode === 'points' ? 'Category roto points' : mode === 'perGame' ? 'Category averages per game' : 'Category totals'
+        }
+      >
         <thead>
           <tr>
             <th
@@ -105,14 +144,20 @@ export default function CategoryTable({ rows, games }: Props) {
                   </td>
                 ))}
               {CATEGORIES.map((category, i) => {
-                const { value, points } = row.categories[i];
+                const { value, points } = cats(row)[i];
                 return (
                   <td
                     key={category.key}
                     className="cat"
                     style={{ '--heat': heat(points, teamCount) } as CSSProperties}
                   >
-                    <b>{showPoints ? formatPoints(points) : category.format(value)}</b>
+                    <b>
+                      {mode === 'points'
+                        ? formatPoints(points)
+                        : mode === 'perGame'
+                          ? perGameFormat(i, value)
+                          : category.format(value)}
+                    </b>
                   </td>
                 );
               })}

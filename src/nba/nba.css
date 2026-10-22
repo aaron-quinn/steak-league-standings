@@ -126,6 +126,7 @@
 .nba-seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 10px; background: rgb(5 9 26 / 0.5); }
 .nba-seg button { border: 0; border-radius: 7px; padding: 4px 11px; background: transparent; font-weight: 600; font-stretch: 85%; font-size: 13px; color: var(--dim); cursor: pointer; transition: color 120ms, background 120ms; }
 .nba-seg button:hover { color: var(--text); }
+.nba-seg button:disabled { opacity: 0.4; cursor: default; }
 .nba-seg button[aria-pressed='true'], .nba-seg button[aria-selected='true'] { background: var(--cyan-wash); color: var(--cyan); box-shadow: inset 0 0 0 1px rgb(62 230 255 / 0.45); }
 /* The season picker and the Season / All-Time switch sit together top-right */
 .nba-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
