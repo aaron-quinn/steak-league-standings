@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import clsx from 'clsx';
 import { CATEGORIES } from '../lib/roto';
 import type { PlayingTime, StandingRow } from '../lib/standings';
@@ -23,6 +23,7 @@ const TIME: { key: Time; label: string; title: string }[] = [
 // sort by it; the team column stays put while the categories scroll.
 export default function CategoryTable({ rows, games }: Props) {
   const [sortBy, setSortBy] = useState<Sort>(null);
+  const [showPoints, setShowPoints] = useState(false);
   const time = (row: StandingRow, key: Time) => games?.get(row.team.id)?.[key] ?? 0;
   const sorted =
     sortBy === null
@@ -35,13 +36,19 @@ export default function CategoryTable({ rows, games }: Props) {
             a.position - b.position,
         );
   const teamCount = rows.length;
-  const average = (key: Time) =>
-    rows.reduce((sum, row) => sum + time(row, key), 0) / (rows.length || 1);
   const toggle = (key: Sort) => setSortBy(sortBy === key ? null : key);
 
   return (
-    <div className="nba-scroll">
-      <table className="nba-table nba-cats">
+    <>
+      <div className="nba-cats-key">
+        <div className="nba-seg" role="group" aria-label="Category values">
+          <button type="button" aria-pressed={!showPoints} onClick={() => setShowPoints(false)}>Totals</button>
+          <button type="button" aria-pressed={showPoints} onClick={() => setShowPoints(true)}>Roto points</button>
+        </div>
+        <span className="nba-cats-scale"><span>Bottom 3</span><i aria-hidden="true" /><span>Top 3</span></span>
+      </div>
+      <div className="nba-scroll">
+      <table className="nba-table nba-cats" aria-label={showPoints ? 'Category roto points' : 'Category totals'}>
         <thead>
           <tr>
             <th
@@ -91,10 +98,7 @@ export default function CategoryTable({ rows, games }: Props) {
                 TIME.map(({ key }) => (
                   <td key={key} className={clsx('cat time', key)}>
                     {games ? (
-                      <>
-                        <b>{time(row, key).toLocaleString('en-US')}</b>
-                        <span>{versus(time(row, key) - average(key))}</span>
-                      </>
+                      <b>{time(row, key).toLocaleString('en-US')}</b>
                     ) : (
                       <b className="nba-faint">–</b>
                     )}
@@ -105,13 +109,10 @@ export default function CategoryTable({ rows, games }: Props) {
                 return (
                   <td
                     key={category.key}
-                    className={clsx('cat', {
-                      top: points >= teamCount - 0.5,
-                      bottom: points <= 1.5,
-                    })}
+                    className="cat"
+                    style={{ '--heat': heat(points, teamCount) } as CSSProperties}
                   >
-                    <b>{category.format(value)}</b>
-                    <span>{formatPoints(points)}</span>
+                    <b>{showPoints ? formatPoints(points) : category.format(value)}</b>
                   </td>
                 );
               })}
@@ -120,14 +121,17 @@ export default function CategoryTable({ rows, games }: Props) {
           ))}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 }
 
-// Above or below the league average: "+12", "−8", "avg"
-function versus(diff: number) {
-  const n = Math.round(diff);
-  if (n === 0) return 'avg';
-  const abs = Math.abs(n).toLocaleString('en-US');
-  return n > 0 ? `+${abs}` : `−${abs}`;
+// Two tint strengths at each end; the middle stays neutral.
+function heat(points: number, teams: number) {
+  if (teams < 7) return 'transparent';
+  if (points >= teams - 1) return 'rgb(46 224 168 / 0.24)';
+  if (points >= teams - 2) return 'rgb(46 224 168 / 0.12)';
+  if (points <= 2) return 'rgb(255 82 134 / 0.24)';
+  if (points <= 3) return 'rgb(255 82 134 / 0.12)';
+  return 'transparent';
 }

@@ -172,6 +172,10 @@
 .nba-zone-tag { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-weight: 650; font-stretch: 80%; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 1px; color: var(--violet); background: var(--violet-wash); }
 
 /* Category grid: team column stays put while the categories scroll */
+.nba-cats-key { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 9px 12px; text-align: left; font-size: 11px; color: var(--dim); border-bottom: 1px solid var(--line); }
+.nba-cats-key > span { display: inline-flex; align-items: center; vertical-align: middle; }
+.nba-cats-scale { gap: 6px; }
+.nba-cats-scale i { width: 48px; height: 6px; border-radius: 2px; background: linear-gradient(90deg, rgb(255 82 134 / 0.24) 0% 20%, rgb(255 82 134 / 0.12) 20% 35%, transparent 35% 65%, rgb(46 224 168 / 0.12) 65% 80%, rgb(46 224 168 / 0.24) 80% 100%); }
 .nba-cats .sticky { position: sticky; left: 0; z-index: 1; background: linear-gradient(var(--row, transparent), var(--row, transparent)), #0f1637; }
 .nba-cats thead .sticky { z-index: 2; background: #0e1534; }
 .nba-cats .team-cell { width: auto; max-width: 124px; min-width: 112px; padding-left: 12px; box-shadow: 8px 0 10px -8px rgb(0 0 0 / 0.7); }
@@ -181,10 +185,8 @@
 .nba-cats td.cat { text-align: right; line-height: 1.1; }
 .nba-cats td.cat b { display: block; font-weight: 600; font-size: 14px; }
 .nba-cats td.cat span { display: block; font-size: 11px; color: var(--faint); }
-.nba-cats td.cat.top { background: var(--good); }
-.nba-cats td.cat.top span { color: var(--good-text); }
-.nba-cats td.cat.bottom { background: var(--bad); }
-.nba-cats td.cat.bottom span { color: var(--bad-text); }
+/* Only category outliers are tinted, against a consistent neutral background. */
+.nba-cats td.cat:not(.time) { background: linear-gradient(var(--heat, transparent), var(--heat, transparent)), #0f1637; }
 .nba-cats th.time, .nba-cats td.time { min-width: 48px; }
 .nba-cats th.minutes, .nba-cats td.minutes { border-right: 1px solid var(--line-strong); }
 .nba-cats td.time b { color: var(--dim); }
@@ -388,14 +390,24 @@ a.who:hover { color: var(--cyan); }
 [aria-sort='ascending'] > .nba-sort::after { border-top-color: transparent; border-bottom-color: var(--cyan); transform: translateY(-2px); }
 .nba-week-table .num { width: 48px; font-variant-numeric: tabular-nums; }
 .nba-week-table tbody.team > tr > td.num { font-weight: 650; }
-/* Stacked bar: one segment per state, scaled to the team with most games */
-.nba-week-bar { display: flex; height: 6px; margin-top: 5px; border-radius: 3px; overflow: hidden; }
-.nba-week-bar > span { flex: none; height: 100%; }
+/* Name and bar share one line: the name takes a fixed column, the bar the rest */
+.nba-week-line { display: flex; align-items: center; gap: 14px; }
+@media (max-width: 520px) { .nba-week-line { gap: 10px; } .nba-week-bar { gap: 1px; height: 10px; } }
+.nba-week-line > .nba-week-toggle { flex: 0 0 clamp(72px, 32%, 168px); min-width: 0; }
+/* One block per game slot, as on the standings page: the same colours as the
+   day tiles, and empty placeholders up to the busiest team's count. As tall
+   as the name's capitals, so bar and text sit level */
+.nba-week-bar { display: flex; flex: 1; gap: 2px; min-width: 0; height: 11px; }
+.nba-week .nba-week-bar > span { flex: 1 1 0; min-width: 0; border-radius: 2px; background: var(--c); box-shadow: none; animation: none; }
+.nba-week-bar > .played { --c: color-mix(in srgb, var(--cyan) 46%, var(--surface)); }
+.nba-week-bar > .live { --c: var(--cyan); filter: drop-shadow(0 0 4px rgb(62 230 255 / 0.6)); }
+.nba-week-bar > .lost { --c: color-mix(in srgb, var(--bad-text) 62%, var(--surface)); }
+.nba-week-bar > .upcoming { --c: rgb(62 230 255 / 0.2); }
+.nba-week-bar > .empty { --c: rgb(140 160 255 / 0.07); }
 .nba-week-toggle { border: 0; padding: 0; width: 100%; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .nba-week-table .nba-week-toggle { display: flex; align-items: center; }
 .nba-week-name { position: relative; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .nba-week-name-measure { position: absolute; left: 0; width: max-content; visibility: hidden; }
-.nba-week-toggle .chev { margin-left: 5px; color: var(--faint); font-size: 11px; }
 .nba-week-toggle:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 2px; }
 .nba-week-table tfoot td { border-top: 1px solid var(--line-strong); border-bottom: 0; }
 @media (max-width: 520px) {
@@ -407,12 +419,35 @@ a.who:hover { color: var(--cyan); }
 /* Starters by day */
 .nba-week-grid table { table-layout: fixed; }
 .nba-week-grid table th.player { width: 45%; min-width: 0; }
-.nba-week-grid table td { text-align: center; padding-left: 4px; padding-right: 4px; }
-.nba-week-grid table thead th:not(.player) { text-align: center; padding-left: 4px; padding-right: 4px; line-height: 1.1; }
+.nba-week-grid table td { text-align: center; padding: 2px; }
+.nba-week-grid table thead th:not(.player) { text-align: center; padding-left: 2px; padding-right: 2px; line-height: 1.1; }
 .nba-week-grid table thead small { display: block; font-size: 10.5px; letter-spacing: 0; }
-.nba-week-grid table td i { width: 12px; height: 12px; }
+.nba-week-grid table { width: calc(100% - 8px); }
+.nba-week-grid table td:last-child, .nba-week-grid table th:last-child { padding-right: 2px; }
+/* Heatmap: each day is a tile filling its cell, so a week reads as a block */
+.nba-week-grid table tbody th, .nba-week-grid table tbody td { border-bottom: 0; }
+.nba-week-grid table tbody tr:first-child > * { padding-top: 6px; }
+/* Compact tiles, centred, so wide screens don't stretch them into bars */
+.nba-week-grid table td i, .nba-week-grid table td i.off, .nba-week-grid table td i.out { display: block; width: min(100%, 36px); height: 24px; margin: 0 auto; border-radius: 6px; }
+.nba-week-grid i.played { background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 50%, var(--surface)), color-mix(in srgb, var(--cyan) 36%, var(--surface))); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12); }
+.nba-week-grid i.live { background: var(--cyan); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4), 0 0 14px rgb(62 230 255 / 0.5); animation: nba-glow 2.4s ease-in-out infinite; }
+.nba-week-grid i.lost { background: linear-gradient(180deg, color-mix(in srgb, var(--bad-text) 62%, var(--surface)), color-mix(in srgb, var(--bad-text) 48%, var(--surface))); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12); }
+.nba-week-grid i.upcoming { background: rgb(62 230 255 / 0.07); box-shadow: inset 0 0 0 1px rgb(62 230 255 / 0.32); }
+.nba-week-grid i.off { background: rgb(140 160 255 / 0.045); }
+.nba-week-grid i.out { background: none; box-shadow: inset 0 0 0 1px var(--line); }
+@keyframes nba-glow { 50% { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4), 0 0 4px rgb(62 230 255 / 0.25); } }
+@media (prefers-reduced-motion: reduce) { .nba-week-grid i.live { animation: none; } }
+/* Today: a soft column wash and a cyan date */
+.nba-week-grid table thead th.today { color: var(--cyan); }
+.nba-table .nba-week-grid th.today, .nba-table .nba-week-grid td.today { background: rgb(62 230 255 / 0.05); }
+.nba-week-grid table tbody tr:last-child td.today { border-radius: 0 0 6px 6px; }
+.nba-week-grid table thead th.today { border-radius: 6px 6px 0 0; }
+/* Row hover: lift the name so the eye can follow it across */
+.nba-week-grid table tbody tr:hover th.player { color: var(--cyan); }
 @media (max-width: 520px) {
-  .nba-week-grid table th.player { width: 56%; }
+  .nba-week-grid table th.player { width: 46%; }
+  .nba-week-grid table td, .nba-week-grid table td:last-child { padding: 1.5px; }
+  .nba-week-grid table td i, .nba-week-grid table td i.off, .nba-week-grid table td i.out { height: 22px; border-radius: 5px; }
 }
 
 /* Builds: shapes from stats so far, or from each roster's projections */

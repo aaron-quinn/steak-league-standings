@@ -26,6 +26,16 @@ const CELL_LABEL: Record<Cell, string> = {
   out: 'Not in the lineup',
 };
 
+// One block per game in state order, padded with empty blocks to the busiest
+// team's count so every bar has the same slots
+const blocks = (t: WeekTeam, slots: number) => [
+  ...Array<string>(t.played).fill('played'),
+  ...Array<string>(t.live).fill('live'),
+  ...Array<string>(t.lost).fill('lost'),
+  ...Array<string>(t.upcoming).fill('upcoming'),
+  ...Array<string>(Math.max(0, slots - t.scheduled)).fill('empty'),
+];
+
 const value = (t: WeekTeam, key: Count) =>
   key === 'played' ? t.played + t.live : t[key];
 
@@ -142,30 +152,29 @@ export default function WeekView({ league, rows }: { league: NbaLeague; rows: St
         </thead>
         {sorted.map(({ row, week: t }) => {
           const open = opened.has(row.team.id);
-          const share = (n: number) => `${(n / most) * 100}%`;
           return (
             <tbody key={row.team.id} className="team">
               <tr className={clsx('openable', { open })} onClick={() => toggleOpen(row.team.id)}>
                 <td className="rank">{row.position}</td>
                 <td className="team-cell">
-                  <button
-                    type="button"
-                    className="who nba-week-toggle"
-                    aria-label={row.name}
-                    title={row.name}
-                    aria-expanded={open}
-                    aria-controls={open ? `week-team-${row.team.id}` : undefined}
-                    onClick={(e) => { e.stopPropagation(); toggleOpen(row.team.id); }}
-                  >
-                    <FittingTeamName name={row.name} />
-                    <span className="chev" aria-hidden="true">{open ? '▾' : '▸'}</span>
-                  </button>
-                  <span className="nba-week-bar" aria-hidden="true">
-                    <span className="played" style={{ width: share(t.played) }} />
-                    <span className="live" style={{ width: share(t.live) }} />
-                    <span className="lost" style={{ width: share(t.lost) }} />
-                    <span className="upcoming" style={{ width: share(t.upcoming) }} />
-                  </span>
+                  <div className="nba-week-line">
+                    <button
+                      type="button"
+                      className="who nba-week-toggle"
+                      aria-label={row.name}
+                      title={row.name}
+                      aria-expanded={open}
+                      aria-controls={open ? `week-team-${row.team.id}` : undefined}
+                      onClick={(e) => { e.stopPropagation(); toggleOpen(row.team.id); }}
+                    >
+                      <FittingTeamName name={row.name} />
+                    </button>
+                    <span className="nba-week-bar" aria-hidden="true">
+                      {blocks(t, most).map((state, i) => (
+                        <span key={i} className={state} />
+                      ))}
+                    </span>
+                  </div>
                 </td>
                 <td className="num">{t.scheduled}</td>
                 <td className="num">{t.played + t.live}</td>
@@ -184,7 +193,7 @@ export default function WeekView({ league, rows }: { league: NbaLeague; rows: St
                               Starter
                             </th>
                             {games.days.map((day) => (
-                              <th key={day} scope="col">
+                              <th key={day} scope="col" className={clsx({ today: day === league.latestDay })}>
                                 {dateOfDay(league.opener, day).toLocaleDateString('en-US', {
                                   weekday: 'narrow',
                                   timeZone: 'UTC',
@@ -201,7 +210,11 @@ export default function WeekView({ league, rows }: { league: NbaLeague; rows: St
                                 <PlayerName name={s.name} proTeam={s.proTeam} />
                               </th>
                               {s.cells.map((c, i) => (
-                                <td key={i} title={`${short(games.days[i])}: ${CELL_LABEL[c]}`}>
+                                <td
+                                  key={i}
+                                  className={clsx({ today: games.days[i] === league.latestDay })}
+                                  title={`${short(games.days[i])}: ${CELL_LABEL[c]}`}
+                                >
                                   <i className={c} role="img" aria-label={CELL_LABEL[c]} />
                                 </td>
                               ))}
