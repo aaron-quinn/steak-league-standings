@@ -191,6 +191,9 @@
 .nba-cats th.time, .nba-cats td.time { min-width: 48px; }
 .nba-cats th.minutes, .nba-cats td.minutes { border-right: 1px solid var(--line-strong); }
 .nba-cats td.time b { color: var(--dim); }
+.nba-cats th.comp, .nba-cats td.comp { text-align: left; white-space: nowrap; padding-left: 14px; padding-right: 12px; border-left: 1px solid var(--line-strong); }
+.nba-cats th.comp span { display: block; font-size: 10px; font-weight: 500; color: var(--faint); }
+.nba-cats td.comp { font-weight: 600; font-size: 14px; }
 .nba-cats td.total { padding-right: 12px; font-weight: 800; font-stretch: 70%; font-size: 18px; }
 
 /* ---------------------------------------------------------------- history */

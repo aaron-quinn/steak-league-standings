@@ -1,4 +1,5 @@
 import { useQueries, useQuery } from '@tanstack/react-query';
+import type { PlayerPool } from './comps';
 import type { StatLine } from './roto';
 import type { NbaSchedule } from './schedule';
 import { CURRENT_SEASON, SEASONS, isFinished } from './season';
@@ -226,6 +227,28 @@ export const useProjections = (season: number, enabled = true) =>
     enabled: enabled && !isFinished(season),
     staleTime: 60 * 60 * 1000,
   });
+
+// The live season's per-game lines say little until about ten games in, so
+// comps use last season's until then
+const COMP_DAYS = 21;
+
+// Every NBA player's season totals to find comps in: a finished season's own,
+// or the live season's once it is three weeks old
+export function usePlayerPool(season: number, enabled = true) {
+  const { data: league } = useLeague(season);
+  const live = !isFinished(season);
+  const own = !live || (league?.latestDay ?? 0) >= COMP_DAYS;
+  const from = own ? season : season - 1;
+  return useQuery({
+    queryKey: ['nba', 'players', from],
+    queryFn: () =>
+      getJSON<PlayerPool>(
+        isFinished(from) ? `/nba-data/${from}/players.json` : `/api/nba/players/${from}`,
+      ),
+    enabled: enabled && (!live || Boolean(league)),
+    staleTime: isFinished(from) ? Infinity : 60 * 60 * 1000,
+  });
+}
 
 // The NBA games on the live season's latest day
 export const useTonight = (season: number) =>

@@ -23,9 +23,11 @@ const parsed = new Map();
 const pending = new Map();
 const coolingUntil = new Map();
 
-export default async function fetchJSON(url, { cacheSeconds = 0 } = {}) {
+// Extra request headers (ESPN's X-Fantasy-Filter) don't enter the cache key,
+// so a URL must always be fetched with the same ones.
+export default async function fetchJSON(url, { cacheSeconds = 0, headers } = {}) {
   if (cacheSeconds <= 0) {
-    return JSON.parse(await fetchFromOrigin(url));
+    return JSON.parse(await fetchFromOrigin(url, headers));
   }
 
   const inMemory = parsed.get(url);
@@ -37,13 +39,13 @@ export default async function fetchJSON(url, { cacheSeconds = 0 } = {}) {
   // rather than each asking MFL.
   let request = pending.get(url);
   if (!request) {
-    request = refresh(url, cacheSeconds).finally(() => pending.delete(url));
+    request = refresh(url, cacheSeconds, headers).finally(() => pending.delete(url));
     pending.set(url, request);
   }
   return request;
 }
 
-async function refresh(url, cacheSeconds) {
+async function refresh(url, cacheSeconds, headers) {
   const cache = caches.default;
   const cached = await cache.match(url);
 
@@ -69,7 +71,7 @@ async function refresh(url, cacheSeconds) {
 
   let text;
   try {
-    text = await fetchFromOrigin(url);
+    text = await fetchFromOrigin(url, headers);
   } catch (error) {
     // A stalled server gets the same break as a throttling one, so the next
     // visitors get the stale copy at once rather than each waiting it out
@@ -113,11 +115,11 @@ function remember(url, data, expires) {
   return data;
 }
 
-async function fetchFromOrigin(url) {
+async function fetchFromOrigin(url, headers) {
   const response = await fetch(url, {
     // Workers send no User-Agent, and ESPN answers 403 both to that and to
     // unrecognized ones. This is the header the Node API sent via axios.
-    headers: { Accept: 'application/json', 'User-Agent': 'axios/1.7.9' },
+    headers: { Accept: 'application/json', 'User-Agent': 'axios/1.7.9', ...headers },
     // Also covers reading the body below
     signal: AbortSignal.timeout(ORIGIN_TIMEOUT_MS),
   });

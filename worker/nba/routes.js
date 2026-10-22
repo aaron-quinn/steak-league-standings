@@ -14,12 +14,15 @@ import { addLine, scoreRoto } from '../../src/nba/lib/roto.ts';
 import {
   DAY_VIEWS,
   LEAGUE_VIEWS,
+  PLAYERS_FILTER,
+  PLAYERS_VIEWS,
   ROSTER_VIEWS,
   SCHEDULE,
   SCOREBOARD,
   compactDay,
   compactGames,
   compactLeague,
+  compactPlayers,
   compactProjections,
   compactSchedule,
 } from './espn.js';
@@ -195,6 +198,19 @@ nba.get('/projections/:year', ...cacheFor(PROJECTION_SECONDS), async (c) => {
     cacheSeconds: PROJECTION_SECONDS,
   });
   return c.json(compactProjections(json, season));
+});
+
+// Every NBA player's season totals so far, for the per-game player comps.
+// Totals only move overnight, so a few hours is fresh enough.
+const PLAYERS_SECONDS = 60 * 60 * 3;
+nba.get('/players/:year', ...cacheFor(PLAYERS_SECONDS), async (c) => {
+  const season = Number(c.req.param('year'));
+  if (!isCurrent(season)) return c.json({ error: 'Not the current season' }, 404);
+  const json = await fetchJSON(`${ESPN_LEAGUE(season)}?${PLAYERS_VIEWS}`, {
+    cacheSeconds: PLAYERS_SECONDS,
+    headers: { 'X-Fantasy-Filter': PLAYERS_FILTER(season) },
+  });
+  return c.json(compactPlayers(json.players?.map((p) => p.player) ?? [], season));
 });
 
 // The NBA games on the latest scoring day, with whether each is still to

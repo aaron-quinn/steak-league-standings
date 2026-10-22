@@ -123,6 +123,35 @@ export function compactProjections(json, season) {
   };
 }
 
+// Every NBA player's season totals, for the per-game player comps. The league
+// endpoint takes a filter (sent as the X-Fantasy-Filter header) that trims the
+// response to the season totals; ESPN's public players endpoint ignores it and
+// returns every game too, which only the build script can afford.
+export const PLAYERS_VIEWS = 'view=kona_player_info';
+export const PLAYERS_FILTER = (season) =>
+  JSON.stringify({
+    players: {
+      limit: 2000,
+      sortPercOwned: { sortAsc: false, sortPriority: 1 },
+      filterStatsForTopScoringPeriodIds: { value: 1, additionalValue: [`00${season}`] },
+    },
+  });
+export const PUBLIC_PLAYERS = (season) =>
+  `https://lm-api-reads.fantasy.espn.com/apis/v3/games/fba/seasons/${season}/players?scoringPeriodId=0&view=kona_player_info`;
+
+// { season, players: [[name, games, minutes, ...stat line]] } for everyone who
+// played, from a list of ESPN player objects
+export function compactPlayers(players, season) {
+  const id = `00${season}`;
+  const out = [];
+  for (const player of players) {
+    const stats = player?.stats?.find((s) => s.id === id)?.stats;
+    const games = stats?.[GP] ?? 0;
+    if (games > 0) out.push([player.fullName, games, stats[MIN] ?? 0, ...statLine(stats)]);
+  }
+  return { season, players: out };
+}
+
 // The NBA's whole season schedule, by fantasy scoring period (day)
 export const SCHEDULE = (season) =>
   `https://lm-api-reads.fantasy.espn.com/apis/v3/games/fba/seasons/${season}?view=proTeamSchedules_wl`;

@@ -1,14 +1,18 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import clsx from 'clsx';
+import { compFinder, type Comp, type PlayerPool } from '../lib/comps';
 import { CATEGORIES, scoreRoto, type CategoryResult } from '../lib/roto';
 import type { PlayingTime, StandingRow } from '../lib/standings';
 import { formatPoints } from '../lib/format';
+import { seasonLabel } from '../lib/season';
 
 interface Props {
   rows: StandingRow[];
   // Games and minutes each team's active lineup played: null while loading,
   // left out for a season without player lines
   games?: Map<number, PlayingTime> | null;
+  // NBA players to find per-game comps in: null while loading
+  pool?: PlayerPool | null;
 }
 
 type Time = keyof PlayingTime;
@@ -21,6 +25,9 @@ const RATES = new Set(['fgp', 'ftp']);
 const perGameFormat = (index: number, value: number) =>
   RATES.has(CATEGORIES[index].key) ? CATEGORIES[index].format(value) : value.toFixed(1);
 
+const compLine = (comp: Comp) =>
+  CATEGORIES.map((c, i) => `${perGameFormat(i, comp.values[i])} ${c.label}`).join(' · ');
+
 const TIME: { key: Time; label: string; title: string }[] = [
   { key: 'games', label: 'GP', title: "Games played by the active lineup (bench and IR don't count)" },
   { key: 'minutes', label: 'MIN', title: "Minutes played by the active lineup (bench and IR don't count)" },
@@ -28,7 +35,7 @@ const TIME: { key: Time; label: string; title: string }[] = [
 
 // Every team's total and roto points in each category. Tap a category to
 // sort by it; the team column stays put while the categories scroll.
-export default function CategoryTable({ rows, games }: Props) {
+export default function CategoryTable({ rows, games, pool }: Props) {
   const [sortBy, setSortBy] = useState<Sort>(null);
   const [chosenMode, setMode] = useState<Mode>('totals');
   // Per game needs games played, which load separately
@@ -46,6 +53,14 @@ export default function CategoryTable({ rows, games }: Props) {
     );
     return new Map(scoreRoto(lines).map((r) => [r.id, r.categories]));
   }, [rows, games]);
+  const comps = useMemo(() => {
+    if (!perGame || !pool) return undefined;
+    const find = compFinder(pool);
+    return new Map(
+      [...perGame].map(([id, categories]) => [id, find(categories.map((c) => c.value))]),
+    );
+  }, [perGame, pool]);
+  const showComps = mode === 'perGame' && pool !== undefined;
   const cats = (row: StandingRow): CategoryResult[] =>
     (mode === 'perGame' && perGame?.get(row.team.id)) || row.categories;
   const sorted =
@@ -125,6 +140,20 @@ export default function CategoryTable({ rows, games }: Props) {
             <th className="num" scope="col" style={{ paddingRight: 12 }} title="Roto points">
               Roto
             </th>
+            {showComps && (
+              <th
+                className="comp"
+                scope="col"
+                title={
+                  pool
+                    ? `The NBA player whose ${seasonLabel(pool.season)} per-game stats are closest`
+                    : undefined
+                }
+              >
+                Player comp
+                {pool && <span>{seasonLabel(pool.season)}</span>}
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -162,12 +191,21 @@ export default function CategoryTable({ rows, games }: Props) {
                 );
               })}
               <td className="num total">{formatPoints(row.points)}</td>
+              {showComps && <CompCell comp={comps?.get(row.team.id)} loading={!pool} />}
             </tr>
           ))}
         </tbody>
       </table>
       </div>
     </>
+  );
+}
+
+function CompCell({ comp, loading }: { comp: Comp | undefined; loading: boolean }) {
+  return (
+    <td className="comp" title={comp ? compLine(comp) : undefined}>
+      {comp ? comp.name : <span className="nba-faint">{loading ? '…' : '–'}</span>}
+    </td>
   );
 }
 

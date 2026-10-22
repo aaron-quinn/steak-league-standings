@@ -13,7 +13,14 @@ import Shell, {
   useSeason,
 } from '../components/Shell';
 import { careerTable, type CareerRow } from '../lib/alltime';
-import { useAllLeagues, useLeague, useSeasonDays, useToday, useTonight } from '../lib/data';
+import {
+  useAllLeagues,
+  useLeague,
+  usePlayerPool,
+  useSeasonDays,
+  useToday,
+  useTonight,
+} from '../lib/data';
 import { rankMoves, tonightByTeam } from '../lib/tonight';
 import { formatPoints, ordinal } from '../lib/format';
 import { FIRST_SEASON, dateOfDay, isFinished, shortDate } from '../lib/season';
@@ -47,6 +54,7 @@ export default function StandingsPage() {
     () => (withGames && days && league ? playingTime(days, league.lastDay) : undefined),
     [withGames, days, league],
   );
+  const { data: pool } = usePlayerPool(season, withGames);
   const today = useToday(season);
   const { data: games } = useTonight(season);
   const moves = useMemo(
@@ -162,7 +170,11 @@ export default function StandingsPage() {
               ) : view === 'week' ? (
                 <WeekView key={season} league={league} rows={rows} />
               ) : (
-                <CategoryTable rows={rows} games={withGames ? (played ?? null) : undefined} />
+                <CategoryTable
+                  rows={rows}
+                  games={withGames ? (played ?? null) : undefined}
+                  pool={withGames ? (pool ?? null) : undefined}
+                />
               )}
             </section>
           )}
