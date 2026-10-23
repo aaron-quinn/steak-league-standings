@@ -274,7 +274,7 @@ export function usePlayerPool(season: number, enabled = true) {
 export const useTonight = (season: number) =>
   useQuery({
     queryKey: ['nba', 'tonight', season],
-    queryFn: () => getJSON<Tonight>(`/api/nba/tonight/${season}`),
+    queryFn: () => getJSON<Tonight>(`/api/nba/games/${season}`),
     enabled: !isFinished(season),
     staleTime: LIVE_REFRESH_MS,
     refetchInterval: LIVE_REFRESH_MS,
@@ -284,7 +284,7 @@ export const useTonight = (season: number) =>
 export const useNightGames = (season: number, day: number, enabled = true) =>
   useQuery({
     queryKey: ['nba', 'tonight', season, day],
-    queryFn: () => getJSON<Tonight>(`/api/nba/tonight/${season}?day=${day}`),
+    queryFn: () => getJSON<Tonight>(`/api/nba/games/${season}/${day}`),
     enabled: enabled && !isFinished(season) && day > 0,
     staleTime: Infinity,
   });

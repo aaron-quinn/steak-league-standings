@@ -216,20 +216,24 @@ nba.get('/players/:year', ...cacheFor(PLAYERS_SECONDS), async (c) => {
   return c.json(compactPlayers(json.players?.map((p) => p.player) ?? [], season));
 });
 
-// The NBA games on the latest scoring day (or an earlier one, ?day=N), with
-// whether each is still to come, being played or over
-nba.get('/tonight/:year', ...cacheFor(LIVE_SECONDS), async (c) => {
+// The NBA games on the latest scoring day (or an earlier one, /games/:year/N),
+// with whether each is still to come, being played or over. The day is in the
+// path because the API cache ignores query strings. (This was /tonight/:year
+// until a ?day= version poisoned that cache entry with a past day's games.)
+const games = async (c) => {
   const season = Number(c.req.param('year'));
   if (!isCurrent(season)) return c.json({ error: 'Not the current season' }, 404);
   const { latestDay } = await getLeague(season);
-  const asked = Number(c.req.query('day'));
+  const asked = Number(c.req.param('day'));
   const past = Number.isInteger(asked) && asked >= 1 && asked < latestDay;
   const day = past ? asked : Math.max(1, latestDay);
   const date = dateOfDay(season, day);
   const seconds = past ? FINAL_DAY_SECONDS : LIVE_SECONDS;
-  const games = compactGames(await fetchJSON(SCOREBOARD(date), { cacheSeconds: seconds }));
+  const list = compactGames(await fetchJSON(SCOREBOARD(date), { cacheSeconds: seconds }));
   if (past) c.header('Cache-Control', `max-age=${FINAL_RESPONSE_SECONDS}`);
-  return c.json({ day, date, games });
-});
+  return c.json({ day, date, games: list });
+};
+nba.get('/games/:year', ...cacheFor(LIVE_SECONDS), games);
+nba.get('/games/:year/:day', ...cacheFor(LIVE_SECONDS), games);
 
 export default nba;
