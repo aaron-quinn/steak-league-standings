@@ -166,10 +166,19 @@
 .nba-table tr.buyer .pts { color: #b7bfdf; }
 /* Child cells only: an open team's row holds a nested box score whose cells
    mustn't pick these up */
-.nba-table tr.steak-line > td { border-bottom: 0; box-shadow: 0 1px 0 0 rgb(62 230 255 / 0.65), 0 6px 14px -6px rgb(62 230 255 / 0.45); }
+.nba-table tr.steak-line > td { border-bottom-color: var(--steak-line); }
+/* The line's glow is painted down from the top of the next row (a buyer, or
+   the open box score). A blurred shadow per cell faded out at every cell's
+   edges, leaving seams down the row.
+   Each team is its own tbody, so the next row is either its open box score
+   or the first row of the next team's tbody. */
+.nba-table { --steak-line: rgb(62 230 255 / 0.35); --steak-glow: linear-gradient(rgb(62 230 255 / 0.1), transparent 10px); }
+.nba-table tr.steak-line + tr > td,
+.nba-table tbody:has(> tr.steak-line:last-child) + tbody > tr:first-child > td { background-image: var(--steak-glow); }
+.nba-table tbody:has(> tr.steak-line:last-child) + tbody > tr.openable:first-child:hover > td { background: var(--steak-glow), linear-gradient(var(--band), var(--band)), var(--row); }
 /* The team buying its own steak sits between two lines: the eaters above,
    the buyers below */
-.nba-table tr.self-buyer > td { border-top: 1px solid rgb(62 230 255 / 0.65); }
+.nba-table tr.self-buyer > td { border-top: 1px solid var(--steak-line); }
 .nba-zone-tag { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-weight: 650; font-stretch: 80%; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 1px; color: var(--violet); background: var(--violet-wash); }
 
 /* Category grid: team column stays put while the categories scroll */
