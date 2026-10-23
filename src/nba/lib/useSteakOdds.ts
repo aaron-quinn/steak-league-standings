@@ -1,10 +1,9 @@
 import { useCallback, useMemo } from 'react';
-import { useAllLeagues, useHistoricalTotals, useLeague, useSeasonTotals } from './data';
-import { buildRace } from './race';
-import { currentOdds, gamesSoFar, modelFor, oddsHistory } from './season-odds';
+import { useLeague, useOddsBasis, useSeasonTotals } from './data';
+import { currentOdds, gamesSoFar, oddsHistory } from './season-odds';
 import { dateOfDay, isFinished } from './season';
 import { buildStandings, hasStarted } from './standings';
-import { isTombstoned, tombstoneLine, tombstoned, type Comeback } from './tombstone';
+import { isTombstoned, tombstoned, type Comeback } from './tombstone';
 
 // Buried means past the history line AND under this chance of eating. Checked
 // leaving each season out (scripts/nba/backtest-tombstones.mjs): the line
@@ -29,47 +28,62 @@ export function useSteakOdds(
   { withHistory = true, enabled = true } = {},
 ) {
   const { data: league } = useLeague(season);
-  const { leagues } = useAllLeagues();
-  const { seasons: past, isPending: pastPending } = useHistoricalTotals(enabled);
   const finished = isFinished(season);
-  // A season's day-by-day totals: the history needs them, and today's odds
-  // need the live season's games so far (they project per game played)
-  const { totals } = useSeasonTotals(season, enabled && (withHistory || !finished));
 
-  const pastSeasons = useMemo(() => {
-    if (pastPending) return null;
-    const out = past.flatMap(({ season: s, totals: t }) => {
-      const l = leagues.find((x) => x.season === s);
-      return l ? [{ season: s, totals: t, league: l, lastDay: l.lastDay }] : [];
-    });
-    return out.length === past.length ? out : null;
-  }, [past, pastPending, leagues]);
+  // The model and the comeback line, fitted from every other finished season
+  // at build time (scripts/nba/build-odds.mjs)
+  const basis = useOddsBasis(season);
+  const model = basis?.model ?? null;
+  const line = basis?.line ?? null;
 
-  const model = useMemo(
-    () => (pastSeasons ? modelFor(season, pastSeasons) : null),
-    [pastSeasons, season],
+  // How far each team trails the last eating spot today
+  const behind = useMemo(() => {
+    if (!league || finished) return null;
+    const rows = buildStandings(league.teams);
+    const eaters = Math.floor(rows.length / 2);
+    const bar = rows[eaters - 1]?.points ?? 0;
+    return {
+      teams: rows.map((r) => ({ id: r.team.id, name: r.name, deficit: Math.max(0, bar - r.points) })),
+      weeksLeft: weeksLeftNow(league.opener, league.latestDay, league.finalDay),
+    };
+  }, [league, finished]);
+  // A tombstone also takes odds under 5%, but only a team past the history
+  // line can get one. Until a team is, the pit needs no odds, which spares the
+  // standings the simulation (a few hundred ms on a phone) and every day's
+  // lines it runs on.
+  const pastLine = Boolean(
+    behind && line && behind.teams.some((t) => isTombstoned(t.deficit, behind.weeksLeft, line)),
   );
+  const needOdds = withHistory || pastLine;
 
-  // The comeback line from every other finished season
-  const line = useMemo(
+  // Today's odds project per game played. The Worker tallies the live
+  // season's games, so they don't take every day's lines; until its tally
+  // catches up they're counted from those lines here.
+  const tallied = useMemo(
     () =>
-      pastSeasons
-        ? tombstoneLine(
-            pastSeasons
-              .filter((p) => p.season !== season)
-              .map((p) => ({ season: p.season, race: buildRace(p.league, p.totals) })),
-          )
+      league?.games
+        ? new Map(league.teams.map((t) => [t.id, league.games![t.id] ?? 0]))
         : null,
-    [pastSeasons, season],
+    [league],
+  );
+  // A season's day-by-day totals: the history needs them, and so do today's
+  // odds when the games aren't tallied
+  const { totals } = useSeasonTotals(
+    season,
+    enabled && (withHistory || (!finished && needOdds && !tallied)),
+  );
+  const games = useMemo(
+    () => tallied ?? (totals ? gamesSoFar(totals) : null),
+    [tallied, totals],
   );
 
   const started = league ? hasStarted(league) : false;
   const now = useMemo(
     () =>
-      league && model && totals && !finished && started
-        ? currentOdds(league, model, gamesSoFar(totals))
+      needOdds && league && model && games && !finished && started
+        ? currentOdds(league, model, games)
         : null,
-    [league, model, totals, finished, started],
+    [needOdds, league, model, games, finished, started],
   );
 
   const history = useMemo(
@@ -82,18 +96,9 @@ export function useSteakOdds(
 
   // Today's pit: how far each team trails the last eating spot
   const pitNow = useMemo(() => {
-    if (!league || !line || !now || finished) return null;
-    const rows = buildStandings(league.teams);
-    const eaters = Math.floor(rows.length / 2);
-    const bar = rows[eaters - 1]?.points ?? 0;
-    const weeksLeft = weeksLeftNow(league.opener, league.latestDay, league.finalDay);
-    return pit(
-      rows.map((r) => ({ id: r.team.id, name: r.name, deficit: Math.max(0, bar - r.points) })),
-      weeksLeft,
-      line,
-      (id) => now.get(id)?.eat ?? 1,
-    );
-  }, [league, line, now, finished]);
+    if (!behind || !line || (needOdds && !now)) return null;
+    return pit(behind.teams, behind.weeksLeft, line, (id) => now?.get(id)?.eat ?? 1);
+  }, [behind, line, needOdds, now]);
 
   // A past season's pit at any week of the replay
   const pitAt = useCallback((week: number) => {

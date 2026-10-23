@@ -1,8 +1,11 @@
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useQueries, useQuery, type QueryClient } from '@tanstack/react-query';
 import type { PlayerPool } from './comps';
+import type { OddsModel } from './odds';
 import type { StatLine } from './roto';
 import type { NbaSchedule } from './schedule';
-import { CURRENT_SEASON, SEASONS, isFinished } from './season';
+import { CURRENT_SEASON, DEFAULT_SEASON, SEASONS, isFinished } from './season';
+import type { Comeback } from './tombstone';
 
 // Shapes from worker/nba/espn.js. Finished seasons come from the static
 // files in public/nba-data/ (scripts/nba/build-seasons.mjs); the live season
@@ -46,6 +49,9 @@ export interface NbaLeague {
   // Live season: days in `totals` from the live box scores, which ESPN's
   // season totals haven't taken in yet
   liveDays?: number[];
+  // Live season: each team's active-lineup games so far, today's included,
+  // from the Worker's running tally (missing while it catches up)
+  games?: Record<string, number>;
   budget: number;
   teams: NbaTeam[];
   draft: DraftPick[];
@@ -271,14 +277,15 @@ export function usePlayerPool(season: number, enabled = true) {
 }
 
 // The NBA games on the live season's latest day
-export const useTonight = (season: number) =>
-  useQuery({
-    queryKey: ['nba', 'tonight', season],
-    queryFn: () => getJSON<Tonight>(`/api/nba/games/${season}`),
-    enabled: !isFinished(season),
-    staleTime: LIVE_REFRESH_MS,
-    refetchInterval: LIVE_REFRESH_MS,
-  });
+const tonightQuery = (season: number) => ({
+  queryKey: ['nba', 'tonight', season],
+  queryFn: () => getJSON<Tonight>(`/api/nba/games/${season}`),
+  enabled: !isFinished(season),
+  staleTime: LIVE_REFRESH_MS,
+  refetchInterval: LIVE_REFRESH_MS,
+});
+
+export const useTonight = (season: number) => useQuery(tonightQuery(season));
 
 // The NBA games on an earlier day of the live season, all finished
 export const useNightGames = (season: number, day: number, enabled = true) =>
@@ -300,6 +307,16 @@ export function useSeasonDays(season: number, enabled = true) {
     staleTime: Infinity,
   });
   const live = useLiveChunks(season, enabled && !finished);
+  // The same objects until a chunk changes, so pages' memos (and the odds
+  // simulation behind them) don't rerun on every render
+  const merged = useMemo(
+    () => ({
+      days: live.chunks.flatMap((c) => c.days),
+      names: Object.assign({}, ...live.chunks.map((c) => c.names)) as Record<string, string>,
+      proTeams: Object.assign({}, ...live.chunks.map((c) => c.proTeams)) as Record<string, number>,
+    }),
+    [live.chunks],
+  );
 
   if (finished) {
     return {
@@ -311,9 +328,9 @@ export function useSeasonDays(season: number, enabled = true) {
     };
   }
   return {
-    days: live.isPending ? undefined : live.chunks.flatMap((c) => c.days),
-    names: Object.assign({}, ...live.chunks.map((c) => c.names)),
-    proTeams: Object.assign({}, ...live.chunks.map((c) => c.proTeams)) as Record<string, number>,
+    days: live.isPending ? undefined : merged.days,
+    names: merged.names,
+    proTeams: merged.proTeams,
     isPending: live.isPending,
     isError: live.isError,
   };
@@ -340,9 +357,11 @@ export function useSeasonTotals(season: number, enabled = true) {
   const finished = isFinished(season);
   const stored = useQuery({ ...totalsQuery(season), enabled: enabled && finished });
   const live = useLiveChunks(season, enabled && !finished);
+  // Kept between renders: the odds simulation reruns whenever this changes
+  const totals = useMemo(() => liveTotals(live.chunks), [live.chunks]);
   if (finished) return { totals: stored.data, isPending: stored.isPending };
   if (live.isPending) return { totals: undefined, isPending: true };
-  return { totals: liveTotals(live.chunks), isPending: false };
+  return { totals, isPending: false };
 }
 
 function liveTotals(chunks: Chunk[]): NbaTotals {
@@ -364,17 +383,42 @@ function liveTotals(chunks: Chunk[]): NbaTotals {
   return { days: days.map((d) => d.day), teams, games };
 }
 
-// Every finished season's daily totals, for the odds model
-export function useHistoricalTotals(enabled = true) {
-  const finished = SEASONS.filter(isFinished);
-  return useQueries({
-    queries: finished.map((s) => ({ ...totalsQuery(s), enabled })),
-    combine: (results) => ({
-      seasons: results.flatMap((r, i) =>
-        r.data ? [{ season: finished[i], totals: r.data }] : [],
-      ),
-      isPending: results.some((r) => r.isPending),
-    }),
+// Each season's odds model and tombstone line, fitted from the other finished
+// seasons at build time (scripts/nba/build-odds.mjs)
+export interface OddsBasis {
+  model: OddsModel;
+  line: (Comeback | null)[];
+}
+
+const oddsQuery = {
+  queryKey: ['nba', 'odds-basis'],
+  // v1: { model, line } per season (see DAYS_VERSION)
+  queryFn: () => getJSON<Record<string, OddsBasis>>('/nba-data/odds.json?v=1'),
+  staleTime: Infinity,
+};
+
+export function useOddsBasis(season: number) {
+  const { data } = useQuery(oddsQuery);
+  return data?.[season];
+}
+
+// Start an NBA page's first requests while its code is still downloading,
+// rather than after: the league, then the newest days, tonight's games and the
+// odds basis. Runs from the main bundle before anything renders.
+export function prefetchNba(client: QueryClient, search: string) {
+  const requested = Number(new URLSearchParams(search).get('season'));
+  const season = SEASONS.includes(requested) ? requested : DEFAULT_SEASON;
+  if (isFinished(season)) {
+    client.prefetchQuery(leagueQuery(season));
+    return;
+  }
+  client.prefetchQuery(oddsQuery);
+  client.prefetchQuery(tonightQuery(season));
+  client.prefetchQuery(leagueQuery(season)).then(() => {
+    const latestDay = client.getQueryData<NbaLeague>(leagueQuery(season).queryKey)?.latestDay ?? 0;
+    if (latestDay > 0) {
+      client.prefetchQuery(chunkQuery(season, Math.floor((latestDay - 1) / CHUNK_DAYS), true));
+    }
   });
 }
 

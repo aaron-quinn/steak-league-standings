@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import App from './App';
+import { prefetchNba } from './nba/lib/data';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -19,6 +20,11 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// The NBA pages' code is a separate download; fetch their data alongside it
+if (location.pathname.startsWith('/nba')) {
+  prefetchNba(queryClient, location.search);
+}
 
 createRoot(document.getElementById('app')!).render(
   <StrictMode>

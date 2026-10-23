@@ -27,7 +27,12 @@ const coolingUntil = new Map();
 // so a URL must always be fetched with the same ones.
 export default async function fetchJSON(url, { cacheSeconds = 0, headers } = {}) {
   if (cacheSeconds <= 0) {
-    return JSON.parse(await fetchFromOrigin(url, headers));
+    try {
+      return JSON.parse(await fetchFromOrigin(url, headers));
+    } catch (error) {
+      coolOnFailure(url, error);
+      throw error;
+    }
   }
 
   const inMemory = parsed.get(url);
@@ -57,14 +62,13 @@ async function refresh(url, cacheSeconds, headers) {
     return remember(url, JSON.parse(cachedText), cachedExpires);
   }
 
-  const host = new URL(url).host;
   const stale = () => {
     const inMemory = parsed.get(url);
     if (inMemory && inMemory.staleUntil > Date.now()) return inMemory.data;
     return cachedText !== null ? JSON.parse(cachedText) : undefined;
   };
 
-  if ((coolingUntil.get(host) ?? 0) > Date.now()) {
+  if (isCoolingDown(url)) {
     const data = stale();
     if (data !== undefined) return data;
   }
@@ -73,11 +77,7 @@ async function refresh(url, cacheSeconds, headers) {
   try {
     text = await fetchFromOrigin(url, headers);
   } catch (error) {
-    // A stalled server gets the same break as a throttling one, so the next
-    // visitors get the stale copy at once rather than each waiting it out
-    if (error.status === 429 || error.name === 'TimeoutError') {
-      coolingUntil.set(host, Date.now() + COOL_DOWN_MS);
-    }
+    coolOnFailure(url, error);
     const data = stale();
     if (data === undefined) throw error;
     console.warn(`Serving a stale copy of ${url}: ${error.message}`);
@@ -105,6 +105,19 @@ async function refresh(url, cacheSeconds, headers) {
   );
 
   return remember(url, data, expires);
+}
+
+// Whether the URL's server asked us to back off (or stalled) in the last
+// minute, so a caller holding a stale copy should serve that instead
+export const isCoolingDown = (url) =>
+  (coolingUntil.get(new URL(url).host) ?? 0) > Date.now();
+
+// A stalled server gets the same break as a throttling one, so the next
+// visitors get the stale copy at once rather than each waiting it out
+function coolOnFailure(url, error) {
+  if (error.status === 429 || error.name === 'TimeoutError') {
+    coolingUntil.set(new URL(url).host, Date.now() + COOL_DOWN_MS);
+  }
 }
 
 const staleUntilFor = (data, expires) =>

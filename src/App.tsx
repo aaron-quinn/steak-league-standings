@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect } from 'react';
-import { Routes, Route, useSearchParams } from 'react-router-dom';
+import { Routes, Route, useLocation, useSearchParams } from 'react-router-dom';
 import { usePrefetchQuery, useQueryClient } from '@tanstack/react-query';
 import LoadingScreen from './components/LoadingScreen';
 import MainView from './views/MainView';
@@ -31,9 +31,12 @@ const TradesView = lazy(loadTradesView);
 const ManagersView = lazy(loadManagersView);
 
 // Fetch them once the first page is up, so opening the tab doesn't show a
-// loading screen
+// loading screen. Not from the NBA pages, which never open them: there the
+// download only competes with the NBA's own code and data.
 function usePrefetchFunViews() {
+  const nba = useLocation().pathname.startsWith('/nba');
   useEffect(() => {
+    if (nba) return;
     const prefetch = () => {
       loadFunView();
       loadSteakRaceView();
@@ -51,7 +54,7 @@ function usePrefetchFunViews() {
     }
     const id = setTimeout(prefetch, 2000);
     return () => clearTimeout(id);
-  }, []);
+  }, [nba]);
 }
 
 // Every Fun screen needs the season's weekly scores. Ask for them here, above

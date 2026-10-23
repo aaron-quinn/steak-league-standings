@@ -14,6 +14,9 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"],
   },
+  // The live NBA season's running games tally (gamesPlayed in
+  // worker/nba/routes.js), so no request has to re-read the season from ESPN
+  "kv_namespaces": [{ "binding": "NBA", "id": "ce6d02be1cd6431ab8a6c8c7b336b2a9" }],
   "observability": {
     "enabled": true,
   },
