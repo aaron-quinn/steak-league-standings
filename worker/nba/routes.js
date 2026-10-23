@@ -216,17 +216,19 @@ nba.get('/players/:year', ...cacheFor(PLAYERS_SECONDS), async (c) => {
   return c.json(compactPlayers(json.players?.map((p) => p.player) ?? [], season));
 });
 
-// The NBA games on the latest scoring day, with whether each is still to
-// come, being played or over
+// The NBA games on the latest scoring day (or an earlier one, ?day=N), with
+// whether each is still to come, being played or over
 nba.get('/tonight/:year', ...cacheFor(LIVE_SECONDS), async (c) => {
   const season = Number(c.req.param('year'));
   if (!isCurrent(season)) return c.json({ error: 'Not the current season' }, 404);
   const { latestDay } = await getLeague(season);
-  const day = Math.max(1, latestDay);
+  const asked = Number(c.req.query('day'));
+  const past = Number.isInteger(asked) && asked >= 1 && asked < latestDay;
+  const day = past ? asked : Math.max(1, latestDay);
   const date = dateOfDay(season, day);
-  const games = compactGames(
-    await fetchJSON(SCOREBOARD(date), { cacheSeconds: LIVE_SECONDS }),
-  );
+  const seconds = past ? FINAL_DAY_SECONDS : LIVE_SECONDS;
+  const games = compactGames(await fetchJSON(SCOREBOARD(date), { cacheSeconds: seconds }));
+  if (past) c.header('Cache-Control', `max-age=${FINAL_RESPONSE_SECONDS}`);
   return c.json({ day, date, games });
 });
 

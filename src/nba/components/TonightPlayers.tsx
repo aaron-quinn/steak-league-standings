@@ -7,7 +7,13 @@ const SLOT_LABEL: Record<number, string> = { 12: 'Bench', 13: 'IR' };
 
 // One team's box score for the day: every player with a game, a column per
 // category
-export default function TonightPlayers({ team }: { team: TonightTeam }) {
+export default function TonightPlayers({
+  team,
+  dayLabel = 'Today',
+}: {
+  team: TonightTeam;
+  dayLabel?: string;
+}) {
   return (
     <div className="nba-box">
       <table>
@@ -69,7 +75,7 @@ export default function TonightPlayers({ team }: { team: TonightTeam }) {
             <th scope="row" className="player">
               Team total
               <span className="when">
-                {team.players.some((p) => !p.active && p.line) ? 'Bench and IR not counted' : 'Today'}
+                {team.players.some((p) => !p.active && p.line) ? 'Bench and IR not counted' : dayLabel}
               </span>
             </th>
             <td className="min">{team.minutes ?? '–'}</td>

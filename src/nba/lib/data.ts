@@ -280,6 +280,15 @@ export const useTonight = (season: number) =>
     refetchInterval: LIVE_REFRESH_MS,
   });
 
+// The NBA games on an earlier day of the live season, all finished
+export const useNightGames = (season: number, day: number, enabled = true) =>
+  useQuery({
+    queryKey: ['nba', 'tonight', season, day],
+    queryFn: () => getJSON<Tonight>(`/api/nba/tonight/${season}?day=${day}`),
+    enabled: enabled && !isFinished(season) && day > 0,
+    staleTime: Infinity,
+  });
+
 // Every day's player lines and moves, with player names
 export function useSeasonDays(season: number, enabled = true) {
   const finished = isFinished(season);

@@ -1,13 +1,19 @@
 import { CATEGORIES, type StatLine } from '../lib/roto';
 import { formatPoints } from '../lib/format';
 import { TOP_STARS, type StarLine, type Stars } from '../lib/stars';
+import type { TonightTeam } from '../lib/tonight';
 import FollowSelect from './FollowSelect';
+import TonightPlayers from './TonightPlayers';
 import PlayerName from './PlayerName';
 
 interface Props {
   stars: Stars;
   // "Tonight" or "Last night"
-  when: string;
+  when: 'Tonight' | 'Last night';
+  // Whether today's games have any lines yet
+  canTonight: boolean;
+  canLastNight: boolean;
+  onLastNight: (lastNight: boolean) => void;
   date: string;
   live: boolean;
   manager: (team: number) => string;
@@ -15,6 +21,8 @@ interface Props {
   teams: { id: number; name: string }[];
   team: number | null;
   onTeam: (team: number | null) => void;
+  // The followed team's whole box score (last night only)
+  box?: TonightTeam;
 }
 
 // "34 PTS · 9 REB · 12/20 FG": the counting stats he got, then his shooting
@@ -30,7 +38,20 @@ function statLine(line: StatLine) {
 // The day's best player-games across the league (or one team), a leader for
 // each category, and the side stories. Bench and IR lines didn't count, so
 // they only show in their own list.
-export default function DayStars({ stars, when, date, live, manager, teams, team, onTeam }: Props) {
+export default function DayStars({
+  stars,
+  when,
+  canTonight,
+  canLastNight,
+  onLastNight,
+  date,
+  live,
+  manager,
+  teams,
+  team,
+  onTeam,
+  box,
+}: Props) {
   const { players, leaders, benchedOff, brick, bestNight, swings } = stars;
   const best = players[0]?.score || 1;
   const owner = (p: StarLine) => manager(p.team);
@@ -58,9 +79,35 @@ export default function DayStars({ stars, when, date, live, manager, teams, team
             {live ? 'Live · ' : ''}
             {date}
           </span>
+          <div className="nba-seg" role="group" aria-label="Which night">
+            <button
+              type="button"
+              aria-pressed={when === 'Tonight'}
+              disabled={!canTonight}
+              title={canTonight ? undefined : 'No lines yet tonight'}
+              onClick={() => onLastNight(false)}
+            >
+              Tonight
+            </button>
+            <button
+              type="button"
+              aria-pressed={when === 'Last night'}
+              disabled={!canLastNight}
+              onClick={() => onLastNight(true)}
+            >
+              Last night
+            </button>
+          </div>
           <FollowSelect teams={teams} value={team} onChange={onTeam} />
         </div>
       </div>
+
+      {box && team !== null && (
+        <>
+          <h4 className="nba-history-sub">{manager(team)}&rsquo;s box score</h4>
+          <TonightPlayers team={box} dayLabel="Last night" />
+        </>
+      )}
 
       {!players.length && !benchedOff.length ? (
         <div className="nba-empty">

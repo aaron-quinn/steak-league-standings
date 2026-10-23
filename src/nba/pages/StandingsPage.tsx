@@ -18,6 +18,7 @@ import {
   useAllLeagues,
   useDay,
   useLeague,
+  useNightGames,
   usePlayerPool,
   useSeasonDays,
   useToday,
@@ -64,10 +65,15 @@ export default function StandingsPage() {
     () => (live && league ? rankMoves(league.teams, today.day) : undefined),
     [live, league, today.day],
   );
-  // The day's stars: today once its games have lines, last night until then
+  // The day's stars: today once its games have lines, or last night (always
+  // there to pick, and shown until today's games start)
   const started = Boolean(today.day?.players.length);
-  const lastNight = useDay(season, (league?.latestDay ?? 0) - 1, live && !started);
-  const starDay = started ? today : lastNight;
+  const [wantLastNight, setLastNight] = useState(false);
+  // Opening night has no last night to switch to
+  const hasLastNight = (league?.latestDay ?? 0) > 1;
+  const showTonight = started && !(wantLastNight && hasLastNight);
+  const lastNight = useDay(season, (league?.latestDay ?? 0) - 1, live && !showTonight);
+  const starDay = showTonight ? today : lastNight;
   const [starTeam, setStarTeam] = useState<number | null>(null);
   const stars = useMemo(
     () =>
@@ -75,6 +81,20 @@ export default function StandingsPage() {
         ? dayStars(starDay.day, starDay.names, starDay.proTeams, league.teams, starTeam ?? undefined)
         : undefined,
     [live, league, starDay.day, starDay.names, starDay.proTeams, starTeam],
+  );
+  // Following a team on last night: its whole box score, as the standings
+  // show it for today
+  const lastNightTeam = !showTonight && starTeam !== null;
+  const { data: lastGames } = useNightGames(season, lastNight.day?.day ?? 0, live && lastNightTeam);
+  const lastNightBox = useMemo(
+    () =>
+      lastNightTeam && lastNight.day && lastGames
+        ? tonightByTeam(lastNight.day, lastGames.games, lastNight.names, {
+            ...lastNight.proTeams,
+            ...lastNight.day.playedFor,
+          }).get(starTeam!)
+        : undefined,
+    [lastNightTeam, lastNight.day, lastNight.names, lastNight.proTeams, lastGames, starTeam],
   );
   const managers = useMemo(() => new Map(rows.map((r) => [r.team.id, lastName(r.name)])), [rows]);
   const tonight = useMemo(
@@ -197,13 +217,17 @@ export default function StandingsPage() {
           {!allTime && stars && league && starDay.day && (
             <DayStars
               stars={stars}
-              when={started ? 'Tonight' : 'Last night'}
+              when={showTonight ? 'Tonight' : 'Last night'}
+              canTonight={started}
+              canLastNight={hasLastNight}
+              onLastNight={setLastNight}
               date={shortDate(dateOfDay(league.opener, starDay.day.day))}
-              live={started && Boolean(games?.games.some((g) => g.state === 'in'))}
+              live={showTonight && Boolean(games?.games.some((g) => g.state === 'in'))}
               manager={(team) => managers.get(team) ?? 'Team'}
               teams={rows.map((r) => ({ id: r.team.id, name: r.name }))}
               team={starTeam}
               onTeam={setStarTeam}
+              box={lastNightBox}
             />
           )}
         </div>
