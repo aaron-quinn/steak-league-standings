@@ -216,6 +216,24 @@ export function useToday(season: number) {
   };
 }
 
+// One day of the live season, from the chunk holding it (refreshed only if
+// that's the newest chunk)
+export function useDay(season: number, day: number, enabled = true) {
+  const { data: league } = useLeague(season);
+  const latestDay = !isFinished(season) ? (league?.latestDay ?? 0) : 0;
+  const chunk = Math.floor((day - 1) / CHUNK_DAYS);
+  const newest = chunk === Math.floor((latestDay - 1) / CHUNK_DAYS);
+  const { data } = useQuery({
+    ...chunkQuery(season, chunk, newest),
+    enabled: enabled && day > 0 && day <= latestDay,
+  });
+  return {
+    day: data?.days.find((d) => d.day === day),
+    names: data?.names ?? {},
+    proTeams: data?.proTeams ?? {},
+  };
+}
+
 // ESPN's season projections summed over each team's current roster (IR left
 // out), from worker/nba/espn.js compactProjections
 export interface NbaProjections {

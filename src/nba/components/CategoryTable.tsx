@@ -1,6 +1,6 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import clsx from 'clsx';
-import { compFinder, type Comp, type PlayerPool } from '../lib/comps';
+import { findComps, type Comp, type PlayerPool } from '../lib/comps';
 import { CATEGORIES, scoreRoto, type CategoryResult } from '../lib/roto';
 import type { PlayingTime, StandingRow } from '../lib/standings';
 import { formatPoints } from '../lib/format';
@@ -55,9 +55,9 @@ export default function CategoryTable({ rows, games, pool }: Props) {
   }, [rows, games]);
   const comps = useMemo(() => {
     if (!perGame || !pool) return undefined;
-    const find = compFinder(pool);
-    return new Map(
-      [...perGame].map(([id, categories]) => [id, find(categories.map((c) => c.value))]),
+    return findComps(
+      pool,
+      new Map([...perGame].map(([id, categories]) => [id, categories.map((c) => c.value)])),
     );
   }, [perGame, pool]);
   const showComps = mode === 'perGame' && pool !== undefined;
@@ -75,6 +75,17 @@ export default function CategoryTable({ rows, games, pool }: Props) {
         );
   const teamCount = rows.length;
   const toggle = (key: Sort) => setSortBy(sortBy === key ? null : key);
+  // The average team's value: percentages are averaged as shown, not pooled
+  const average = (of: (row: StandingRow) => number) =>
+    rows.reduce((sum, row) => sum + of(row), 0) / teamCount;
+  // The third-best value, whichever team has it: the line to clear for the
+  // top 3
+  const third = (of: (row: StandingRow) => number) =>
+    rows.map(of).sort((a, b) => b - a)[Math.min(2, teamCount - 1)];
+  const footRows = [
+    { label: 'Average', title: 'The average team', of: average },
+    { label: 'Top 3', title: "The third-best team's value in each column", of: third },
+  ];
 
   return (
     <>
@@ -146,7 +157,7 @@ export default function CategoryTable({ rows, games, pool }: Props) {
                 scope="col"
                 title={
                   pool
-                    ? `The NBA player whose ${seasonLabel(pool.season)} per-game stats are closest`
+                    ? `The NBA player whose ${seasonLabel(pool.season)} per-game stats have the closest shape: strong and weak in the same categories, measured against other players as the team is against other teams`
                     : undefined
                 }
               >
@@ -195,6 +206,33 @@ export default function CategoryTable({ rows, games, pool }: Props) {
             </tr>
           ))}
         </tbody>
+        {mode !== 'points' && teamCount > 0 && (
+          <tfoot>
+            {footRows.map((foot) => (
+              <tr key={foot.label}>
+                <th className="sticky team-cell" scope="row" title={foot.title}>
+                  {foot.label}
+                </th>
+                {games !== undefined &&
+                  TIME.map(({ key }) => (
+                    <td key={key} className={clsx('cat time', key)}>
+                      <b>{games ? Math.round(foot.of((row) => time(row, key))).toLocaleString('en-US') : '–'}</b>
+                    </td>
+                  ))}
+                {CATEGORIES.map((category, i) => {
+                  const value = foot.of((row) => cats(row)[i].value);
+                  return (
+                    <td key={category.key} className="cat">
+                      <b>{mode === 'perGame' ? perGameFormat(i, value) : category.format(value)}</b>
+                    </td>
+                  );
+                })}
+                <td className="num total" />
+                {showComps && <td className="comp" />}
+              </tr>
+            ))}
+          </tfoot>
+        )}
       </table>
       </div>
     </>

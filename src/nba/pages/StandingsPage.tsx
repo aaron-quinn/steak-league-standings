@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CategoryTable from '../components/CategoryTable';
+import DayStars from '../components/DayStars';
 import HistoryPanel from '../components/HistoryPanel';
 import SeasonStatus from '../components/SeasonStatus';
 import StandingsTable from '../components/StandingsTable';
@@ -15,6 +16,7 @@ import Shell, {
 import { careerTable, type CareerRow } from '../lib/alltime';
 import {
   useAllLeagues,
+  useDay,
   useLeague,
   usePlayerPool,
   useSeasonDays,
@@ -25,7 +27,8 @@ import { rankMoves, tonightByTeam } from '../lib/tonight';
 import { formatPoints, ordinal } from '../lib/format';
 import { FIRST_SEASON, dateOfDay, isFinished, shortDate } from '../lib/season';
 import { useSteakOdds } from '../lib/useSteakOdds';
-import { buildStandings, hasStarted, playingTime } from '../lib/standings';
+import { buildStandings, hasStarted, lastName, playingTime } from '../lib/standings';
+import { dayStars } from '../lib/stars';
 
 type View = 'points' | 'categories' | 'week';
 
@@ -61,6 +64,19 @@ export default function StandingsPage() {
     () => (live && league ? rankMoves(league.teams, today.day) : undefined),
     [live, league, today.day],
   );
+  // The day's stars: today once its games have lines, last night until then
+  const started = Boolean(today.day?.players.length);
+  const lastNight = useDay(season, (league?.latestDay ?? 0) - 1, live && !started);
+  const starDay = started ? today : lastNight;
+  const [starTeam, setStarTeam] = useState<number | null>(null);
+  const stars = useMemo(
+    () =>
+      live && league && starDay.day
+        ? dayStars(starDay.day, starDay.names, starDay.proTeams, league.teams, starTeam ?? undefined)
+        : undefined,
+    [live, league, starDay.day, starDay.names, starDay.proTeams, starTeam],
+  );
+  const managers = useMemo(() => new Map(rows.map((r) => [r.team.id, lastName(r.name)])), [rows]);
   const tonight = useMemo(
     () =>
       live && games
@@ -177,6 +193,18 @@ export default function StandingsPage() {
                 />
               )}
             </section>
+          )}
+          {!allTime && stars && league && starDay.day && (
+            <DayStars
+              stars={stars}
+              when={started ? 'Tonight' : 'Last night'}
+              date={shortDate(dateOfDay(league.opener, starDay.day.day))}
+              live={started && Boolean(games?.games.some((g) => g.state === 'in'))}
+              manager={(team) => managers.get(team) ?? 'Team'}
+              teams={rows.map((r) => ({ id: r.team.id, name: r.name }))}
+              team={starTeam}
+              onTeam={setStarTeam}
+            />
           )}
         </div>
         <HistoryPanel />
