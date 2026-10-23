@@ -80,7 +80,7 @@ async function liveTotals(season, league, json) {
 // it in memory too.
 const memory = new Map();
 async function getDay(season, day, final) {
-  const key = `https://nba.steak.internal/day/v5/${season}/${day}`;
+  const key = `https://nba.steak.internal/day/v6/${season}/${day}`;
   const kept = memory.get(key);
   if (kept && kept.expires > Date.now()) return kept.data;
 
@@ -162,16 +162,19 @@ nba.get('/days/:year/:chunk', ...cacheFor(LIVE_SECONDS), async (c) => {
   const final = first + CHUNK_DAYS - 1 < latestDay;
   if (final) c.header('Cache-Control', `max-age=${FINAL_RESPONSE_SECONDS}`);
   return c.json({
-    days: days.map(({ day, teams, players, rosters, slots, minutes, playedFor, tx }) => ({
-      day,
-      teams,
-      players,
-      rosters,
-      slots,
-      minutes,
-      playedFor,
-      tx,
-    })),
+    days: days.map(
+      ({ day, teams, players, rosters, slots, minutes, playerMinutes, playedFor, tx }) => ({
+        day,
+        teams,
+        players,
+        rosters,
+        slots,
+        minutes,
+        playerMinutes,
+        playedFor,
+        tx,
+      }),
+    ),
     names,
     proTeams,
   });

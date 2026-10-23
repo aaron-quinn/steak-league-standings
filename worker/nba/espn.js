@@ -22,6 +22,7 @@ const counts = (slot) => slot !== BENCH && slot !== IR;
 //   rosters: { [teamID]: every player on the team that day },
 //   slots: { [playerID]: lineup slot } for every rostered player,
 //   minutes: { [teamID]: minutes played by the active lineup },
+//   playerMinutes: { [playerID]: minutes } for rostered players who played,
 //   playedFor: { [playerID]: NBA team } for rostered players who played,
 //   tx: executed adds, drops and trades,
 //   names: { [playerID]: name } for every rostered player
@@ -35,6 +36,7 @@ export function compactDay(json, day) {
   const rosters = {};
   const slots = {};
   const minutes = {};
+  const playerMinutes = {};
   const playedFor = {};
   const names = {};
   const proTeams = {};
@@ -63,6 +65,7 @@ export function compactDay(json, day) {
       if (!games) continue;
       const line = statLine(stats);
       players.push([team.teamId, player.id, entry.lineupSlotId, games, ...line]);
+      playerMinutes[player.id] = Math.round(stats[MIN] ?? 0);
       if (counts(entry.lineupSlotId)) {
         line.forEach((v, i) => (total[i] += v));
         played += stats[MIN] ?? 0;
@@ -89,7 +92,19 @@ export function compactDay(json, day) {
     }))
     .sort((a, b) => a.at - b.at);
 
-  return { day, teams, players, rosters, slots, minutes, playedFor, tx, names, proTeams };
+  return {
+    day,
+    teams,
+    players,
+    rosters,
+    slots,
+    minutes,
+    playerMinutes,
+    playedFor,
+    tx,
+    names,
+    proTeams,
+  };
 }
 
 // Each team's rostered players with ESPN's season projections:

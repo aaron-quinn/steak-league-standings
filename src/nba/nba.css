@@ -301,6 +301,7 @@ tr.open .nba-games .chev { transform: translateY(-2px) rotate(180deg); }
 .nba-box tr.live .when { color: var(--cyan); }
 .nba-box td:last-child, .nba-box th:last-child { padding-right: 12px; }
 .nba-box td.none { text-align: center; color: var(--faint); }
+.nba-box td.min { color: var(--dim); }
 .nba-box tr.benched { opacity: 0.5; }
 .nba-box tbody tr:last-child > * { border-bottom: 0; }
 .nba-box tfoot th, .nba-box tfoot td { border-top: 1px solid var(--line-strong); border-bottom: 0; font-weight: 750; color: var(--text); }

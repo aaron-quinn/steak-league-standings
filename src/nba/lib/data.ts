@@ -81,6 +81,8 @@ export interface NbaDay {
   playedFor?: Record<string, number>;
   // Each team's active-lineup minutes, on days with games
   minutes?: Record<string, number>;
+  // Each rostered player's minutes, for those who played (live season only)
+  playerMinutes?: Record<string, number>;
   tx: Transaction[];
 }
 

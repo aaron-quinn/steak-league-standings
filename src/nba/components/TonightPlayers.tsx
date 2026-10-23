@@ -16,6 +16,7 @@ export default function TonightPlayers({ team }: { team: TonightTeam }) {
             <th scope="col" className="player">
               Player
             </th>
+            <th scope="col" title="Minutes">MIN</th>
             <th scope="col">PTS</th>
             <th scope="col">REB</th>
             <th scope="col">AST</th>
@@ -43,6 +44,7 @@ export default function TonightPlayers({ team }: { team: TonightTeam }) {
                 </th>
                 {line ? (
                   <>
+                    <td className="min">{player.minutes ?? '–'}</td>
                     {[0, 1, 2, 3, 4, 5].map((i) => (
                       <td key={i}>{line[i]}</td>
                     ))}
@@ -54,7 +56,7 @@ export default function TonightPlayers({ team }: { team: TonightTeam }) {
                     </td>
                   </>
                 ) : (
-                  <td colSpan={8} className="none">
+                  <td colSpan={9} className="none">
                     –
                   </td>
                 )}
@@ -70,6 +72,7 @@ export default function TonightPlayers({ team }: { team: TonightTeam }) {
                 {team.players.some((p) => !p.active && p.line) ? 'Bench and IR not counted' : 'Today'}
               </span>
             </th>
+            <td className="min">{team.minutes ?? '–'}</td>
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <td key={i}>{team.total[i]}</td>
             ))}

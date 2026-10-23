@@ -40,12 +40,14 @@ export interface TonightPlayer {
   game: NbaGame;
   // The day's stat line, once the player has got on the court
   line?: StatLine;
+  minutes?: number;
 }
 
 export interface TonightTeam {
   players: TonightPlayer[];
   // The day's stat line from the active lineup: what counts toward the totals
   total: StatLine;
+  minutes?: number;
   // Active players whose game hasn't started, is being played, or is over
   toPlay: number;
   playing: number;
@@ -71,6 +73,7 @@ export function tonightByTeam(
     const team: TonightTeam = {
       players: [],
       total: day.teams?.[teamID] ?? emptyLine(),
+      minutes: day.minutes?.[teamID],
       toPlay: 0,
       playing: 0,
       done: 0,
@@ -89,6 +92,7 @@ export function tonightByTeam(
         active,
         game,
         line: lines.get(id),
+        minutes: day.playerMinutes?.[id],
       });
       if (!active) continue;
       if (game.state === 'pre') team.toPlay++;
