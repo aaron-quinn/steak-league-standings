@@ -578,3 +578,14 @@ a.who:hover { color: var(--cyan); }
 .nba-habits .hint { color: var(--faint); }
 .nba-tiers th[scope='row'] { padding-left: 12px; text-align: left; font-weight: 650; }
 .nba-tiers td:last-child, .nba-tiers th:last-child { padding-right: 12px; }
+
+.nba-player-name a { color: inherit; text-decoration: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.nba-player-name a:hover, .nba-player-name a:focus-visible { color: var(--cyan); text-decoration: underline; }
+.nba-player-summary { display: flex; flex-wrap: wrap; gap: 20px; padding: 18px; }
+.nba-player-summary span { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.nba-player-summary strong { font-size: 22px; font-variant-numeric: tabular-nums; }
+.nba-player-note { padding: 0 18px 14px; font-size: 13px; }
+.nba-player-log { overflow-x: auto; padding: 0 18px 18px; }
+.nba-player-log table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 13px; }
+.nba-player-log th, .nba-player-log td { padding: 9px 12px; text-align: right; border-bottom: 1px solid rgba(128,128,128,.2); white-space: nowrap; }
+.nba-player-log th:first-child { text-align: left; }

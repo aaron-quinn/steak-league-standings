@@ -1,3 +1,5 @@
+import { Link, useSearchParams } from 'react-router-dom';
+
 // Same locally hosted RotoWire logos and ESPN team mapping as steak-nba.
 const TEAMS: Record<number, string> = {
   1: 'ATL',
@@ -39,6 +41,8 @@ export default function PlayerName({
   name: string;
   proTeam?: number;
 }) {
+  const [params] = useSearchParams();
+  const season = params.get('season');
   const code = proTeam === undefined ? undefined : TEAMS[proTeam];
   return (
     <span className="nba-player-name">
@@ -60,7 +64,7 @@ export default function PlayerName({
           aria-label={proTeam === 0 ? 'Free agent' : 'NBA team unavailable'}
         />
       )}
-      <span>{name}</span>
+      <Link to={`/nba/players/${encodeURIComponent(name)}${season ? `?season=${encodeURIComponent(season)}` : ''}`}>{name}</Link>
     </span>
   );
 }
