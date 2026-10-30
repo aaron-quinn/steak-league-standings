@@ -188,11 +188,6 @@ function SlotTag({ p }: { p: RosterPlayer }) {
     <>
       {p.slot === IR && <span className="nba-roster-tag" title="On injured reserve: doesn’t count">IR</span>}
       {p.slot === BENCH && <span className="nba-roster-tag" title="On the bench this week">BE</span>}
-      {p.availabilitySource !== 'ESPN' && (
-        <span className="nba-roster-tag" title={`${p.availabilitySource} availability: ${(p.remaining * p.availability).toFixed(1)} projected games remaining`}>
-          {p.availabilitySource === 'RotoWire' ? 'RW' : p.availabilitySource}
-        </span>
-      )}
       {p.status && p.status !== 'ACTIVE' && (
         <span className="nba-roster-tag out" title={`ESPN injury status: ${p.status.replace(/_/g, ' ')}`}>
           {p.status === 'DAY_TO_DAY' ? 'DTD' : p.status.replace(/_/g, ' ')}
@@ -434,7 +429,7 @@ function StrengthTable({
         of the season, with no head start. Each player projects at his per-game line blended with his last two seasons
         (rookies with a typical end-of-roster line), times projected games remaining, capped at his NBA team’s
         games left. Availability uses a RotoWire snapshot for up to 48 hours, then ESPN, then historical availability.
-        Player tags identify the source; projections may lag injury news.
+        Projections may lag injury news.
         <b>Finish</b> adds today’s totals; <b>Gap</b> is how far either sits from today’s points. Positions
         aren’t checked. Values are in roto points at last season’s rates, as on the Waivers page. Tap a team to see its
         roster.
@@ -745,7 +740,7 @@ function PlayersView({ league, model, basis }: { league: NbaLeague; model: Roste
       </div>
       <p className="nba-foot nba-panel-foot">
         {basis === 'projected'
-          ? 'Projected value is roto points from here on: the per-game line blended with the last two seasons, times expected games remaining. Availability uses a RotoWire snapshot for up to 48 hours, then ESPN, then historical availability. Player tags identify the source; projections may lag injury news.'
+          ? 'Projected value is roto points from here on: the per-game line blended with the last two seasons, times expected games remaining. Availability uses a RotoWire snapshot for up to 48 hours, then ESPN, then historical availability. Projections may lag injury news.'
           : 'Season value is roto points produced so far, in every NBA game, rostered or not.'}{' '}
         Values are at last season’s rates. Tap a category to sort by it.
       </p>
