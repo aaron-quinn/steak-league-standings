@@ -596,6 +596,8 @@ a.who:hover { color: var(--cyan); }
 .nba-player-season { padding-bottom: 12px; }
 .nba-player-season td.cat { color: var(--text); font-weight: 600; }
 .nba-player-season .extra { border-left: 1px solid var(--line-strong); }
+/* Between MIN and the stat line */
+.nba-player-log:not(.nba-player-season) :is(th, td):nth-child(4) { border-left: 1px solid var(--line-strong); }
 .nba-player-log .won { color: var(--good-text); }
 .nba-player-log .lost { color: var(--bad-text); }
 .nba-player-log .sat { margin-left: 6px; padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; font-size: 10px; font-weight: 650; letter-spacing: 0.06em; color: var(--dim); }
