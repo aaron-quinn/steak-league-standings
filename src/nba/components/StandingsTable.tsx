@@ -1,3 +1,4 @@
+import StandingsName from './StandingsName';
 import clsx from 'clsx';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -139,7 +140,7 @@ export default function StandingsTable({
                     so the name isn't a link there */}
                 {row.team.owner && !liveSeason ? (
                   <Link to={`/nba/managers/${slugify(row.name)}`} className="who">
-                    {row.name}
+                    <StandingsName name={row.name} hasOwner={Boolean(row.team.owner)} />
                     {buried?.has(row.team.id) && <span title="Tombstoned"> 🪦</span>}
                     {row.zone === 'self-buyer' && (
                       <span className="nba-zone-tag">Buys own</span>
@@ -147,7 +148,7 @@ export default function StandingsTable({
                   </Link>
                 ) : (
                   <span className="who">
-                    {row.name}
+                    <StandingsName name={row.name} hasOwner={Boolean(row.team.owner)} />
                     {buried?.has(row.team.id) && <span title="Tombstoned"> 🪦</span>}
                     {row.zone === 'self-buyer' && (
                       <span className="nba-zone-tag">Buys own</span>

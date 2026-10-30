@@ -1,3 +1,4 @@
+import StandingsName from './StandingsName';
 import { useMemo, useState, type CSSProperties } from 'react';
 import clsx from 'clsx';
 import { findComps, type Comp, type PlayerPool } from '../lib/comps';
@@ -171,7 +172,7 @@ export default function CategoryTable({ rows, games, pool }: Props) {
           {sorted.map((row) => (
             <tr key={row.team.id}>
               <td className="sticky team-cell">
-                <span className="who">{row.name}</span>
+                <span className="who"><StandingsName name={row.name} hasOwner={Boolean(row.team.owner)} /></span>
               </td>
               {games !== undefined &&
                 TIME.map(({ key }) => (
