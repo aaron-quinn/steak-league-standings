@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import PlayerPage from './pages/PlayerPage';
 import BuildsPage from './pages/BuildsPage';
 import DraftPage from './pages/DraftPage';
+import InjuriesPage from './pages/InjuriesPage';
 import ManagerPage from './pages/ManagerPage';
 import ManagersPage from './pages/ManagersPage';
 import OddsPage from './pages/OddsPage';
@@ -24,6 +25,7 @@ export default function NbaApp() {
       <Route path="waivers" element={<WaiversPage />} />
       <Route path="trades" element={<TradesPage />} />
       <Route path="builds" element={<BuildsPage />} />
+      <Route path="injuries" element={<InjuriesPage />} />
       <Route path="managers"element={<ManagersPage />} />
       <Route path="managers/:slug" element={<ManagerPage />} />
       <Route path="*" element={<StandingsPage />} />

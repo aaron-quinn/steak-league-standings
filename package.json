@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "npm run nba:odds && tsc -b && vite build",
     "nba:odds": "esbuild scripts/nba/build-odds.mjs --bundle --platform=node --format=esm --log-level=warning --outfile=node_modules/.cache/build-odds.mjs && node node_modules/.cache/build-odds.mjs",
+    "nba:injuries": "esbuild scripts/nba/build-injuries.mjs --bundle --platform=node --format=esm --log-level=warning --outfile=node_modules/.cache/build-injuries.mjs && node node_modules/.cache/build-injuries.mjs",
     "preview": "vite preview --port 4173",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "deploy": "npm run build && wrangler deploy",

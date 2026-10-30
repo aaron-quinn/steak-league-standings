@@ -611,3 +611,25 @@ a.who:hover { color: var(--cyan); }
 .nba-player-log .won { color: var(--good-text); }
 .nba-player-log .lost { color: var(--bad-text); }
 .nba-player-log .sat { margin-left: 6px; padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; font-size: 10px; font-weight: 650; letter-spacing: 0.06em; color: var(--dim); }
+
+/* Injuries */
+.nba-injury-facts { margin: 0 0 16px; }
+/* Lets the wide tables scroll inside the column instead of widening the page */
+.nba-injury-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-content: start; min-width: 0; }
+.nba-injury-facts .big { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nba-injury-table .team-cell { min-width: 132px; }
+.nba-injury-table td.num { line-height: 1.1; font-variant-numeric: tabular-nums; }
+.nba-injury-table td.num b { display: block; font-weight: 600; font-size: 14px; }
+.nba-injury-table td.num small { display: block; font-size: 11px; color: var(--faint); }
+.nba-injury-table td.num small.nba-good { color: var(--good-text); }
+.nba-injury-table td.num small.nba-bad { color: var(--bad-text); }
+.nba-injury-table td.luck { font-weight: 800; font-stretch: 70%; font-size: 19px; }
+.nba-injury-table .healthy { padding-right: 12px; }
+.nba-injury-heat th, .nba-injury-heat td { height: 30px; }
+.nba-injury-heat thead th:not(.team-cell) { min-width: 26px; padding: 0 2px; text-align: center; }
+.nba-injury-heat .team-cell { width: 100%; max-width: 0; min-width: 104px; padding-left: 12px; text-align: left; }
+.nba-injury-heat .team-cell .who { font-size: 13.5px; }
+.nba-injury-heat .sticky { position: sticky; left: 0; z-index: 1; background: linear-gradient(var(--row, transparent), var(--row, transparent)), #0f1637; box-shadow: 8px 0 10px -8px rgb(0 0 0 / 0.7); }
+.nba-injury-heat thead .sticky { z-index: 2; background: #0e1534; }
+.nba-table.nba-injury-heat tbody td { padding: 0 2px; text-align: center; font-size: 12px; font-weight: 650; color: var(--text); background: linear-gradient(var(--heat, transparent), var(--heat, transparent)), var(--row); }
+.nba-injury-heat td:last-child, .nba-injury-heat th:last-child { padding-right: 12px; }

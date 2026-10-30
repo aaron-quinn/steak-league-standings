@@ -183,6 +183,7 @@ opening night), and build the finished season:
 
 ```bash
 node scripts/nba/build-seasons.mjs 2027
+npm run nba:injuries 2027   # the Injuries screen's absences, from that cache
 ```
 
 ESPN responses are saved gzipped in `.cache/nba-espn/` (gitignored), so later

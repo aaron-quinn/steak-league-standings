@@ -11,6 +11,7 @@ export const NBA_SCREENS = [
   { to: '/nba/waivers', label: 'Waivers' },
   { to: '/nba/trades', label: 'Trades' },
   { to: '/nba/builds', label: 'Builds' },
+  { to: '/nba/injuries', label: 'Injuries' },
   // Stays lit on each manager's own page
   { to: '/nba/managers', label: 'Managers', nested: true },
 ];
