@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import apiRoutes from './routes/index.js';
 import nbaRoutes from './nba/routes.js';
+import { refreshRotoWire } from './nba/rotowire.js';
 
 // Only /api/* reaches this Worker. Everything else is served straight from the
 // built site in dist/ (see "assets" in wrangler.jsonc).
@@ -21,4 +22,9 @@ app.onError((error, c) => {
   );
 });
 
-export default app;
+export default {
+  fetch: app.fetch,
+  async scheduled(_event, env) {
+    await refreshRotoWire(env);
+  },
+};

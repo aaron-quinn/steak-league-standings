@@ -8,6 +8,7 @@
 // minutes. Rosters with projections are fetched once an hour. A finished day is
 // fetched once, reduced to its compact form and kept at the edge for a month.
 import { Hono } from 'hono';
+import { readRotoWire } from './rotowire.js';
 import fetchJSON, { isCoolingDown } from '../api/fetch-json.js';
 import { cacheFor } from '../routes/index.js';
 import { FINAL_RESPONSE_SECONDS } from '../utils/season-cache.js';
@@ -304,6 +305,12 @@ nba.get('/schedule/:year', ...cacheFor(SCHEDULE_SECONDS), async (c) => {
 // Builds page's projected shapes. Rosters change with moves, projections
 // rarely, so an hour is fresh enough.
 const PROJECTION_SECONDS = 60 * 60;
+nba.get('/rotowire/:year', async (c) => {
+  if (!isCurrent(Number(c.req.param('year')))) return c.json({ error: 'Not the current season' }, 404);
+  c.header('Cache-Control', 'no-store');
+  return c.json(await readRotoWire(c.env));
+});
+
 nba.get('/projections/:year', ...cacheFor(PROJECTION_SECONDS), async (c) => {
   const season = Number(c.req.param('year'));
   if (!isCurrent(season)) return c.json({ error: 'Not the current season' }, 404);

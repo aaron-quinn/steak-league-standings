@@ -10,7 +10,7 @@
     "preview": "vite preview --port 4173",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "deploy": "npm run build && wrangler deploy",
-    "test": "node --test worker/utils/trade-value.test.js scripts/trades.test.mjs"
+    "test": "node --test worker/utils/trade-value.test.js worker/nba/rotowire.test.js scripts/trades.test.mjs scripts/nba/rosters.test.mjs"
   },
   "engines": {
     "node": ">=20.5.0"

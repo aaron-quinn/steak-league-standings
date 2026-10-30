@@ -633,3 +633,50 @@ a.who:hover { color: var(--cyan); }
 .nba-injury-heat thead .sticky { z-index: 2; background: #0e1534; }
 .nba-table.nba-injury-heat tbody td { padding: 0 2px; text-align: center; font-size: 12px; font-weight: 650; color: var(--text); background: linear-gradient(var(--heat, transparent), var(--heat, transparent)), var(--row); }
 .nba-injury-heat td:last-child, .nba-injury-heat th:last-child { padding-right: 12px; }
+
+/* Rosters */
+.nba-strength-table .strength { font-weight: 800; font-stretch: 70%; font-size: 20px; }
+.nba-strength-table tr.selected .strength { color: var(--cyan); }
+.nba-strength-table tr.selected .rank { color: var(--cyan); }
+.nba-strength-table td.trend { width: 84px; padding-right: 12px; }
+.nba-spark { display: block; overflow: visible; }
+.nba-spark polyline { fill: none; stroke: var(--cyan); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; opacity: 0.8; }
+.nba-spark circle { fill: var(--cyan); }
+.nba-strength-cats thead th:not(.team-cell) { min-width: 30px; }
+@media (min-width: 960px) { .nba-rosters-grid { grid-template-columns: minmax(0, 1fr) 380px; } }
+.nba-roster-panel { margin-top: 16px; }
+.nba-roster-summary { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--dim); }
+.nba-roster-summary b { color: var(--text); font-weight: 650; }
+.nba-roster-table th.cat { min-width: 50px; cursor: default; }
+.nba-roster-table td.cat { font-variant-numeric: tabular-nums; font-size: 13.5px; }
+.nba-roster-table .player { min-width: 190px; padding-left: 12px; }
+.nba-roster-table td.player .nba-player-name { max-width: 170px; }
+.nba-roster-table td.num { font-variant-numeric: tabular-nums; color: var(--dim); }
+.nba-roster-table td.num.lead { color: var(--text); font-weight: 650; }
+.nba-roster-table td.value { color: var(--text); font-weight: 700; }
+.nba-roster-table td.cost { padding-right: 12px; font-size: 12.5px; color: var(--dim); }
+.nba-roster-table td.manager { font-size: 13px; }
+.nba-roster-table td.manager a { color: var(--dim); text-decoration: none; }
+.nba-roster-table td.manager a:hover { color: var(--cyan); }
+.nba-table .nba-roster-group th { height: 26px; padding-left: 12px; text-align: left; font-weight: 650; font-stretch: 80%; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); background: rgb(5 9 26 / 0.45); }
+.nba-roster-tag { display: inline-block; margin-left: 6px; padding: 0 5px; border: 1px solid var(--line-strong); border-radius: 5px; font-size: 10.5px; font-weight: 650; line-height: 16px; letter-spacing: 0.04em; color: var(--faint); vertical-align: middle; }
+.nba-roster-tag.out { border-color: rgb(255 82 134 / 0.5); color: var(--bad-text); }
+.nba-sort { padding: 0; border: 0; background: none; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; }
+.nba-sort:hover, .nba-sort.on { color: var(--cyan); }
+.nba-players-sorted { font-size: 12.5px; }
+.nba-strength-table td.gap, .nba-depth-table td.gap { padding-right: 10px; font-weight: 800; font-stretch: 70%; font-size: 19px; }
+.nba-table th[aria-sort] .nba-sort { color: var(--cyan); }
+.nba-depth-panel { margin-top: 16px; }
+.nba-depth-table .shape { width: 40%; min-width: 220px; }
+@media (max-width: 640px) { .nba-depth-table .shape { width: auto; min-width: 110px; } }
+.nba-depth-bar { display: flex; gap: 1px; height: 14px; }
+.nba-depth-bar i { display: block; min-width: 1px; border-radius: 2px; background: var(--cyan); opacity: 0.85; }
+.nba-depth-bar i:nth-child(even).starter { opacity: 0.6; }
+.nba-depth-bar i.bench { background: var(--violet); opacity: 0.7; }
+.nba-depth-bar i.bench:nth-child(even) { opacity: 0.45; }
+.nba-depth-bar i.ir { background: repeating-linear-gradient(135deg, rgb(160 170 210 / 0.45) 0 3px, transparent 3px 6px); opacity: 1; }
+.nba-depth-key { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); }
+.nba-depth-key i { display: inline-block; width: 10px; height: 10px; margin-left: 6px; border-radius: 2px; background: var(--cyan); }
+.nba-depth-key i.bench { background: var(--violet); }
+.nba-depth-key i.ir { background: repeating-linear-gradient(135deg, rgb(160 170 210 / 0.6) 0 2px, transparent 2px 4px); }
+.nba-depth-table td.num small { max-width: 90px; margin-left: auto; overflow: hidden; text-overflow: ellipsis; }

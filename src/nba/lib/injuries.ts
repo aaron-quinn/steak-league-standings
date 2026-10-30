@@ -65,12 +65,12 @@ const RATE_WEIGHT = 41;
 
 // A season's length in games: what nearly every full-season player reached
 // (traded players can play a few more)
-function seasonGames(pool: PlayerPool) {
+export function seasonGames(pool: PlayerPool) {
   const games = pool.players.map((p) => p[1]).sort((a, b) => a - b);
   return games[Math.floor(games.length * 0.95)] ?? 82;
 }
 
-function missRates(ids: Iterable<number>, names: Record<string, string>, priors: PlayerPool[]) {
+export function missRates(ids: Iterable<number>, names: Record<string, string>, priors: PlayerPool[]) {
   const pools = priors.slice(0, 2).map((pool) => ({
     games: seasonGames(pool),
     byName: new Map(pool.players.map((p) => [p[0], p[1]])),

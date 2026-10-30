@@ -52,12 +52,16 @@ export function pointRates(league: NbaLeague): PointRates {
 // shooting, how far the made shots beat a league-average shooter on the same
 // attempts, spread over a team's season of attempts
 export function linePoints(line: StatLine, rates: PointRates) {
-  let points = 0;
-  rates.perPoint.forEach((per, i) => (points += (line[i] ?? 0) / per));
+  return categoryPoints(line, rates).reduce((sum, p) => sum + p, 0);
+}
+
+// The same, category by category (CATEGORIES order)
+export function categoryPoints(line: StatLine, rates: PointRates) {
+  const points = rates.perPoint.map((per, i) => (line[i] ?? 0) / per);
   rates.shooting.forEach(({ rate, attempts, perPoint }, k) => {
     const made = line[6 + 2 * k] ?? 0;
     const tried = line[7 + 2 * k] ?? 0;
-    if (attempts) points += (made - rate * tried) / attempts / perPoint;
+    points.push(attempts ? (made - rate * tried) / attempts / perPoint : 0);
   });
   return points;
 }

@@ -7,6 +7,7 @@ export const NBA_SCREENS = [
   { to: '/nba', label: 'Standings' },
   { to: '/nba/race', label: 'Steak Race' },
   { to: '/nba/odds', label: 'Steak Odds' },
+  { to: '/nba/rosters', label: 'Rosters' },
   { to: '/nba/draft', label: 'Draft' },
   { to: '/nba/waivers', label: 'Waivers' },
   { to: '/nba/trades', label: 'Trades' },

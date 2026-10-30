@@ -244,6 +244,9 @@ export function useDay(season: number, day: number, enabled = true) {
 // out), from worker/nba/espn.js compactProjections
 export interface NbaProjections {
   teams: { id: number; totals: StatLine; players: number; missing: number }[];
+  // Every rostered player's projected games for the season and ESPN injury
+  // status (missing from responses cached before it was added)
+  players?: Record<string, [number | null, string]>;
 }
 
 export const useProjections = (season: number, enabled = true) =>

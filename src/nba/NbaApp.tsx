@@ -7,6 +7,7 @@ import ManagerPage from './pages/ManagerPage';
 import ManagersPage from './pages/ManagersPage';
 import OddsPage from './pages/OddsPage';
 import RacePage from './pages/RacePage';
+import RostersPage from './pages/RostersPage';
 import StandingsPage from './pages/StandingsPage';
 import TradesPage from './pages/TradesPage';
 import WaiversPage from './pages/WaiversPage';
@@ -24,6 +25,7 @@ export default function NbaApp() {
       <Route path="draft" element={<DraftPage />} />
       <Route path="waivers" element={<WaiversPage />} />
       <Route path="trades" element={<TradesPage />} />
+      <Route path="rosters" element={<RostersPage />} />
       <Route path="builds" element={<BuildsPage />} />
       <Route path="injuries" element={<InjuriesPage />} />
       <Route path="managers"element={<ManagersPage />} />
