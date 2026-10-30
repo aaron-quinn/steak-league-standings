@@ -239,10 +239,11 @@ export function compactLeague(json) {
 }
 
 // One NBA player's every game in a season, from ESPN's public game log
-//   https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/ID/gamelog?season=YYYY
-// The athlete ID is the same as the fantasy API's player ID.
+//   https://site.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/ID/gamelog?season=YYYY
+// The athlete ID is the same as the fantasy API's player ID. ESPN's usual
+// host for it, site.web.api.espn.com, answers 403 to Cloudflare Workers.
 export const GAMELOG = (season, id) =>
-  `https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/${id}/gamelog?season=${season}`;
+  `https://site.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/${id}/gamelog?season=${season}`;
 
 // The game log's columns that make up the stat line, in stat line order
 const LOG_COLUMNS = [
