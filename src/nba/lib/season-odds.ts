@@ -1,4 +1,4 @@
-import type { NbaLeague, NbaTotals } from './data';
+import type { NbaLeague, NbaTotals, Tonight } from './data';
 import { fitModel, seeded, simulate, type OddsModel, type PastSeason, type TeamOdds } from './odds';
 import { addLine, emptyLine, type StatLine } from './roto';
 import { buildRace, type Race } from './race';
@@ -35,20 +35,54 @@ export function gamesSoFar(totals: NbaTotals) {
   );
 }
 
-// Odds today, from the league's live totals and each team's games so far
+// How much better than a coin flip the eat odds have been after each week of
+// the season (Brier skill, leaving each season out, 2018–19 to 2025–26):
+// barely early, steadily sharper, nearly certain by the last weeks
+const SKILL_BY_WEEK = [
+  0.14, 0.14, 0.16, 0.21, 0.25, 0.27, 0.3, 0.32, 0.38, 0.43, 0.46, 0.52, 0.55, 0.59, 0.63,
+  0.7, 0.7, 0.7, 0.74, 0.79, 0.87, 0.9, 0.96,
+];
+
+// How far to trust today's odds: their track record this far into a season
+export function oddsConfidence(elapsed: number) {
+  const week = Math.min(Math.max(elapsed / 7, 1), SKILL_BY_WEEK.length);
+  const below = Math.floor(week);
+  const skill =
+    SKILL_BY_WEEK[below - 1] +
+    (week - below) * ((SKILL_BY_WEEK[below] ?? SKILL_BY_WEEK[below - 1]) - SKILL_BY_WEEK[below - 1]);
+  return { skill, level: skill < 0.35 ? 'Low' : skill < 0.65 ? 'Medium' : 'High' };
+}
+
+// How much of today's slate the live totals hold: its finished games, and half
+// of those being played. A day without games is over. Unknown counts as none.
+export function todayPlayed(tonight: Tonight | undefined, latestDay: number) {
+  if (!tonight || tonight.day !== latestDay) return 0;
+  if (!tonight.games.length) return 1;
+  const done = tonight.games.reduce(
+    (sum, g) => sum + (g.state === 'post' ? 1 : g.state === 'in' ? 0.5 : 0),
+    0,
+  );
+  return done / tonight.games.length;
+}
+
+// Odds today, from the league's live totals and each team's games so far.
+// Today (latestDay) is still being played: only `played` of it is in the
+// totals, and the rest is projected with the days to come.
 export function currentOdds(
   league: NbaLeague,
   model: OddsModel,
   games?: Map<number, number>,
+  played = 0,
   runs = 4000,
 ) {
   const totals = new Map<number, StatLine>(league.teams.map((t) => [t.id, t.totals]));
+  const elapsed = Math.max(0, league.latestDay - 1 + played);
   return simulate(
     {
       totals,
       games,
-      elapsed: league.latestDay,
-      remaining: Math.max(0, league.finalDay - league.latestDay),
+      elapsed,
+      remaining: Math.max(0, league.finalDay - elapsed),
     },
     model,
     tieOrder(league),

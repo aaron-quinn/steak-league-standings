@@ -581,6 +581,9 @@ a.who:hover { color: var(--cyan); }
 
 .nba-player-name a { color: inherit; text-decoration: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .nba-player-name a:hover, .nba-player-name a:focus-visible { color: var(--cyan); text-decoration: underline; }
+.nba-confidence { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-weight: 650; font-stretch: 80%; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); cursor: help; }
+.nba-confidence .nba-bar { width: 56px; height: 4px; }
+.nba-confidence b { font-weight: 700; color: var(--text); }
 .nba-player-note { padding: 0 18px 14px; font-size: 13px; }
 .nba-player-log { overflow-x: auto; padding: 4px 18px 18px; }
 .nba-player-log table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 13px; }

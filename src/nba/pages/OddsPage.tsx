@@ -7,14 +7,18 @@ import SeasonStatus from '../components/SeasonStatus';
 import Shell, { Loading, useSeason } from '../components/Shell';
 import StandingsOnly from '../components/StandingsOnly';
 import TombstonePit from '../components/TombstonePit';
-import { formatPoints, ordinal } from '../lib/format';
-import { oddsStories } from '../lib/season-odds';
+import { formatPoints } from '../lib/format';
+import { oddsConfidence, oddsStories } from '../lib/season-odds';
 import { isFinished } from '../lib/season';
-import { buildStandings, hasStarted } from '../lib/standings';
+import { buildStandings, hasStarted, steakZone } from '../lib/standings';
 import { useSteakOdds } from '../lib/useSteakOdds';
 
 const percent = (p: number) =>
   p >= 0.995 ? '>99%' : p > 0 && p < 0.005 ? '<1%' : `${Math.round(p * 100)}%`;
+
+// The odds as shown, so rows that read the same tie: >99% is 100, <1% falls
+// between 0% and 1%
+const shown = (p: number) => (p >= 0.995 ? 100 : p > 0 && p < 0.005 ? 0.5 : Math.round(p * 100));
 
 export default function OddsPage() {
   const [season] = useSeason();
@@ -23,7 +27,21 @@ export default function OddsPage() {
   const [week, setWeek] = useState<number | null>(null);
   const finished = isFinished(season);
 
-  const rows = useMemo(() => (league ? buildStandings(league.teams) : []), [league]);
+  // Best chance of eating first, as shown; ties go to the better shot at first,
+  // then the standings
+  const rows = useMemo(() => {
+    const standings = league ? buildStandings(league.teams) : [];
+    const odds = (id: number) => {
+      const o = now?.get(id);
+      return o ? { eat: shown(o.eat), first: shown(o.first) } : { eat: -1, first: -1 };
+    };
+    return standings.sort(
+      (a, b) =>
+        odds(b.team.id).eat - odds(a.team.id).eat ||
+        odds(b.team.id).first - odds(a.team.id).first ||
+        a.position - b.position,
+    );
+  }, [league, now]);
   const stories = useMemo(
     () => (finished && history ? oddsStories(history, (w) => pitAt(w)?.buried ?? new Set()) : []),
     [finished, history, pitAt],
@@ -85,12 +103,26 @@ export default function OddsPage() {
               <section className="nba-panel" aria-label="Chances of eating steak">
                 <div className="nba-panel-head">
                   <h3 className="nba-panel-title">Chance of eating</h3>
+                  {(() => {
+                    const { skill, level } = oddsConfidence(league.latestDay);
+                    return (
+                      <span
+                        className="nba-confidence"
+                        title={`At this point in past seasons, these odds were ${Math.round(skill * 100)}% better than a coin flip`}
+                      >
+                        Odds confidence
+                        <span className="nba-bar" aria-hidden="true">
+                          <span style={{ width: `${Math.round(skill * 100)}%` }} />
+                        </span>
+                        <b>{level}</b>
+                      </span>
+                    );
+                  })()}
                 </div>
                 <table className="nba-table">
                   <thead>
                     <tr>
-                      <th className="rank">#</th>
-                      <th style={{ textAlign: 'left' }}>Team</th>
+                      <th style={{ textAlign: 'left', paddingLeft: 12 }}>Team</th>
                       <th className="num">1st</th>
                       <th className="num" style={{ paddingRight: 12 }}>
                         Eat
@@ -98,25 +130,32 @@ export default function OddsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((row) => {
+                    {rows.map((row, i) => {
                       const odds = now?.get(row.team.id);
                       const buried = pit?.buried.has(row.team.id) ?? false;
+                      // Zones by place in the odds order, with the steak line
+                      // drawn the way the standings draw it
+                      const zone = steakZone(i + 1, rows.length);
+                      const eaters = Math.floor(rows.length / 2);
+                      const lineAfter = rows.length % 2 ? eaters + 1 : eaters;
                       return (
                         <tr
                           key={row.team.id}
-                          className={clsx(row.zone, { leader: row.position === 1, followed: row.team.id === followed })}
+                          className={clsx(zone, {
+                            leader: i === 0,
+                            'steak-line': i + 1 === lineAfter,
+                            followed: row.team.id === followed,
+                          })}
                           onClick={() => setFollowed(followed === row.team.id ? null : row.team.id)}
                           style={{ cursor: 'pointer' }}
                         >
-                          <td className="rank">{row.position}</td>
-                          <td className="team-cell">
+                          <td className="team-cell" style={{ paddingLeft: 12 }}>
                             <span className="who">
                               {row.name}
                               {buried && <span title="Tombstoned"> 🪦</span>}
                             </span>
                             <span className="team-name">
                               {formatPoints(row.points)} roto points
-                              {odds && ` · projects ${ordinal(Math.round(odds.position))}`}
                             </span>
                           </td>
                           <td className="num nba-dim">{odds ? percent(odds.first) : '–'}</td>

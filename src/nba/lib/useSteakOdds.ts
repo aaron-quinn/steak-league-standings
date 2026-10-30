@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import { useLeague, useOddsBasis, useSeasonTotals } from './data';
-import { currentOdds, gamesSoFar, oddsHistory } from './season-odds';
+import { useLeague, useOddsBasis, useSeasonTotals, useTonight } from './data';
+import { currentOdds, gamesSoFar, oddsHistory, todayPlayed } from './season-odds';
 import { dateOfDay, isFinished } from './season';
 import { buildStandings, hasStarted } from './standings';
 import { isTombstoned, tombstoned, type Comeback } from './tombstone';
@@ -77,22 +77,39 @@ export function useSteakOdds(
     [tallied, totals],
   );
 
+  // How much of today is played, so tonight's games still to come are
+  // projected rather than dropped
+  const { data: tonight } = useTonight(season);
+  const played = league ? todayPlayed(tonight, league.latestDay) : 0;
+
   const started = league ? hasStarted(league) : false;
   const now = useMemo(
     () =>
       needOdds && league && model && games && !finished && started
-        ? currentOdds(league, model, games)
+        ? currentOdds(league, model, games, played)
         : null,
-    [needOdds, league, model, games, finished, started],
+    [needOdds, league, model, games, finished, started, played],
   );
 
-  const history = useMemo(
+  const simulated = useMemo(
     () =>
       withHistory && league && model && totals
         ? oddsHistory(league, totals, model, finished ? league.lastDay : league.finalDay)
         : null,
     [withHistory, league, model, totals, finished],
   );
+  // The live season's newest point is today, still being played: show
+  // today's odds there, which project the games still to come
+  const history = useMemo(() => {
+    const end = (simulated?.race.checkpoints.length ?? 0) - 1;
+    if (!simulated || !now || !league || simulated.race.checkpoints[end]?.day !== league.latestDay) {
+      return simulated;
+    }
+    const eat = new Map(
+      [...simulated.eat].map(([id, odds]) => [id, odds.map((p, i) => (i === end ? (now.get(id)?.eat ?? p) : p))]),
+    );
+    return { ...simulated, eat };
+  }, [simulated, now, league]);
 
   // Today's pit: how far each team trails the last eating spot
   const pitNow = useMemo(() => {
