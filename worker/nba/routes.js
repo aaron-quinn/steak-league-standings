@@ -11,10 +11,11 @@ import { Hono } from 'hono';
 import fetchJSON, { isCoolingDown } from '../api/fetch-json.js';
 import { cacheFor } from '../routes/index.js';
 import { FINAL_RESPONSE_SECONDS } from '../utils/season-cache.js';
-import { BENCH, CURRENT_SEASON, ESPN_LEAGUE, IR, OPENERS, dateOfDay } from './config.js';
+import { BENCH, CURRENT_SEASON, ESPN_LEAGUE, FIRST_SEASON, IR, OPENERS, dateOfDay } from './config.js';
 import { addLine, scoreRoto } from '../../src/nba/lib/roto.ts';
 import {
   DAY_VIEWS,
+  GAMELOG,
   LEAGUE_VIEWS,
   PLAYERS_FILTER,
   PLAYERS_VIEWS,
@@ -22,6 +23,7 @@ import {
   SCHEDULE,
   SCOREBOARD,
   compactDay,
+  compactGameLog,
   compactGames,
   compactLeague,
   compactPlayers,
@@ -322,6 +324,24 @@ nba.get('/players/:year', ...cacheFor(PLAYERS_SECONDS), async (c) => {
     headers: { 'X-Fantasy-Filter': PLAYERS_FILTER(season) },
   });
   return c.json(compactPlayers(json.players?.map((p) => p.player) ?? [], season));
+});
+
+// One player's every NBA game in a season, for the player pages. Unlike the
+// rest of this file it serves finished seasons too: the stored days only hold
+// games played while on a league roster. Lines only move overnight.
+const GAMELOG_SECONDS = 60 * 60 * 3;
+nba.get('/gamelog/:year/:id', ...cacheFor(GAMELOG_SECONDS), async (c) => {
+  const season = Number(c.req.param('year'));
+  const id = Number(c.req.param('id'));
+  if (season < FIRST_SEASON || season > CURRENT_SEASON || !Number.isInteger(id) || id <= 0) {
+    return c.json({ error: 'No such player or season' }, 404);
+  }
+  const finished = season < CURRENT_SEASON;
+  const json = await fetchJSON(GAMELOG(season, id), {
+    cacheSeconds: finished ? FINAL_DAY_SECONDS : GAMELOG_SECONDS,
+  });
+  if (finished) c.header('Cache-Control', `max-age=${FINAL_RESPONSE_SECONDS}`);
+  return c.json(compactGameLog(json));
 });
 
 // The NBA games on the latest scoring day (or an earlier one, /games/:year/N),

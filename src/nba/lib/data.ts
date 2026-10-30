@@ -276,6 +276,31 @@ export function usePlayerPool(season: number, enabled = true) {
   });
 }
 
+// Every NBA player's totals for the season itself, even early in the live one
+// (usePlayerPool falls back to last season's for comps)
+export const useSeasonPool = (season: number) =>
+  useQuery({
+    queryKey: ['nba', 'players', season],
+    queryFn: () =>
+      getJSON<PlayerPool>(
+        isFinished(season) ? `/nba-data/${season}/players.json` : `/api/nba/players/${season}`,
+      ),
+    staleTime: isFinished(season) ? Infinity : 60 * 60 * 1000,
+  });
+
+// [date, NBA team, '@' | 'vs', opponent, 'W' | 'L', minutes, ...stat line]
+export type GameLogLine = [string, string, string, string, string, number, ...number[]];
+
+// One player's every regular-season NBA game, from worker/nba/espn.js
+// compactGameLog
+export const useGameLog = (season: number, id: number | undefined) =>
+  useQuery({
+    queryKey: ['nba', 'gamelog', season, id],
+    queryFn: () => getJSON<{ games: GameLogLine[] }>(`/api/nba/gamelog/${season}/${id}`),
+    enabled: id !== undefined,
+    staleTime: isFinished(season) ? Infinity : 60 * 60 * 1000,
+  });
+
 // The NBA games on the live season's latest day
 const tonightQuery = (season: number) => ({
   queryKey: ['nba', 'tonight', season],

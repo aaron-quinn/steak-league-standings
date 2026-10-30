@@ -237,3 +237,49 @@ export function compactLeague(json) {
       })),
   };
 }
+
+// One NBA player's every game in a season, from ESPN's public game log
+//   https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/ID/gamelog?season=YYYY
+// The athlete ID is the same as the fantasy API's player ID.
+export const GAMELOG = (season, id) =>
+  `https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/${id}/gamelog?season=${season}`;
+
+// The game log's columns that make up the stat line, in stat line order
+const LOG_COLUMNS = [
+  'points',
+  'totalRebounds',
+  'assists',
+  'threePointFieldGoalsMade-threePointFieldGoalsAttempted',
+  'steals',
+  'blocks',
+  'fieldGoalsMade-fieldGoalsAttempted',
+  'freeThrowsMade-freeThrowsAttempted',
+];
+
+// { games: [[date, team, '@' | 'vs', opponent, result, minutes, ...stat line]] }
+// for every regular-season game played, oldest first. The date is the game's
+// in Eastern time, which is the fantasy day it counted on.
+export function compactGameLog(json) {
+  const names = json.names ?? [];
+  const at = (stats, name) => stats[names.indexOf(name)] ?? '0';
+  const regular = (json.seasonTypes ?? []).filter((t) => /Regular Season/.test(t.displayName ?? ''));
+  const games = [];
+  for (const { stats, eventId } of regular.flatMap((t) => t.categories ?? []).flatMap((c) => c.events ?? [])) {
+    const event = json.events?.[eventId];
+    // ESPN files the All-Star Game under the regular season
+    if (!event || !stats?.length || event.team?.isAllStar) continue;
+    const line = LOG_COLUMNS.flatMap((name) => at(stats, name).split('-').map(Number));
+    // 3PM-3PA splits into two; the stat line only counts makes
+    line.splice(4, 1);
+    games.push([
+      new Date(event.gameDate).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }),
+      event.team?.abbreviation ?? '',
+      event.atVs ?? '',
+      event.opponent?.abbreviation ?? '',
+      event.gameResult ?? '',
+      Number(at(stats, 'minutes')) || 0,
+      ...line,
+    ]);
+  }
+  return { games: games.sort((a, b) => a[0].localeCompare(b[0])) };
+}

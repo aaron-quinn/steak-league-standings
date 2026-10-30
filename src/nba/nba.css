@@ -581,11 +581,21 @@ a.who:hover { color: var(--cyan); }
 
 .nba-player-name a { color: inherit; text-decoration: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .nba-player-name a:hover, .nba-player-name a:focus-visible { color: var(--cyan); text-decoration: underline; }
-.nba-player-summary { display: flex; flex-wrap: wrap; gap: 20px; padding: 18px; }
-.nba-player-summary span { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
-.nba-player-summary strong { font-size: 22px; font-variant-numeric: tabular-nums; }
 .nba-player-note { padding: 0 18px 14px; font-size: 13px; }
-.nba-player-log { overflow-x: auto; padding: 0 18px 18px; }
+.nba-player-log { overflow-x: auto; padding: 4px 18px 18px; }
 .nba-player-log table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 13px; }
-.nba-player-log th, .nba-player-log td { padding: 9px 12px; text-align: right; border-bottom: 1px solid rgba(128,128,128,.2); white-space: nowrap; }
-.nba-player-log th:first-child { text-align: left; }
+.nba-player-log th, .nba-player-log td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.nba-player-log thead th { font-weight: 650; font-stretch: 80%; font-size: 11px; letter-spacing: 0.08em; color: var(--faint); border-bottom-color: var(--line-strong); }
+.nba-player-log tbody th { font-weight: 600; }
+/* Date and roster lead the game log, the opponent ends it; headings align with their cells */
+.nba-player-log:not(.nba-player-season) :is(th, td):first-child,
+.nba-player-log:not(.nba-player-season) :is(th, td):nth-child(2),
+.nba-player-log:not(.nba-player-season) :is(th, td):last-child { text-align: left; }
+.nba-player-log:not(.nba-player-season) tbody tr:not(.rostered) { color: var(--dim); }
+.nba-player-log tr.rostered { background: var(--cyan-wash); }
+.nba-player-season { padding-bottom: 12px; }
+.nba-player-season td.cat { color: var(--text); font-weight: 600; }
+.nba-player-season .extra { border-left: 1px solid var(--line-strong); }
+.nba-player-log .won { color: var(--good-text); }
+.nba-player-log .lost { color: var(--bad-text); }
+.nba-player-log .sat { margin-left: 6px; padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; font-size: 10px; font-weight: 650; letter-spacing: 0.06em; color: var(--dim); }
