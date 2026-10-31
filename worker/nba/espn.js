@@ -111,16 +111,20 @@ export function compactDay(json, day) {
 //   ESPN_LEAGUE(season)?view=mRoster
 export const ROSTER_VIEWS = 'view=mRoster';
 
-// { teams: [{ id, totals, players, missing }], players }: each team's summed
-// projection (stat line order) over its roster, leaving out IR slots, which
-// don't count; `missing` is how many of those players ESPN has no projection
-// for. `players` is every rostered player's (IR too) projected games for the
-// season and injury status: { [playerID]: [games, 'ACTIVE' | 'OUT' | ...] }
+// { teams: [{ id, totals, players, missing }], players, positions }: each
+// team's summed projection (stat line order) over its roster, leaving out IR
+// slots, which don't count; `missing` is how many of those players ESPN has no
+// projection for. `players` is every rostered player's (IR too) projected games
+// for the season and injury status: { [playerID]: [games, 'ACTIVE' | 'OUT' |
+// ...] }. `positions` is ESPN's position id (1 PG, 2 SG, 3 SF, 4 PF, 5 C) for
+// every rostered player.
 export function compactProjections(json, season) {
   const id = `10${season}`;
   const everyone = {};
+  const positions = {};
   return {
     players: everyone,
+    positions,
     teams: (json.teams ?? []).map((team) => {
       const totals = STAT_IDS.map(() => 0);
       let players = 0;
@@ -128,10 +132,15 @@ export function compactProjections(json, season) {
       for (const entry of team.roster?.entries ?? []) {
         const player = entry.playerPoolEntry?.player;
         const games = player?.stats?.find((s) => s.id === id && s.statSourceId === 1)?.stats?.[GP];
-        if (player) everyone[player.id] = [
-          Number.isFinite(games) && games >= 0 ? games : null,
-          player.injuryStatus ?? 'ACTIVE',
-        ];
+        if (player) {
+          everyone[player.id] = [
+            Number.isFinite(games) && games >= 0 ? games : null,
+            player.injuryStatus ?? 'ACTIVE',
+          ];
+          if (Number.isInteger(player.defaultPositionId)) {
+            positions[player.id] = player.defaultPositionId;
+          }
+        }
         if (entry.lineupSlotId === IR) continue;
         players++;
         const projection = player?.stats?.find(

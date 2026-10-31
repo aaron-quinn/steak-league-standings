@@ -247,6 +247,9 @@ export interface NbaProjections {
   // Every rostered player's projected games for the season and ESPN injury
   // status (missing from responses cached before it was added)
   players?: Record<string, [number | null, string]>;
+  // ESPN position ids (1 PG, 2 SG, 3 SF, 4 PF, 5 C), by player ID (missing
+  // from responses cached before it was added)
+  positions?: Record<string, number>;
 }
 
 export const useProjections = (season: number, enabled = true) =>

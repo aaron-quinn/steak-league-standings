@@ -45,7 +45,7 @@ function build(season) {
   });
   writeFileSync(`${OUT}/${season}/injuries.json`, JSON.stringify(data));
   const kb = Math.round(JSON.stringify(data).length / 1024);
-  console.log(`${season}: ${data.misses.length} starter games missed, ${kb} KB`);
+  console.log(`${season}: ${data.misses.length} rostered games missed, ${kb} KB`);
 }
 
 const seasons = process.argv.slice(2).map(Number);

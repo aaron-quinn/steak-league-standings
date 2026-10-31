@@ -50,12 +50,35 @@ export type Acquired =
   | { how: 'waiver' | 'free agent'; bid: number; day: number }
   | { how: 'trade'; day: number };
 
+// ESPN's basketball positions, and the groups the roster page compares within
+export type NbaPosition = 'PG' | 'SG' | 'SF' | 'PF' | 'C';
+export type PositionGroup = 'G' | 'F' | 'C';
+
+// Which of a player's two values a view is showing
+export type ValueBasis = 'projected' | 'season';
+
+const POSITIONS: Record<number, NbaPosition> = {
+  1: 'PG',
+  2: 'SG',
+  3: 'SF',
+  4: 'PF',
+  5: 'C',
+};
+
+export function positionGroup(position: NbaPosition | undefined): PositionGroup | undefined {
+  if (position === 'PG' || position === 'SG') return 'G';
+  if (position === 'SF' || position === 'PF') return 'F';
+  return position === 'C' ? 'C' : undefined;
+}
+
 export interface RosterPlayer {
   id: number;
   name: string;
   team: number;
   slot: number;
   proTeam?: number;
+  // ESPN's position (missing when ESPN hasn't answered yet)
+  position?: NbaPosition;
   // This season, every NBA game (not only while rostered)
   games: number;
   seasonLine: StatLine;
@@ -98,10 +121,6 @@ export interface TeamStrength {
   starters: number;
   bench: number;
   ir: number;
-  // This week's actual lineup, and the best nine of those not out (see
-  // isOut), at the same values
-  lineup: number;
-  available: number;
   // Roster strength on each day in `days`: that day's roster at today's values
   trend: number[];
 }
@@ -130,8 +149,9 @@ export interface RosterInput {
   // ESPN's projected games for the season and injury status, by player ID
   // (worker/nba/espn.js compactProjections). Its games know about long
   // injuries the box scores can't, so they set availability where ESPN has a
-  // number.
+  // number. `positions` is ESPN's position id for every rostered player.
   espn?: Record<string, [number | null, string]>;
+  positions?: Record<string, number>;
   // Snapshot converted from RotoWire remaining games to a season total by
   // adding games played at fetch time. This avoids counting played games twice.
   rotowire?: Record<string, number>;
@@ -250,6 +270,7 @@ export function buildRosters({
   rates,
   options = PROJECTION,
   espn = {},
+  positions = {},
   rotowire = {},
 }: RosterInput): RosterModel {
   const sorted = [...days].sort((a, b) => a.day - b.day);
@@ -317,6 +338,7 @@ export function buildRosters({
       id,
       name,
       proTeam: proTeams[id],
+      position: POSITIONS[positions[id]],
       games: own?.[1] ?? 0,
       seasonLine,
       seasonValue: own ? linePoints(seasonLine, rates) : 0,
@@ -421,8 +443,6 @@ export function buildRosters({
         starters: sum(ps.filter((p) => p.starter)),
         bench: sum(ps.filter((p) => !p.starter && p.slot !== IR)),
         ir: sum(ps.filter((p) => p.slot === IR)),
-        lineup: sum(ps.filter((p) => isStarterSlot(p.slot))),
-        available: sum(lineup(ps.filter((p) => !isOut(p)), starters)),
         trend: trend.get(id)!,
       };
     })
@@ -439,3 +459,101 @@ export function perGameLine(p: RosterPlayer, basis: 'season' | 'projected') {
 
 // Each category's value per game, for the heat cells
 export const perGameCategories = (line: StatLine, rates: PointRates) => categoryPoints(line, rates);
+
+// A player's place among his team's best, and how that place compares with the
+// same place on every other roster. IR is left out: it doesn't count.
+export interface SlotPlace {
+  // 1-based: best player, second-best, and so on through the bench
+  slot: number;
+  // The other rosters' average at that place, his rank among every team with
+  // someone there, and how many teams that is
+  average?: number;
+  rank?: number;
+  teams?: number;
+}
+
+export interface SlotComparison {
+  overall: SlotPlace;
+  // The same within his position group, when ESPN gives his position
+  position?: SlotPlace & { group: PositionGroup };
+}
+
+interface SlotEntry {
+  id: number;
+  value: number;
+}
+
+// Fill in each entry's place against the others in its bucket (one player per
+// team). A bucket of one has no one to compare with: the place alone.
+function fillPlaces(entries: SlotEntry[], slot: number, out: Map<number, SlotPlace>) {
+  const total = entries.reduce((s, e) => s + e.value, 0);
+  const others = entries.length - 1;
+  for (const e of entries) {
+    if (!others) {
+      out.set(e.id, { slot });
+      continue;
+    }
+    out.set(e.id, {
+      slot,
+      average: (total - e.value) / others,
+      rank: 1 + entries.filter((o) => o.value > e.value + 1e-9).length,
+      teams: entries.length,
+    });
+  }
+}
+
+// Every non-IR player's place on his roster and against the same place on the
+// other rosters, overall and within his position group. Values follow the
+// selected basis, so a different ranking can put a different player in a slot.
+export function slotComparisons(teams: TeamStrength[], basis: ValueBasis): Map<number, SlotComparison> {
+  const value = (p: RosterPlayer) => (basis === 'projected' ? p.projectedValue : p.seasonValue);
+  const rosters = teams.map((t) => ({
+    id: t.id,
+    players: t.players.filter((p) => p.slot !== IR).sort((a, b) => value(b) - value(a)),
+  }));
+
+  const overall = new Map<number, SlotPlace>();
+  const buckets = new Map<number, SlotEntry[]>();
+  for (const r of rosters) {
+    r.players.forEach((p, i) => {
+      const entries = buckets.get(i) ?? [];
+      entries.push({ id: p.id, value: value(p) });
+      buckets.set(i, entries);
+    });
+  }
+  for (const [i, entries] of buckets) fillPlaces(entries, i + 1, overall);
+
+  const positional = new Map<number, SlotPlace & { group: PositionGroup }>();
+  const groups = new Map<string, SlotEntry[]>();
+  for (const r of rosters) {
+    const teamGroups = new Map<PositionGroup, RosterPlayer[]>();
+    for (const p of r.players) {
+      const group = positionGroup(p.position);
+      if (!group) continue;
+      const ps = teamGroups.get(group) ?? [];
+      ps.push(p);
+      teamGroups.set(group, ps);
+    }
+    for (const [group, ps] of teamGroups) {
+      ps.forEach((p, i) => {
+        const key = `${group}${i}`;
+        const entries = groups.get(key) ?? [];
+        entries.push({ id: p.id, value: value(p) });
+        groups.set(key, entries);
+      });
+    }
+  }
+  for (const [key, entries] of groups) {
+    const group = key[0] as PositionGroup;
+    const places = new Map<number, SlotPlace>();
+    fillPlaces(entries, Number(key.slice(1)) + 1, places);
+    for (const [id, place] of places) positional.set(id, { ...place, group });
+  }
+
+  const out = new Map<number, SlotComparison>();
+  for (const [id, place] of overall) {
+    const position = positional.get(id);
+    out.set(id, position ? { overall: place, position } : { overall: place });
+  }
+  return out;
+}

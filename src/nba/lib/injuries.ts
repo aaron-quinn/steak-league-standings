@@ -1,8 +1,11 @@
-// Games each fantasy team lost to absences: a starter whose NBA team played
-// without him. Lineups are weekly, so a starter who goes down mid-week costs
-// his team every game until the next lineup; one who was already out when the
-// week's lineup locked and stayed in it is the manager's call. Players on the
-// bench or IR don't count: a stash costs nothing.
+// Games each fantasy team lost to absences: a player on the roster whose NBA
+// team played without him. Lineups are weekly, so a starter who goes down
+// mid-week costs his team a zero in that lineup slot until the next week;
+// once the next week's lineup locks, managers usually move him to IR or the
+// bench while he's out (or leave him in the starting lineup: "kept in"). Both
+// in-lineup losses and games missed while sidelined on IR or the bench are
+// recorded so you can see every player a team has been missing out on, or
+// narrow to active lineup slots alone.
 //
 // ESPN keeps no record of why a player sat, only that he did. A run of two or
 // more missed games reads as an injury; a lone missed game is rest, illness or
@@ -22,6 +25,8 @@ const BENCH = 12;
 const IR = 13;
 const isStarter = (slot: number | undefined) => slot !== undefined && slot !== BENCH && slot !== IR;
 
+export type AbsenceScope = 'roster' | 'lineup';
+
 export interface InjuryDay {
   day: number;
   rosters?: Record<string, number[]>;
@@ -30,17 +35,18 @@ export interface InjuryDay {
   playedFor?: Record<string, number>;
 }
 
-// [fantasy team, player, day, first day of his absence, games the absence ran]
-export type Miss = [number, number, number, number, number];
+// [fantasy team, player, day, first day of his absence, games the absence ran,
+// slot kind: omitted/0 = starter, 1 = bench, 2 = IR]
+export type Miss = [number, number, number, number, number, number?];
 
 export interface InjuryData {
   // The last day counted
   through: number;
-  // [fantasy team, player, games his NBA team played while he started]
-  starts: [number, number, number][];
+  // [fantasy team, player, starter games (played + missed), total games played on roster]
+  starts: [number, number, number, number?][];
   misses: Miss[];
-  // Player → [games, ...stat totals]: his season while rostered, or his last
-  // season's if he never played this one
+  // Player → [games, ...stat totals]: his season while rostered, padded to
+  // MIN_LINE_GAMES from his last two seasons when he played fewer
   lines: Record<string, number[]>;
   // Player → share of his NBA team's games he missed over the last two
   // seasons, pulled toward the league's usual share by how little of them
@@ -62,6 +68,13 @@ export interface InjuryInput {
 // it takes to count as much as that typical share
 const USUAL_MISS_RATE = 0.15;
 const RATE_WEIGHT = 41;
+
+// Pad small in-season samples up to this many games with the prior two seasons
+// so a star hurt early (or anyone in the opening weeks) is valued accurately
+const MIN_LINE_GAMES = 25;
+// Minimum auction price for an unplayed 0-game IR stash (e.g. $40 Zion in 2022)
+// to count as a core absence rather than a $1–$4 end-of-draft lottery ticket
+const MIN_STASH_PRICE = 5;
 
 // A season's length in games: what nearly every full-season player reached
 // (traded players can play a few more)
@@ -98,6 +111,8 @@ export function buildInjuryData({ days, schedule, through, names, proTeams, prio
   const proTeam = (id: number, d: InjuryDay) => d.playedFor?.[id] ?? teamOn(id, d.day) ?? proTeams[id];
 
   const starts = new Map<string, number>();
+  const playedCount = new Map<string, number>();
+  const rostered = new Set<string>();
   const misses: Miss[] = [];
   const lines = new Map<number, number[]>();
   // Player → his absence so far: first day, and each missed game's team and slot
@@ -106,7 +121,12 @@ export function buildInjuryData({ days, schedule, through, names, proTeams, prio
     const spell = open.get(id);
     if (!spell) return;
     for (const [team, day, slot] of spell.games) {
-      if (isStarter(slot)) misses.push([team, id, day, spell.start, spell.games.length]);
+      const kind = slot === IR ? 2 : slot === BENCH ? 1 : 0;
+      misses.push(
+        kind
+          ? [team, id, day, spell.start, spell.games.length, kind]
+          : [team, id, day, spell.start, spell.games.length],
+      );
     }
     open.delete(id);
   };
@@ -132,11 +152,13 @@ export function buildInjuryData({ days, schedule, through, names, proTeams, prio
         const hadGame = played.has(id) || (pro !== undefined && games?.has(pro));
         if (!hadGame) continue;
         const slot = d.slots?.[id];
+        const key = `${team}:${id}`;
+        rostered.add(key);
         if (isStarter(slot)) {
-          const key = `${team}:${id}`;
           starts.set(key, (starts.get(key) ?? 0) + 1);
         }
         if (played.has(id)) {
+          playedCount.set(key, (playedCount.get(key) ?? 0) + 1);
           close(id);
           continue;
         }
@@ -156,79 +178,175 @@ export function buildInjuryData({ days, schedule, through, names, proTeams, prio
   for (const id of [...open.keys()]) close(id);
   misses.sort((a, b) => a[2] - b[2] || a[0] - b[0] || a[1] - b[1]);
 
-  const starters = new Set([...starts.keys()].map((k) => Number(k.split(':')[1])));
-  // Players who never played while rostered: price them by last season
-  const lastSeason = new Map((priors[0]?.players ?? []).map((p) => [p[0], p]));
+  const playersSeen = new Set([...rostered].map((k) => Number(k.split(':')[1])));
+  const priorPools = priors.slice(0, 2).map((pool, i) => ({
+    weight: i === 0 ? 1 : 0.5,
+    byName: new Map((pool?.players ?? []).map((p) => [p[0], p])),
+  }));
   const out: Record<string, number[]> = {};
-  for (const id of starters) {
+  for (const id of playersSeen) {
     const own = lines.get(id);
-    if (own && own[0] > 0) out[id] = own;
-    else {
-      const prior = lastSeason.get(names[id]);
-      if (prior) out[id] = [prior[1], ...(prior.slice(3) as number[])];
+    const ownGames = own?.[0] ?? 0;
+    if (ownGames >= MIN_LINE_GAMES) {
+      out[id] = own!;
+      continue;
     }
+    const priorLine = emptyLine();
+    let priorGames = 0;
+    for (const pool of priorPools) {
+      const p = pool.byName.get(names[id]);
+      if (!p || p[1] <= 0) continue;
+      priorGames += pool.weight * p[1];
+      for (let i = 0; i < 10; i++) priorLine[i] += pool.weight * ((p[3 + i] as number) ?? 0);
+    }
+    const pad = Math.min(MIN_LINE_GAMES - ownGames, priorGames);
+    if (ownGames + pad <= 0) continue;
+    const totalGames = Math.round((ownGames + pad) * 10) / 10;
+    const stats = emptyLine().map((_, i) => {
+      const o = own ? own[1 + i] : 0;
+      const pr = priorGames > 0 ? (priorLine[i] / priorGames) * pad : 0;
+      return Math.round((o + pr) * 10) / 10;
+    });
+    out[id] = [totalGames, ...stats];
+  }
+
+  const startEntries: [number, number, number, number?][] = [];
+  for (const key of rostered) {
+    const s = starts.get(key) ?? 0;
+    const p = playedCount.get(key) ?? 0;
+    if (s === 0 && p === 0) continue;
+    const [team, id] = key.split(':').map(Number);
+    startEntries.push([team, id, s, p]);
   }
 
   return {
     through,
-    starts: [...starts].map(([k, games]) => {
-      const [team, id] = k.split(':').map(Number);
-      return [team, id, games];
-    }),
+    starts: startEntries,
     misses,
     lines: out,
-    rates: missRates(starters, names, priors),
+    rates: missRates(playersSeen, names, priors),
   };
 }
 
-export interface TeamInjuries {
-  id: number;
-  // Games his NBA team played while a player was in this team's lineup
-  starts: number;
-  lost: number;
-  // Lost while the player was already out when the week's lineup locked
-  keptIn: number;
-  points: number;
-  // Points lost to surprises (out after the lineup locked) and to players
-  // kept in the lineup though already out
-  surprisePoints: number;
-  keptInPoints: number;
-  // A league-average share of surprise absences, given each starter's history
-  expectedGames: number;
-  expectedPoints: number;
-  // Expected minus actual points lost to surprises: below zero is bad luck.
-  // Keeping an injured player in the lineup is a choice, so it isn't luck.
-  luck: number;
-  rank: number;
-  healthyRank: number;
-  healthyPoints: number;
-  rotoPoints: number;
-  // Games lost each lineup week
-  weeks: { games: number; points: number }[];
-}
-
-export interface Absence {
+export interface PlayerAbsence {
   team: number;
   player: number;
   from: number;
   to: number;
-  // Starter games this team lost, and every game the absence ran
+  // Games missed in the active scope (roster or lineup)
   lost: number;
+  lineup: number;
+  sidelined: number;
+  // Every NBA game the absence ran while rostered
   length: number;
   keptIn: number;
   points: number;
 }
 
+export interface PlayerInjury {
+  team: number;
+  player: number;
+  // Auction price if drafted by this team
+  price?: number;
+  // Games played on this team (starter + bench) and in the starting lineup
+  played: number;
+  startPlayed: number;
+  // Total counted opportunities (played + lost in active scope)
+  starts: number;
+  // Total games missed in the active scope
+  lost: number;
+  lineup: number;
+  sidelined: number;
+  ir: number;
+  bench: number;
+  keptIn: number;
+  surprise: number;
+  // Roto points per game from his stat line
+  perGame: number;
+  // Roto points missed in the active scope
+  points: number;
+  lineupPoints: number;
+  sidelinedPoints: number;
+  keptInPoints: number;
+  surprisePoints: number;
+  // Prior two seasons' miss rate (before league scaling)
+  usualRate: number;
+  expectedGames: number;
+  expectedPoints: number;
+  // Expected minus actual points missed: below zero is bad luck
+  luck: number;
+  spells: PlayerAbsence[];
+}
+
+export interface WeekPlayerLoss {
+  player: number;
+  games: number;
+  lineup: number;
+  sidelined: number;
+  points: number;
+}
+
+export interface TeamWeekLoss {
+  games: number;
+  lineup: number;
+  sidelined: number;
+  points: number;
+  players: WeekPlayerLoss[];
+}
+
+export interface TeamInjuries {
+  id: number;
+  // Games played + missed in the active scope
+  starts: number;
+  played: number;
+  lost: number;
+  lineup: number;
+  sidelined: number;
+  ir: number;
+  bench: number;
+  // Lost while the player was already out when the week's lineup locked
+  keptIn: number;
+  surprise: number;
+  points: number;
+  lineupPoints: number;
+  sidelinedPoints: number;
+  // Points lost to surprises (out after the lineup locked) and to players
+  // kept in the lineup though already out
+  surprisePoints: number;
+  keptInPoints: number;
+  // Expected absences, given each player's history, scaled to the league
+  expectedGames: number;
+  expectedPoints: number;
+  // Expected minus actual points lost: below zero is bad luck
+  luck: number;
+  rank: number;
+  healthyRank: number;
+  healthyPoints: number;
+  rotoPoints: number;
+  // Players on this team, sorted by points missed
+  players: PlayerInjury[];
+  // Games lost each lineup week
+  weeks: TeamWeekLoss[];
+}
+
+export type Absence = PlayerAbsence;
+
 export interface InjurySummary {
   teams: TeamInjuries[];
+  players: PlayerInjury[];
   absences: Absence[];
   weeks: LineupWeek[];
+  scope: AbsenceScope;
+  multiOnly: boolean;
 }
 
 export function summarizeInjuries(
   data: InjuryData,
   league: NbaLeague,
-  { multiOnly = false }: { multiOnly?: boolean } = {},
+  {
+    multiOnly = false,
+    scope = 'roster',
+  }: { multiOnly?: boolean; scope?: AbsenceScope } = {},
 ): InjurySummary {
   const rates = pointRates(league);
   const perGame = new Map<number, StatLine>();
@@ -238,8 +356,83 @@ export function summarizeInjuries(
     perGame.set(Number(id), line);
     value.set(Number(id), Math.max(0, linePoints(line, rates)));
   }
+
+  // Replacement starter line (~120th–150th rostered player) for sidelined
+  // bench/IR games in the healthy standings simulation
+  const sortedLines = [...perGame.entries()]
+    .sort((a, b) => (value.get(b[0]) ?? 0) - (value.get(a[0]) ?? 0))
+    .map(([, line]) => line);
+  const repSlice = sortedLines.slice(110, 150);
+  const replacementLine = emptyLine();
+  if (repSlice.length > 0) {
+    for (const l of repSlice) for (let i = 0; i < 10; i++) replacementLine[i] += l[i] / repSlice.length;
+  }
+  const replacementValue = linePoints(replacementLine, rates);
+
   const weeks = lineupWeeks(league.opener, league.finalDay).filter((w) => w.first <= data.through);
   const weekOf = (day: number) => weeks.findIndex((w) => day >= w.first && day <= w.last);
+
+  const draftPrice = new Map<string, number>();
+  for (const pick of league.draft ?? []) {
+    draftPrice.set(`${pick.team}:${pick.playerID}`, pick.price);
+  }
+
+  // Raw starter misses per (team, player) to recover startPlayed when older
+  // data.starts entries lack the 4th element
+  const allStarterMisses = new Map<string, number>();
+  for (const [teamID, id, , , , kind = 0] of data.misses) {
+    if (kind === 0) {
+      const k = `${teamID}:${id}`;
+      allStarterMisses.set(k, (allStarterMisses.get(k) ?? 0) + 1);
+    }
+  }
+
+  const byTeamPlayer = new Map<string, PlayerInjury>();
+  const ensurePlayer = (teamID: number, id: number): PlayerInjury => {
+    const key = `${teamID}:${id}`;
+    let p = byTeamPlayer.get(key);
+    if (!p) {
+      p = {
+        team: teamID,
+        player: id,
+        price: draftPrice.get(key),
+        played: 0,
+        startPlayed: 0,
+        starts: 0,
+        lost: 0,
+        lineup: 0,
+        sidelined: 0,
+        ir: 0,
+        bench: 0,
+        keptIn: 0,
+        surprise: 0,
+        perGame: value.get(id) ?? 0,
+        points: 0,
+        lineupPoints: 0,
+        sidelinedPoints: 0,
+        keptInPoints: 0,
+        surprisePoints: 0,
+        usualRate: data.rates[id] ?? USUAL_MISS_RATE,
+        expectedGames: 0,
+        expectedPoints: 0,
+        luck: 0,
+        spells: [],
+      };
+      byTeamPlayer.set(key, p);
+    }
+    return p;
+  };
+
+  for (const [teamID, id, startGames, playedGames] of data.starts) {
+    if (!league.teams.some((t) => t.id === teamID)) continue;
+    const key = `${teamID}:${id}`;
+    const startPlayed = Math.max(0, startGames - (allStarterMisses.get(key) ?? 0));
+    const played = playedGames ?? startPlayed;
+    if (scope === 'lineup' && startGames === 0) continue;
+    const p = ensurePlayer(teamID, id);
+    p.startPlayed = startPlayed;
+    p.played = scope === 'lineup' ? startPlayed : played;
+  }
 
   const teams = new Map<number, TeamInjuries>(
     league.teams.map((t) => [
@@ -247,9 +440,17 @@ export function summarizeInjuries(
       {
         id: t.id,
         starts: 0,
+        played: 0,
         lost: 0,
+        lineup: 0,
+        sidelined: 0,
+        ir: 0,
+        bench: 0,
         keptIn: 0,
+        surprise: 0,
         points: 0,
+        lineupPoints: 0,
+        sidelinedPoints: 0,
         surprisePoints: 0,
         keptInPoints: 0,
         expectedGames: 0,
@@ -259,59 +460,153 @@ export function summarizeInjuries(
         healthyRank: 0,
         healthyPoints: 0,
         rotoPoints: 0,
-        weeks: weeks.map(() => ({ games: 0, points: 0 })),
+        players: [],
+        weeks: weeks.map(() => ({ games: 0, lineup: 0, sidelined: 0, points: 0, players: [] })),
       },
     ]),
   );
   const healthy = new Map(league.teams.map((t) => [t.id, [...t.totals]]));
-  const absences = new Map<string, Absence>();
+  const absences = new Map<string, PlayerAbsence>();
+  const weekPlayerMap = new Map<string, WeekPlayerLoss>();
 
-  for (const [teamID, id, day, start, length] of data.misses) {
+  for (const [teamID, id, day, start, length, kind = 0] of data.misses) {
     if (multiOnly && length < 2) continue;
+    if (scope === 'lineup' && kind !== 0) continue;
     const team = teams.get(teamID);
     if (!team) continue;
+    const key = `${teamID}:${id}`;
+    const existing = byTeamPlayer.get(key);
+    // Skip pure unplayed $0–$4 stashes who never played or started a game for this team
+    if (!existing && (draftPrice.get(key) ?? 0) < MIN_STASH_PRICE) continue;
+    const p = existing ?? ensurePlayer(teamID, id);
+
     const week = weekOf(day);
-    const keptIn = week >= 0 && start < weeks[week].first ? 1 : 0;
-    const points = value.get(id) ?? 0;
-    team.lost++;
-    team.keptIn += keptIn;
-    team.points += points;
-    if (keptIn) team.keptInPoints += points;
-    else team.surprisePoints += points;
-    if (week >= 0) {
-      team.weeks[week].games++;
-      team.weeks[week].points += points;
+    const isLineup = kind === 0;
+    const keptIn = isLineup && week >= 0 && start < weeks[week].first ? 1 : 0;
+    const surprise = isLineup && !keptIn ? 1 : 0;
+    const pts = value.get(id) ?? 0;
+
+    p.lost++;
+    p.points += pts;
+    if (isLineup) {
+      p.lineup++;
+      p.lineupPoints += pts;
+      p.keptIn += keptIn;
+      p.surprise += surprise;
+      if (keptIn) p.keptInPoints += pts;
+      else p.surprisePoints += pts;
+    } else {
+      p.sidelined++;
+      p.sidelinedPoints += pts;
+      if (kind === 2) p.ir++;
+      else p.bench++;
     }
+
+    if (week >= 0) {
+      const w = team.weeks[week];
+      w.games++;
+      if (isLineup) w.lineup++;
+      else w.sidelined++;
+      w.points += pts;
+      const wkKey = `${teamID}:${week}:${id}`;
+      let wp = weekPlayerMap.get(wkKey);
+      if (!wp) {
+        wp = { player: id, games: 0, lineup: 0, sidelined: 0, points: 0 };
+        weekPlayerMap.set(wkKey, wp);
+        w.players.push(wp);
+      }
+      wp.games++;
+      if (isLineup) wp.lineup++;
+      else wp.sidelined++;
+      wp.points += pts;
+    }
+
     const line = perGame.get(id);
-    if (line) addLine(healthy.get(teamID)!, line);
-    const key = `${teamID}:${id}:${start}`;
-    const a = absences.get(key) ?? { team: teamID, player: id, from: day, to: day, lost: 0, length, keptIn: 0, points: 0 };
+    if (line) {
+      if (isLineup) {
+        addLine(healthy.get(teamID)!, line);
+      } else if (pts > replacementValue) {
+        addLine(
+          healthy.get(teamID)!,
+          line.map((v, i) => Math.max(0, v - replacementLine[i])),
+        );
+      }
+    }
+
+    const spellKey = `${teamID}:${id}:${start}`;
+    let a = absences.get(spellKey);
+    if (!a) {
+      a = {
+        team: teamID,
+        player: id,
+        from: day,
+        to: day,
+        lost: 0,
+        lineup: 0,
+        sidelined: 0,
+        length,
+        keptIn: 0,
+        points: 0,
+      };
+      absences.set(spellKey, a);
+      p.spells.push(a);
+    }
     a.to = day;
     a.lost++;
+    if (isLineup) a.lineup++;
+    else a.sidelined++;
     a.keptIn += keptIn;
-    a.points += points;
-    absences.set(key, a);
+    a.points += pts;
   }
 
-  // Expected: each starter missing his usual share, scaled so the league as a
-  // whole expects the surprise absences it actually had. Luck is then
-  // relative: who lost more than their starters' histories said they would.
-  let rawGames = 0;
-  for (const [teamID, id, games] of data.starts) {
-    const team = teams.get(teamID);
-    if (!team) continue;
-    const rate = data.rates[id] ?? USUAL_MISS_RATE;
-    team.starts += games;
-    team.expectedGames += games * rate;
-    team.expectedPoints += games * rate * (value.get(id) ?? 0);
-    rawGames += games * rate;
+  // Expected: each player missing his usual share over his counted games on
+  // the roster, scaled so the league as a whole expects the absences it had.
+  let rawExpectedGames = 0;
+  let totalLuckMissed = 0;
+  for (const p of byTeamPlayer.values()) {
+    const luckMissed = scope === 'lineup' ? p.surprise : p.lost;
+    const opp = p.played + luckMissed;
+    p.starts = p.played + p.lost;
+    p.expectedGames = opp * p.usualRate;
+    rawExpectedGames += p.expectedGames;
+    totalLuckMissed += luckMissed;
   }
-  const surprises = [...teams.values()].reduce((s, t) => s + t.lost - t.keptIn, 0);
-  const scale = rawGames ? surprises / rawGames : 0;
+  const scale = rawExpectedGames ? totalLuckMissed / rawExpectedGames : 0;
+
+  for (const p of byTeamPlayer.values()) {
+    p.expectedGames *= scale;
+    p.expectedPoints = p.expectedGames * p.perGame;
+    const actualLuckPoints = scope === 'lineup' ? p.surprisePoints : p.points;
+    p.luck = p.expectedPoints - actualLuckPoints;
+    p.spells.sort((a, b) => a.from - b.from);
+
+    const team = teams.get(p.team);
+    if (!team) continue;
+    team.starts += p.starts;
+    team.played += p.played;
+    team.lost += p.lost;
+    team.lineup += p.lineup;
+    team.sidelined += p.sidelined;
+    team.ir += p.ir;
+    team.bench += p.bench;
+    team.keptIn += p.keptIn;
+    team.surprise += p.surprise;
+    team.points += p.points;
+    team.lineupPoints += p.lineupPoints;
+    team.sidelinedPoints += p.sidelinedPoints;
+    team.keptInPoints += p.keptInPoints;
+    team.surprisePoints += p.surprisePoints;
+    team.expectedGames += p.expectedGames;
+    team.expectedPoints += p.expectedPoints;
+    team.luck += p.luck;
+    team.players.push(p);
+  }
+
   for (const t of teams.values()) {
-    t.expectedGames *= scale;
-    t.expectedPoints *= scale;
-    t.luck = t.expectedPoints - t.surprisePoints;
+    t.players.sort((a, b) => b.points - a.points || a.luck - b.luck || b.played - a.played);
+    for (const w of t.weeks) {
+      w.players.sort((a, b) => b.points - a.points || b.games - a.games);
+    }
   }
 
   const actual = scoreRoto(new Map(league.teams.map((t) => [t.id, t.totals])));
@@ -329,7 +624,10 @@ export function summarizeInjuries(
 
   return {
     teams: [...teams.values()],
-    absences: [...absences.values()].sort((a, b) => b.points - a.points),
+    players: [...byTeamPlayer.values()].filter((p) => p.lost > 0).sort((a, b) => b.points - a.points || b.lost - a.lost),
+    absences: [...absences.values()].sort((a, b) => b.points - a.points || b.lost - a.lost),
     weeks,
+    scope,
+    multiOnly,
   };
 }

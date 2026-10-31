@@ -31,6 +31,7 @@ export function useRosters() {
   // if ESPN is slow or down
   const espn = useProjections(season);
   const espnPlayers = espn.data?.players;
+  const espnPositions = espn.data?.positions;
   const { data: rw, isPending: rwPending } = useQuery({
     queryKey: ['nba', 'rotowire-availability', season],
     queryFn: () => getJSON<{ season: number; fetchedAt: string | null; fresh: boolean; refreshFailed: boolean; seasonGames: Record<string, number> }>(`/api/nba/rotowire/${season}`),
@@ -65,9 +66,10 @@ export function useRosters() {
       priors: priors.pools,
       rates: pointRates(basis),
       espn: espnPlayers,
+      positions: espnPositions,
       rotowire: rwGames,
     });
-  }, [league, basis, days, isPending, schedule, pool, priors.isPending, priors.pools, names, proTeams, espnPlayers, rwGames]);
+  }, [league, basis, days, isPending, schedule, pool, priors.isPending, priors.pools, names, proTeams, espnPlayers, espnPositions, rwGames]);
 
   const checked = Number.isFinite(age) ? `${Math.max(0, Math.floor(age / 3_600_000))}h ago` : null;
   const freshness = rwGames

@@ -16,7 +16,7 @@ async function getJSON<T>(url: string): Promise<T> {
 
 const storedQuery = (season: number, enabled = true) => ({
   queryKey: ['nba', 'injuries', season],
-  queryFn: () => getJSON<InjuryData>(`/nba-data/${season}/injuries.json?v=1`),
+  queryFn: () => getJSON<InjuryData>(`/nba-data/${season}/injuries.json?v=2`),
   enabled: enabled && isFinished(season) && season >= FIRST_INJURY_SEASON,
   staleTime: Infinity,
 });
